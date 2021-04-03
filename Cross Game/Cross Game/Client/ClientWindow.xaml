@@ -1,0 +1,21 @@
+﻿<Window x:Class="Cross_Game.Client.ClientWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:Cross_Game.Client="clr-namespace:Cross_Game.Client"
+        mc:Ignorable="d"
+        Closing="Window_Closing"
+        Title="MainWindow" Height="600" Width="800">
+    <Grid Background="#262425">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Button Content="Iniciar escucha" Grid.Row="0" Margin="3" Click="IniciarEscucha_Click"/>
+        <Button Content="Detener escucha" Grid.Row="1"  Margin="3" Click="DetenerEscucha_Click"/>
+        <TextBox Name="IP" Text="192.168.1.138" Grid.Row="2" Width="100" Height="18" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <!--<Vlc:VlcControl x:Name="test" Grid.ColumnSpan="2" Grid.RowSpan="4"/>85.137.46.117-->
+    </Grid>
+</Window>
