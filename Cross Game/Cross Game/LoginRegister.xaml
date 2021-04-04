@@ -1,0 +1,89 @@
+﻿<Window x:Class="Cross_Game.LoginRegister"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"        
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:local="clr-namespace:Cross_Game"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="380"
+        AllowsTransparency="True" Background="Transparent"
+        WindowStyle="None" ResizeMode="NoResize"
+        MouseDown="MainWindow_OnMouseDown"
+        Name="LoginWindow">
+    <Window.Resources>
+        <ResourceDictionary Source="styles/LoginStyles.xaml"/>
+    </Window.Resources>
+    <Grid>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <Border CornerRadius="10" Grid.RowSpan="2">
+                <Border.Background>
+                    <LinearGradientBrush>
+                        <GradientStop Color="#3095bf" Offset="0.0" />
+                        <GradientStop Color="#121209" Offset="0.5"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+            </Border>
+
+            <Image Source="Images/CrossGame.png" Height="190"/>
+
+            <StackPanel Grid.Row="1" >
+                <StackPanel Orientation="Horizontal" Margin="0 15 0 0">
+                    <TextBox Name="Email"
+                             Text="email@example.com"
+                             TextChanged="Email_TextChanged"
+                             GotFocus="Field_GotFocus"
+                             LostFocus="Field_LostFocus"
+                             Style="{StaticResource EmailBoxStyle}"/>
+                    <iconPacks:PackIconMaterial Kind="Account" 
+                                                VerticalAlignment="Center" 
+                                                HorizontalAlignment="Center" 
+                                                Foreground="{Binding ElementName=Email, Path=Foreground}"/>
+                </StackPanel>
+
+                <Border Width="250" Height="2"
+                        Opacity="{Binding ElementName=Email, Path=Opacity}"
+                        Background="{Binding ElementName=Email, Path=Foreground}"/>
+
+
+                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                    <PasswordBox Name="Password"
+                                 Password="email@example.c"
+                                 PasswordChanged="Password_PasswordChanged"
+                                 GotFocus="Field_GotFocus"
+                                 LostFocus="Field_LostFocus"
+                                 Style="{StaticResource PasswordBoxStyle}"/>
+                    <iconPacks:PackIconMaterial Kind="FormTextboxPassword" 
+                                                VerticalAlignment="Center" 
+                                                HorizontalAlignment="Center" 
+                                                Foreground="{Binding ElementName=Password, Path=Foreground}"/>
+                </StackPanel>
+
+                <Border Width="250" Height="2"
+                        Opacity="{Binding ElementName=Password, Path=Opacity}"
+                        Background="{Binding ElementName=Password, Path=Foreground}"
+                        Visibility="{Binding ElementName=LoginWindow, Path=error}"/>
+
+                <StackPanel Margin="60 0 60 0">
+                    <TextBlock Name="Error"
+                               Text="Email o contraseña incorrectos" 
+                               IsVisibleChanged="Error_IsVisibleChanged"
+                               Style="{StaticResource ErrorTextStyle}"/>
+                    <Border Style="{StaticResource LoginButtonStyle}" Margin="0 0 0 5">
+                        <Button Content="Iniciar sesión"
+                                Click="Button_Click"/>
+                    </Border>
+                    <TextBlock Text="¿Todavía no tienes una cuenta? Registrate ahora."
+                               MouseDown="TextBlock_MouseDown" 
+                               Style="{StaticResource LinkTextStyle}"/>
+                </StackPanel>
+
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

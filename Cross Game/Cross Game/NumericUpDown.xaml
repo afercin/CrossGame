@@ -7,7 +7,7 @@
              Name="UpDown"
              d:DesignHeight="28" d:DesignWidth="200">
     <UserControl.Resources>
-        <ResourceDictionary Source="Styles.xaml"/>
+        <ResourceDictionary Source="Styles/Styles.xaml"/>
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>

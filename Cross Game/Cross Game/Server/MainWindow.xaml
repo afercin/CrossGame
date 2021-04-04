@@ -11,7 +11,7 @@
         Visibility="Hidden"
         Title="MainWindow" Height="240" Width="780">
     <Window.Resources>
-        <ResourceDictionary Source="Styles.xaml"/>
+        <ResourceDictionary Source="Styles/Styles.xaml"/>
     </Window.Resources>
     <Grid Background="#111">
         <Grid.ColumnDefinitions>
