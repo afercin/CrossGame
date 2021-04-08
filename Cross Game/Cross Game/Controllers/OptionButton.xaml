@@ -1,0 +1,34 @@
+﻿<UserControl x:Class="Cross_Game.Controllers.OptionButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d" 
+             MouseLeftButtonDown="Option_MouseLeftButtonDown"
+             MouseLeftButtonUp="Option_MouseLeftButtonUp"
+             MouseEnter="Option_MouseEnter"
+             MouseLeave="Option_MouseLeave"
+             Name="Option"
+             Height="55" d:DesignWidth="180">
+    <Grid>
+        <StackPanel Orientation="Horizontal">
+            <Border Name="OverEffect"
+                    Width="8"
+                    Background="#0078d7"
+                    Opacity="0"/>
+            <Grid Margin="3 0 0 0">
+                <Canvas Name="BackColor"
+                        Background="#292728"
+                        Opacity="0"/>
+                <TextBlock Text="{Binding Name, ElementName=Option}" 
+                           Foreground="#E0E0E0" 
+                           TextAlignment="Left" 
+                           VerticalAlignment="Center"
+                           FontSize="16" 
+                           Width="150" 
+                           Margin="16,0,0,0"/>
+            </Grid>
+
+        </StackPanel>
+    </Grid>
+</UserControl>    

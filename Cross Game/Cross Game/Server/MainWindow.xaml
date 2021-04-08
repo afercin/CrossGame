@@ -5,19 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Cross_Game"
         mc:Ignorable="d"
-        Closing="Window_Closing"
         WindowStyle="None"
         ResizeMode="NoResize"
         Visibility="Hidden"
         Title="MainWindow" Height="240" Width="780">
-    <Window.Resources>
-        <ResourceDictionary Source="Styles/Styles.xaml"/>
-    </Window.Resources>
     <Grid Background="#111">
-        <Grid.ColumnDefinitions>
+        <!--Grid.ColumnDefinitions>
             <ColumnDefinition Width="180"/>
             <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        </>
         <Grid.RowDefinitions>
             <RowDefinition Height="32"/>
             <RowDefinition Height="*"/>
@@ -62,6 +58,6 @@
             <Button Name="Cancel" Grid.Row="1" Margin="3" Style="{StaticResource FlatButtonStyle}" Width="130" HorizontalAlignment="Right" Click="Cancel_Click">
                 <TextBlock Text="Cancelar"/>
             </Button>
-        </Grid>
+        </Grid-->
     </Grid>
 </Window>

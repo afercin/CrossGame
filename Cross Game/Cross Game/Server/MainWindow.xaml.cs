@@ -13,6 +13,7 @@ namespace Cross_Game.Server
     /// </summary>
     public partial class MainWindow : Window
     {
+        /*
         private System.Windows.Forms.NotifyIcon notifyIcon;
         private Server server;
         private bool closeWindow;
@@ -141,5 +142,6 @@ namespace Cross_Game.Server
             server.Start();
             notifyIcon.ShowBalloonTip(2000, "Reinicio completado", "Servidor a la espera de clientes", System.Windows.Forms.ToolTipIcon.Info);
         }
+        */
     }
 }

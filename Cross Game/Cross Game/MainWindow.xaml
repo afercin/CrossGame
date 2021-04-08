@@ -3,66 +3,118 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Cross_Game"
+        xmlns:controllers="clr-namespace:Cross_Game.Controllers"
         mc:Ignorable="d"
+        UseLayoutRounding="True"
         WindowStyle="None"
-        ResizeMode="NoResize"
-        Title="MainWindow" Height="450" Width="800">
+        AllowsTransparency="True"
+        ResizeMode="CanResizeWithGrip"
+        WindowStartupLocation="CenterScreen"        
+        Title="MainWindow" Height="450" Width="800" 
+        MinHeight="282"
+        Name="mainWindow"
+        Loaded="Window_Loaded"    
+        SourceInitialized="Window_SourceInitialized">
     <Window.Resources>
-        <ResourceDictionary Source="Styles/Styles.xaml"/>
+        <ResourceDictionary Source="/Styles/Styles.xaml"/>
     </Window.Resources>
     <Grid Background="#111">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="180"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="32"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition/>
+            <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Grid.ColumnSpan="2" MouseLeftButtonDown="Window_MouseLeftButtonDown" Background="#111">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="2"/>
-                <RowDefinition Height="30"/>
-            </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0"
+                    Grid.ColumnSpan="2"
+                    Background="#111"
+                    MouseLeftButtonDown="Header_MouseLeftButtonDown"
+                    MouseLeftButtonUp="Header_MouseLeftButtonUp"
+                    MouseMove="Header_MouseMove">
+            
+            <Canvas Background="#0078d7" 
+                    Height="2"/>
 
-            <Canvas Grid.Row="0" Background="#0078d7"/>
+            <Grid Height="30">
 
-            <Image Grid.Row="1" Margin="3" HorizontalAlignment="Left" Source="pack://application:,,,/Images/CrossGameLogo.png"/>
-            <TextBlock Grid.Row="1" Text="Opciones" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold" FontSize="16"/>
-            <Button Grid.Row="1" Width="30" Height="30" Style="{StaticResource OptionButtonStyle}" HorizontalAlignment="Right" Click="Close_Click">
-                <Image Source="pack://application:,,,/Images/cross.png"/>
-            </Button>
-        </Grid>
+                <StackPanel HorizontalAlignment="Left"
+                            Orientation="Horizontal">
 
-        <Button Grid.Row="1" Grid.Column="0" Style="{StaticResource OptionButtonStyle}" Height="55" Margin="14 0 0 0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Click="Button_Click" MouseMove="Button_MouseMove" MouseLeave="Button_MouseLeave">
-            <TextBlock Text="Ordenadores" Foreground="White" FontWeight="Bold" VerticalAlignment="Center" TextAlignment="Left" FontSize="16" Width="150" Margin="16,0,0,0"/>
-        </Button>
-        <Button Grid.Row="1" Grid.Column="0" Style="{StaticResource OptionButtonStyle}" Height="55" Margin="14 55 0 0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Click="Button_Click" MouseMove="Button_MouseMove" MouseLeave="Button_MouseLeave">
-            <TextBlock Text="Ordenadores" Foreground="White" FontWeight="Bold" VerticalAlignment="Center" TextAlignment="Left"  FontSize="16" Width="150" Margin="16,0,0,0"/>
-        </Button>
-        <Button Grid.Row="1" Grid.Column="0" Style="{StaticResource OptionButtonStyle}" Height="55" Margin="14 110 0 0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Click="Button_Click" MouseMove="Button_MouseMove" MouseLeave="Button_MouseLeave">
-            <TextBlock Text="Amigos" TextAlignment="Left" FontSize="16" Width="150" Margin="16,0,0,0"/>
-        </Button>
-        <Button Grid.Row="1" Grid.Column="0" Style="{StaticResource OptionButtonStyle}" Height="55" Margin="14 165 0 0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Click="Button_Click" MouseMove="Button_MouseMove" MouseLeave="Button_MouseLeave">
-            <TextBlock Text="Transmisión" Foreground="White" FontWeight="Bold" VerticalAlignment="Center" TextAlignment="Left"  FontSize="16" Width="150" Margin="16,0,0,0"/>
-        </Button>
-        <Canvas Grid.Row="1" Grid.Column="0" Name="OverEffect" Background="#550078d7" HorizontalAlignment="Left" VerticalAlignment="Top" Width="8" Height="55" Margin="3,0,0,0" Visibility="Hidden"/>
-        <Canvas Grid.Row="1" Grid.Column="0" Name="SelectEffect" Background="#0078d7" HorizontalAlignment="Left" VerticalAlignment="Top" Width="8" Height="55" Margin="3,0,0,0"/>
+                    <Image Margin="6 3" 
+                           Source="/Images/CrossGameLogo.png"/>
 
-        <Grid Grid.Row="1" Grid.Column="1" Background="#292728" Margin="0 0 3 3">
+                    <TextBlock Text="Cross Game" 
+                               Margin="0 3"
+                               Foreground="#E0E0E0" 
+                               FontWeight="Bold" 
+                               FontSize="16"/>
+
+                </StackPanel>
+                
+                <StackPanel HorizontalAlignment="Right" 
+                            Orientation="Horizontal">                    
+                    <Button Style="{StaticResource OptionButtonStyle}" Click="Minimize_Click">
+                        <Image Source="/Images/minimize.png"/>
+                    </Button>
+                    
+                    <Button Style="{StaticResource OptionButtonStyle}" Click="Maximize_Click">
+                        <Image Source="/Images/maximize.png"/>
+                    </Button>
+                    
+                    <Button Style="{StaticResource OptionButtonStyle}" Click="Close_Click">
+                        <Image Source="/Images/cross.png"/>
+                    </Button>  
+                    
+                </StackPanel>                
+            </Grid>              
+        </StackPanel>
+
+        <StackPanel Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="6,0,0,0">
+            <controllers:OptionButton x:Name="Ordenadores" MouseLeftButtonDown="OptionButton_MouseLeftButtonDown"/>
+            <controllers:OptionButton x:Name="Amigos" MouseLeftButtonDown="OptionButton_MouseLeftButtonDown"/>
+            <controllers:OptionButton x:Name="Tranmisión" MouseLeftButtonDown="OptionButton_MouseLeftButtonDown"/>
+        </StackPanel>
+
+        <Grid Grid.Row="1" 
+              Grid.Column="1" 
+              Background="#292728"
+              Margin="0 0 3 3">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="30"/>
             </Grid.RowDefinitions>
-            <local:TransmissionOptions x:Name="tOptions"/>
+
+            <controllers:MyComputers x:Name="MyComputers"/>
+            <!--local:TransmissionOptions x:Name="tOptions"/>
             <Button Name="Accept" Grid.Row="1" Margin="3 3 139 3" Style="{StaticResource FlatButtonStyle}" Width="130" HorizontalAlignment="Right" Click="Accept_Click">
                 <TextBlock Text="Aceptar"/>
             </Button>
             <Button Name="Cancel" Grid.Row="1" Margin="3" Style="{StaticResource FlatButtonStyle}" Width="130" HorizontalAlignment="Right" Click="Cancel_Click">
                 <TextBlock Text="Cancelar"/>
-            </Button>
+            </Button-->
         </Grid>
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center">
+
+            <Ellipse Width="8"
+                     Height="8"
+                     Margin="-10 3 2 0"
+                     Stroke="Black"
+                     StrokeThickness="1"
+                     Fill="Green"/>
+
+            <TextBlock Text="{Binding UserName, ElementName=mainWindow}" Foreground="#E0E0E0"/>
+            <TextBlock Text="#" Foreground="Gray"/>
+            <TextBlock Text="{Binding UserNumber, ElementName=mainWindow}" Foreground="#E0E0E0"/>
+
+        </StackPanel>
     </Grid>
 </Window>

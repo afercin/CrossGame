@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace Cross_Game
+namespace Cross_Game.Controllers
 {
     /// <summary>
     /// Lógica de interacción para TransmissionOptions.xaml

@@ -9,8 +9,10 @@ using System.Windows;
 
 namespace Cross_Game
 {
-    class DBConnect
+    class DBConnection
     {
+        public static int User_ID = -1;
+        public static string User_NickName = "Pepe el butanero";
         private static MySqlConnection connection = new MySqlConnection(
             "SERVER=localhost;" +
             "DATABASE=CrossGame;" +
@@ -70,23 +72,24 @@ namespace Cross_Game
         */
         private static MySqlDataReader Query(string sqlQuery) => new MySqlCommand(sqlQuery, connection).ExecuteReader();
 
-        public static int CheckLogin(string email, string password)
+        public static int CheckLogin(string email, string password, bool md5 = false)
         {
             int return_value = -1;
 
             if (OpenConnection())
             {
-                MD5 md5 = MD5.Create();
                 MySqlDataReader dataReader = Query(
-                    "SELECT user_id " +
+                    "SELECT user_id, name, number " +
                     "FROM users " +
                     "WHERE email = '" + email + "' " +
-                    "AND password = '" + CreateMD5(password) + "'"
+                    "AND password = '" + (md5 ? password : CreateMD5(password)) + "'"
                     );
                 if (dataReader.HasRows)
                 {
                     dataReader.Read();
-                    return_value = (int)dataReader["user_id"];
+                    User_ID = (int)dataReader["user_id"];
+                    User_NickName = dataReader["name"] + "#" + (int)dataReader["number"];
+                    return_value = 1;
                 }
                 else
                     return_value = 0;
@@ -97,20 +100,18 @@ namespace Cross_Game
             return return_value;
         }
 
-        private static string CreateMD5(string input)
+        public static string CreateMD5(string input)
         {
+            StringBuilder sb = new StringBuilder();
             using (MD5 md5 = MD5.Create())
             {
                 byte[] inputBytes = Encoding.ASCII.GetBytes(input);
                 byte[] hashBytes = md5.ComputeHash(inputBytes);
                 
-                StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < hashBytes.Length; i++)
-                {
                     sb.Append(hashBytes[i].ToString("X2"));
-                }
-                return sb.ToString();
             }
+            return sb.ToString();
         }
     }
 }

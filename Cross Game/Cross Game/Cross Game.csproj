@@ -64,21 +64,30 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="DBConnect.cs" />
-    <Compile Include="LoginRegister.xaml.cs">
-      <DependentUpon>LoginRegister.xaml</DependentUpon>
+    <Compile Include="Controllers\Computer.xaml.cs">
+      <DependentUpon>Computer.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controllers\MyComputers.xaml.cs">
+      <DependentUpon>MyComputers.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controllers\OptionButton.xaml.cs">
+      <DependentUpon>OptionButton.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DBConnection.cs" />
+    <Compile Include="Login.xaml.cs">
+      <DependentUpon>Login.xaml</DependentUpon>
     </Compile>
     <Compile Include="Server\DXKeyboardSimulator.cs" />
     <Compile Include="Server\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Server\MouseSimulator.cs" />
-    <Compile Include="NumericUpDown.xaml.cs">
+    <Compile Include="Controllers\NumericUpDown.xaml.cs">
       <DependentUpon>NumericUpDown.xaml</DependentUpon>
     </Compile>
     <Compile Include="Server\Server.cs" />
     <Compile Include="Server\TCPServer.cs" />
-    <Compile Include="TransmissionOptions.xaml.cs">
+    <Compile Include="Controllers\TransmissionOptions.xaml.cs">
       <DependentUpon>TransmissionOptions.xaml</DependentUpon>
     </Compile>
     <Compile Include="Server\UDPSender.cs" />
@@ -91,7 +100,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="LoginRegister.xaml">
+    <Page Include="Controllers\Computer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controllers\MyComputers.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controllers\OptionButton.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Login.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -126,7 +147,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="NumericUpDown.xaml">
+    <Page Include="Controllers\NumericUpDown.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -134,7 +155,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="TransmissionOptions.xaml">
+    <Page Include="Controllers\TransmissionOptions.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

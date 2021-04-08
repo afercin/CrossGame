@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace Cross_Game
+namespace Cross_Game.Controllers
 {
     /// <summary>
     /// Lógica de interacción para NumericUpDown.xaml
