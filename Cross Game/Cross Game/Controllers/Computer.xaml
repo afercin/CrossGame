@@ -1,24 +1,44 @@
 ﻿<UserControl x:Class="Cross_Game.Controllers.Computer"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:Cross_Game.Controllers"
-             mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800"
-             Name="computer">
-    <Grid>
-        <StackPanel VerticalAlignment="Center">
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+             mc:Ignorable="d"
+             Height="125" d:DesignWidth="150"
+             Name="ComputerTemplate">
+    <UserControl.Resources>
+        <ResourceDictionary Source="/Styles/MainWindowStyles.xaml"/>
+    </UserControl.Resources>
+    <Grid Style="{StaticResource ComputerGridStyle}">
+        <Border Name="ComputerBorder" 
+                BorderThickness="4" 
+                CornerRadius="4" 
+                BorderBrush="#329dc9" 
+                Padding="10">
+            <StackPanel HorizontalAlignment="Center">
 
-            <Image Height="60" Width="60" Source="/Images/computer.png"/>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Nombre:" 
-                           Foreground="White"/>
-                <TextBlock Text="{Binding ComputerName, ElementName=computer}" 
-                           Foreground="White"/>
+                <TextBlock Name="ComputerName" 
+                           Text="Potato PC (local)"
+                           Foreground="{Binding BorderBrush, ElementName=ComputerBorder}"
+                           FontWeight="SemiBold"
+                           FontSize="13"/>
+                <Grid Margin="0 10 0 0">
+                    <iconPacks:PackIconMaterial Kind="MonitorEdit"
+                                                Height="70" 
+                                                Width="auto"
+                                                HorizontalAlignment="Center"
+                                                Foreground="{Binding BorderBrush, ElementName=ComputerBorder}"/>
+                    <TextBlock Name="Connections"
+                               Text="0/4"
+                               FontWeight="SemiBold"
+                               Foreground="{Binding BorderBrush, ElementName=ComputerBorder}"
+                               VerticalAlignment="Bottom"
+                               HorizontalAlignment="Right"/>
+                </Grid>
 
-            </StackPanel>
-
-        </StackPanel>
+            </StackPanel>            
+        </Border>
+        
     </Grid>
 </UserControl>

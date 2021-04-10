@@ -36,7 +36,7 @@
                     MouseLeftButtonUp="Header_MouseLeftButtonUp"
                     MouseMove="Header_MouseMove">
             
-            <Canvas Background="#0078d7" 
+            <Canvas Background="#3095bf" 
                     Height="2"/>
 
             <Grid Height="30">

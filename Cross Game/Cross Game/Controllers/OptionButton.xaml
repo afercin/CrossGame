@@ -14,7 +14,7 @@
         <StackPanel Orientation="Horizontal">
             <Border Name="OverEffect"
                     Width="8"
-                    Background="#0078d7"
+                    Background="#3095bf"
                     Opacity="0"/>
             <Grid Margin="3 0 0 0">
                 <Canvas Name="BackColor"
@@ -23,6 +23,7 @@
                 <TextBlock Text="{Binding Name, ElementName=Option}" 
                            Foreground="#E0E0E0" 
                            TextAlignment="Left" 
+                           FontWeight="SemiBold"
                            VerticalAlignment="Center"
                            FontSize="16" 
                            Width="150" 

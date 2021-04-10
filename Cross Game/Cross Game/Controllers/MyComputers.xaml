@@ -6,8 +6,14 @@
              xmlns:local="clr-namespace:Cross_Game.Controllers"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <TextBlock Text="patata" Foreground="White"/>
-        <StackPanel Orientation="Horizontal" CanVerticallyScroll="true"/>
-    </Grid>
+    <UserControl.Resources>
+        <ResourceDictionary Source="/Styles/MainWindowStyles.xaml"/>
+    </UserControl.Resources>
+    <Border Padding="5">
+        <StackPanel Name="ComputerPanel"
+                    Width="auto"
+                    Orientation="Horizontal" 
+                    CanVerticallyScroll="true"
+                    VerticalAlignment="Top"/>
+    </Border>
 </UserControl>

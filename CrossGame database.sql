@@ -15,7 +15,7 @@ CREATE TABLE users(
 CREATE TABLE friendlist(
 	user1 INT(9) NOT NULL,
 	user2 INT(9) NOT NULL,
-	accepted INT(1) NOT NULL, -- 0 => Accepted, 1 => Need user1 confirmation, 2 => Need user2 confirmation.
+	accepted INT(1) NOT NULL, -- 0 => Accepted, 1 => Need user2 confirmation.
 	PRIMARY KEY(user1, user2),
 	CONSTRAINT FK_F_Users1 FOREIGN KEY(user1) REFERENCES users(user_id) ON DELETE CASCADE,
 	CONSTRAINT FK_F_Users2 FOREIGN KEY(user2) REFERENCES users(user_id) ON DELETE CASCADE
@@ -23,12 +23,14 @@ CREATE TABLE friendlist(
 
 CREATE TABLE computers(
 	MAC CHAR(23) PRIMARY KEY,
-	IP VARCHAR(15) NOT NULL,
-	TCP_port INT(5) NOT NULL,
-	UDP_port INT(5) NOT NULL,
+	LocalIP VARCHAR(15) NOT NULL,
+	PublicIP VARCHAR(15) NOT NULL,
+	TCP INT(5) NOT NULL,
+	UDP INT(5) NOT NULL,
 	name VARCHAR(30),
-	max_conections INT(2) NOT NULL DEFAULT 1,
-	status INT(1) NOT NULL, -- 0 => Disconected, 1 => Connected, 2 => Used.
+	n_connections INT(2) NOT NULL,
+	max_connections INT(2) NOT NULL,
+	status INT(1) NOT NULL, -- 0 => Disconected, 1 => Connected.
 	owner int(9) NOT NULL,
 	CONSTRAINT FK_C_Users FOREIGN KEY(owner) REFERENCES users(user_id) ON DELETE CASCADE
 );

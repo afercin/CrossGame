@@ -70,7 +70,9 @@ namespace Cross_Game
             }
         }
         */
+
         private static MySqlDataReader Query(string sqlQuery) => new MySqlCommand(sqlQuery, connection).ExecuteReader();
+        private static bool NonQuery(string sqlQuery) => new MySqlCommand(sqlQuery, connection).ExecuteNonQuery() > 0;
 
         public static int CheckLogin(string email, string password, bool md5 = false)
         {
@@ -90,14 +92,21 @@ namespace Cross_Game
                     User_ID = (int)dataReader["user_id"];
                     User_NickName = dataReader["name"] + "#" + (int)dataReader["number"];
                     return_value = 1;
+                    dataReader.Close();
                 }
                 else
                     return_value = 0;
 
-                dataReader.Close();
+                dataReader?.Close();
                 CloseConnection();
             }
             return return_value;
+        }
+
+        public static void LogOut(string LocalMAC)
+        {
+            NonQuery("UPDATE users SET status = 0 WHERE user_id = " + User_ID);
+            NonQuery("UPDATE computers SET status = 0 WHERE MAC = " + LocalMAC);
         }
 
         public static string CreateMD5(string input)
@@ -112,6 +121,92 @@ namespace Cross_Game
                     sb.Append(hashBytes[i].ToString("X2"));
             }
             return sb.ToString();
+        }
+
+        public static List<string> GetMyComputers()
+        {
+            List<string> myComputers = new List<string>();
+
+            if (OpenConnection())
+            {
+                MySqlDataReader dataReader = Query($"SELECT MAC FROM computers WHERE owner = {User_ID}");
+                if (dataReader.HasRows)                
+                    while (dataReader.Read())
+                        myComputers.Add((string)dataReader["MAC"]);
+
+                dataReader.Close();
+                CloseConnection();
+            }
+
+            return myComputers;
+        }
+
+        public static void GetComputerData(string MAC, out string LocalIP, out string PublicIP, out int TCP, out int UDP, out string name, out int n_connections, out int max_connections, out int status)
+        {
+            name = LocalIP = PublicIP = null;
+            TCP = UDP = n_connections = max_connections = status = -1;
+            if (OpenConnection())
+            {
+                MySqlDataReader dataReader = Query(
+                    "SELECT LocalIP, PublicIP, TCP, UDP, name, n_connections, max_connections, status " +
+                    "FROM computers " +
+                    "WHERE MAC = '" + MAC + "'"
+                    );
+                if (dataReader.HasRows)
+                {
+                    dataReader.Read();
+                    LocalIP = (string)dataReader["LocalIP"];
+                    PublicIP = (string)dataReader["PublicIP"];
+                    TCP = (int)dataReader["TCP"];
+                    UDP = (int)dataReader["UDP"];
+                    name = (string)dataReader["name"];
+                    n_connections = (int)dataReader["n_connections"];
+                    max_connections = (int)dataReader["max_connections"];
+                    status = (int)dataReader["status"];
+                }
+
+                dataReader.Close();
+                CloseConnection();
+            }
+        }
+
+        public static void SyncComputerData(string MAC, string LocalIP, string PublicIP, out int TCP, out int UDP, out string name, out int n_connections, out int max_connections, int status)
+        {
+            TCP = 3030;
+            UDP = 3031;
+            name = PublicIP;
+            max_connections = 1;
+            n_connections = 0;
+            if (OpenConnection())
+            {
+                MySqlDataReader dataReader = Query(
+                    "SELECT TCP, UDP, name, n_connections, max_connections " +
+                    "FROM computers " +
+                    "WHERE MAC = '" + MAC + "'"
+                    );
+                if (dataReader.HasRows) // Actualizar datos del ordenador actual
+                {
+                    dataReader.Read();
+                    TCP = (int)dataReader["TCP"];
+                    UDP = (int)dataReader["UDP"];
+                    name = (string)dataReader["name"];
+                    n_connections = (int)dataReader["n_connections"];
+                    max_connections = (int)dataReader["max_connections"];
+                    dataReader.Close();
+                    NonQuery("UPDATE computers " +
+                            $"SET LocalIP = '{LocalIP}', PublicIP = '{PublicIP}', status = {status} " +
+                            $"WHERE MAC = '{MAC}'");
+                }
+                else // Insertar el nuevo equipo del usuario
+                {
+                    dataReader.Close();
+                    NonQuery("INSERT INTO computers VALUES " +
+                            $"('{MAC}', '{LocalIP}', '{PublicIP}', {TCP}, {UDP}, '{name}', {n_connections}, {max_connections}, {status}, {User_ID})");
+                    //NonQuery("INSERT INTO users_computers VALUES " +
+                    //        $"('{MAC}', {User_ID}, 0, null)");
+                }
+                CloseConnection();
+            }
         }
     }
 }
