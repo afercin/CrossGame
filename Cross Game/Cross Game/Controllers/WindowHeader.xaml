@@ -1,0 +1,80 @@
+﻿<UserControl x:Class="Cross_Game.Controllers.WindowHeader"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Cross_Game.Controllers"
+             mc:Ignorable="d" 
+             Height="32" d:DesignWidth="800"
+             Name="Header">
+    <UserControl.Resources>
+        <Style x:Key="OptionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Margin" Value="3 0 0 0"/>
+            <Setter Property="BorderThickness" Value="5 0 0 0"/>
+            <Setter Property="BorderBrush" Value="#0078d7"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#7F292728"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#292728"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <StackPanel  Background="#111" 
+                 MouseLeftButtonDown="Header_MouseLeftButtonDown"
+                 MouseLeftButtonUp="Header_MouseLeftButtonUp"
+                 MouseMove="Header_MouseMove">
+
+        <Canvas Background="#3095bf" 
+                Height="2"/>
+
+        <Grid Height="30">
+            
+            <Image Margin="6 3" 
+                   HorizontalAlignment="Left"
+                   Source="/Images/CrossGameLogo.png"/>
+
+            <TextBlock Name="Caption"
+                       Text="Cross Game" 
+                       HorizontalAlignment="Center"
+                       Margin="0 3"
+                       Foreground="#E0E0E0" 
+                       FontWeight="Bold" 
+                       FontSize="16"/>
+
+            <StackPanel HorizontalAlignment="Right" 
+                        Orientation="Horizontal">
+                <Button Name="Minimize"
+                        Click="Button_Click"
+                        Style="{StaticResource OptionButtonStyle}">
+                    <Image Source="/Images/minimize.png"/>
+                </Button>
+
+                <Button Name="Maximize"
+                        Click="Button_Click"
+                        Style="{StaticResource OptionButtonStyle}">
+                    <Image Source="/Images/maximize.png"/>
+                </Button>
+
+                <Button Name="Close"
+                        Click="Button_Click"
+                        Style="{StaticResource OptionButtonStyle}">
+                    <Image Source="/Images/cross.png"/>
+                </Button>
+
+            </StackPanel>
+        </Grid>
+    </StackPanel>
+</UserControl>

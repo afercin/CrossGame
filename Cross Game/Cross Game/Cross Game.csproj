@@ -73,8 +73,18 @@
     <Compile Include="Controllers\OptionButton.xaml.cs">
       <DependentUpon>OptionButton.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controllers\WindowHeader.xaml.cs">
+      <DependentUpon>WindowHeader.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CrossGameEvents.cs" />
+    <Compile Include="CustomMessageBox.xaml.cs">
+      <DependentUpon>CustomMessageBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DBConnection.cs" />
     <Compile Include="CrossGameExceptions.cs" />
+    <Compile Include="EditComputerParams.xaml.cs">
+      <DependentUpon>EditComputerParams.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Login.xaml.cs">
       <DependentUpon>Login.xaml</DependentUpon>
     </Compile>
@@ -88,9 +98,6 @@
     </Compile>
     <Compile Include="Server\Server.cs" />
     <Compile Include="Server\TCPServer.cs" />
-    <Compile Include="Controllers\TransmissionOptions.xaml.cs">
-      <DependentUpon>TransmissionOptions.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Server\UDPSender.cs" />
     <Compile Include="TCPSocket.cs" />
     <Page Include="Client\ClientDisplay.xaml">
@@ -110,6 +117,18 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controllers\OptionButton.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controllers\WindowHeader.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CustomMessageBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EditComputerParams.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -156,11 +175,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Styles\Styles.xaml">
-      <Generator>MSBuild:Compile</Generator>
+    <Page Include="Styles\PopUpWindowStyle.xaml">
       <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controllers\TransmissionOptions.xaml">
+    <Page Include="Styles\Styles.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

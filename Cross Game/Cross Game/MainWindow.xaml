@@ -28,51 +28,12 @@
             <RowDefinition/>
             <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
-
-        <StackPanel Grid.Row="0"
-                    Grid.ColumnSpan="2"
-                    Background="#111"
-                    MouseLeftButtonDown="Header_MouseLeftButtonDown"
-                    MouseLeftButtonUp="Header_MouseLeftButtonUp"
-                    MouseMove="Header_MouseMove">
-            
-            <Canvas Background="#3095bf" 
-                    Height="2"/>
-
-            <Grid Height="30">
-
-                <StackPanel HorizontalAlignment="Left"
-                            Orientation="Horizontal">
-
-                    <Image Margin="6 3" 
-                           Source="/Images/CrossGameLogo.png"/>
-
-                    <TextBlock Text="Cross Game" 
-                               Margin="0 3"
-                               Foreground="#E0E0E0" 
-                               FontWeight="Bold" 
-                               FontSize="16"/>
-
-                </StackPanel>
-                
-                <StackPanel HorizontalAlignment="Right" 
-                            Orientation="Horizontal">                    
-                    <Button Style="{StaticResource OptionButtonStyle}" Click="Minimize_Click">
-                        <Image Source="/Images/minimize.png"/>
-                    </Button>
-                    
-                    <Button Style="{StaticResource OptionButtonStyle}" Click="Maximize_Click">
-                        <Image Source="/Images/maximize.png"/>
-                    </Button>
-                    
-                    <Button Style="{StaticResource OptionButtonStyle}" Click="Close_Click">
-                        <Image Source="/Images/cross.png"/>
-                    </Button>  
-                    
-                </StackPanel>                
-            </Grid>              
-        </StackPanel>
-
+        <controllers:WindowHeader x:Name="Header"
+                                  HeaderText="Cross Game"
+                                  Grid.Row="0"
+                                  Grid.ColumnSpan="2"
+                                  MenuButtonClick="WindowHeader_MenuButtonClick"/>
+        
         <StackPanel Grid.Row="1"
                     Grid.Column="0"
                     Margin="6,0,0,0">

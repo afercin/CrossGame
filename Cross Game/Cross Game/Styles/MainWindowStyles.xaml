@@ -50,9 +50,6 @@
         <Setter Property="CornerRadius" Value="4"/>
         <Setter Property="Padding" Value="10"/>
         <Style.Triggers>
-            <DataTrigger Binding="{Binding Status, ElementName=ComputerTemplate}" Value="0">
-                <Setter Property="BorderBrush" Value=""
-            </DataTrigger>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Opacity" Value="1.0"/>
                 <Setter Property="Cursor" Value="Hand"/>
