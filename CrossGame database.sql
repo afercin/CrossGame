@@ -75,8 +75,8 @@ BEGIN
     SELECT MAX(user_id) + 1 INTO return_code FROM users;
 	
 	IF return_code < 2 THEN 
-		error_code := 2; 
-	END IF
+		SET return_code = 2; 
+	END IF;
 	
     INSERT INTO users VALUES(return_code, _name, random_number(), email, _password, 1);
   END IF;
