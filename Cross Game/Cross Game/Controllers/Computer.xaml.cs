@@ -1,18 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MahApps.Metro.IconPacks;
+using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Cross_Game.Controllers
 {
@@ -35,46 +26,108 @@ namespace Cross_Game.Controllers
         private int n_connections;
         private int max_connections;
 
-        public string ComputerMAC
-        {
-            get => computerMAC;
-            set => computerMAC = value;
-        }
-        public string LocalIP { get => localIP; }
-        public string PublicIP { get => publicIP; }
-        public int TCP { get => tcp; }
-        public int UPD { get => udp; }
-        public int Status { get => status; }
-        public int NConnections { get => n_connections; }
-        public int MaxConnections { get => max_connections; }
+        private bool localMachine;
+        private bool editArea;
+        private PackIconMaterialKind currentIcon;
+
+        public string ComputerMAC { get => computerMAC; set => computerMAC = value; }
+        public string LocalIP { get => localIP; set => localIP = value; }
+        public string PublicIP { get => publicIP; set => publicIP = value; }
+        public int Tcp { get => tcp; set => tcp = value; }
+        public int Udp { get => udp; set => udp = value; }
+        public int Status { get => status; set => status = value; }
+        public int N_connections { get => n_connections; set => n_connections = value; }
+        public int Max_connections { get => max_connections; set => max_connections = value; }
 
         public Computer(string _computerMAC = "")
         {
-            string name;
-            bool local = false;
 
             InitializeComponent();
 
-            computerMAC = _computerMAC;
+            ComputerMAC = _computerMAC;
+            localMachine = string.IsNullOrEmpty(ComputerMAC);
 
-            if (string.IsNullOrEmpty(computerMAC))
+            UpdateStatus();
+        }
+
+        private void Computer_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (!editArea)
             {
-                local = true;
-                localIP = ConnectionUtils.GetLocalIPAddress();
-                publicIP = ConnectionUtils.GetPublicIPAddress();
-                computerMAC = ConnectionUtils.GetMacByIP(LocalIP);
-                status = 1;
-                DBConnection.SyncComputerData(ComputerMAC, LocalIP, PublicIP, out tcp, out udp, out name, out n_connections, out max_connections, Status);
+                UpdateStatus();
+                if (n_connections < max_connections)
+                    MessageBox.Show("conectandose no más");
+            }
+            else if (new EditComputerParams().Show(this) == true)
+            {
+                DBConnection.UpdateComputerInfo(this);
+                ComputerName.Text += (localMachine ? " (local)" : "");
+            }
+            Icon.Kind = currentIcon;
+            editArea = false;
+        }
+
+        public void UpdateStatus()
+        {
+            if (localMachine)
+            {
+                LocalIP = ConnectionUtils.GetLocalIPAddress();
+                PublicIP = ConnectionUtils.GetPublicIPAddress();
+                ComputerMAC = ConnectionUtils.GetMacByIP(LocalIP);
+                Status = 1;
+                DBConnection.SyncComputerData(this);
             }
             else
-                DBConnection.GetComputerData(ComputerMAC, out localIP, out publicIP, out tcp, out udp, out name, out n_connections, out max_connections, out status);
+                DBConnection.GetComputerData(this);
 
-            ComputerName.Text = name + (local ? " (local)" : "");
-            Connections.Text = $"{n_connections}/{max_connections}";
-            if (NConnections == 0)
-                ComputerBorder.BorderBrush = Status == 1 ? blue : gray;
+            if (status != -1)
+            {
+                ComputerName.Text += (localMachine ? " (local)" : "");
+
+                Connections.Text = Status == 1 ? $"{N_connections}/{Max_connections}" : "";
+                if (N_connections == 0)
+                {
+                    switch (Status)
+                    {
+                        case 0:
+                            ComputerBorder.BorderBrush = gray;
+                            Icon.Kind = PackIconMaterialKind.MonitorOff;
+                            break;
+                        case 1:
+                            ComputerBorder.BorderBrush = blue;
+                            Icon.Kind = PackIconMaterialKind.MonitorClean;
+                            break;
+                    }
+                }
+                else if (N_connections == -1 || N_connections == Max_connections)
+                {
+                    Icon.Kind = PackIconMaterialKind.MonitorDashboard;
+                    ComputerBorder.BorderBrush = red;
+                }
+                else
+                {
+                    Icon.Kind = PackIconMaterialKind.MonitorEye;
+                    ComputerBorder.BorderBrush = yellow;
+                }
+
+                currentIcon = Icon.Kind;
+            }
             else
-                ComputerBorder.BorderBrush = NConnections == -1 || NConnections == max_connections ? red : yellow;
+            {
+                //error
+            }            
+        }
+
+        private void ComputerName_MouseEnter(object sender, MouseEventArgs e)
+        {
+            Icon.Kind = PackIconMaterialKind.MonitorEdit;
+            editArea = true;
+        }
+
+        private void ComputerName_MouseLeave(object sender, MouseEventArgs e)
+        {
+            Icon.Kind = currentIcon;
+            editArea = false;
         }
     }
 }
