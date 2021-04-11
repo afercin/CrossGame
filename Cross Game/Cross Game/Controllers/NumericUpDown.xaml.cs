@@ -14,6 +14,7 @@ namespace Cross_Game.Controllers
         private int step;
         private int maximum;
         private int minimum;
+        private bool keyPressed;
 
         public int Step
         {
@@ -49,7 +50,8 @@ namespace Cross_Game.Controllers
             set => SetValue(ValuePropertyChanged, value < minimum ? minimum : value > maximum ? maximum : value);
         }
 
-        public static readonly DependencyProperty ValuePropertyChanged = DependencyProperty.Register("Value", typeof(int), typeof(NumericUpDown), new PropertyMetadata(0));
+        public static readonly DependencyProperty ValuePropertyChanged = 
+            DependencyProperty.Register("Value", typeof(int), typeof(NumericUpDown), new PropertyMetadata(0));
 
         public NumericUpDown()
         {
@@ -57,14 +59,20 @@ namespace Cross_Game.Controllers
             step = 1;
             maximum = int.MaxValue;
             minimum = 0;
+            keyPressed = false;
         }
 
         private static bool IsTextAllowed(string text) => _regex.IsMatch(text);
 
-        private void NumericBox_PreviewTextInput(object sender, TextCompositionEventArgs e) => e.Handled = IsTextAllowed(e.Text);
+        private void NumericBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            keyPressed = true;
+            e.Handled = IsTextAllowed(e.Text);
+        }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            keyPressed = false;
             switch ((sender as Button).Name)
             {
                 case "Decrement": Value -= step; break;
@@ -74,14 +82,31 @@ namespace Cross_Game.Controllers
 
         private void NumericBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+            if (NumericBox.Text != string.Empty && !keyPressed)
+            {
+                if (int.Parse(NumericBox.Text) < minimum)
+                {
+                    Value = minimum;
+                    NumericBox.CaretIndex = NumericBox.Text.Length;
+                }
+                else if (int.Parse(NumericBox.Text) > maximum)
+                {
+                    Value = maximum;
+                    NumericBox.CaretIndex = NumericBox.Text.Length;
+                }
+            }
+        }
+
+        private void UpDown_LostFocus(object sender, RoutedEventArgs e)
+        {
             if (NumericBox.Text == string.Empty || int.Parse(NumericBox.Text) < minimum)
             {
-                NumericBox.Text = minimum.ToString();
+                Value = minimum;
                 NumericBox.CaretIndex = NumericBox.Text.Length;
             }
-            if (int.Parse(NumericBox.Text) > maximum)
+            else if (int.Parse(NumericBox.Text) > maximum)
             {
-                NumericBox.Text = maximum.ToString();
+                Value = maximum;
                 NumericBox.CaretIndex = NumericBox.Text.Length;
             }
         }
