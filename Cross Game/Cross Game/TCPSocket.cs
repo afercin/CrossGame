@@ -40,8 +40,6 @@ namespace Cross_Game
 
             return data;
         }
-
-        public abstract bool Start();
         public abstract void Close();
     }
 }

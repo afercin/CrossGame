@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace Cross_Game.Controllers
@@ -19,10 +20,19 @@ namespace Cross_Game.Controllers
             ComputerPanel.Children.Add(currentComputer);
             foreach (string mac in DBConnection.GetMyComputers())
                 if (mac != currentComputer.ComputerMAC)
-                    ComputerPanel.Children.Add(new Computer(mac)
+                {
+                    try
                     {
-                        Margin = new Thickness(5)
-                    });
+                        ComputerPanel.Children.Add(new Computer(mac)
+                        {
+                            Margin = new Thickness(5)
+                        });
+                    }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show(e.Message);
+                    }
+                }
         }
 
         public void LogOut() => DBConnection.LogOut(currentComputer.ComputerMAC);

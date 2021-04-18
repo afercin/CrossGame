@@ -2,19 +2,16 @@
 using System.Runtime.InteropServices;
 using System.Windows.Input;
 
-namespace Cross_Game.Server
+namespace Cross_Game.Connection
 {
     public class DXKeyboardSimulator
     {
-        public static void SendKey(int key, Actions action)
+        public static void SendKey(int key, Petition petition)
         {
-            int keycode;
-            try
-            {
-                keycode = (int)Enum.Parse(typeof(DirectXKeyStrokes), ((Key)key).ToString());
+            int keycode = (int)Enum.Parse(typeof(DirectXKeyStrokes), ((Key)key).ToString());
 
-                Input[] input =
-                {
+            Input[] input =
+            {
                 new Input
                 {
                     type = (int) InputType.Keyboard,
@@ -24,19 +21,14 @@ namespace Cross_Game.Server
                         {
                             wVk = 0,
                             wScan = (ushort) keycode,
-                            dwFlags = (uint) ((action == Actions.KeyboardKeyUp ? KeyEventF.KeyUp : KeyEventF.KeyDown) | KeyEventF.Scancode),
+                            dwFlags = (uint) ((petition == Petition.KeyboardKeyUp ? KeyEventF.KeyUp : KeyEventF.KeyDown) | KeyEventF.Scancode),
                             dwExtraInfo = GetMessageExtraInfo()
                         }
                     }
                 }
             };
 
-                SendInput((uint)input.Length, input, Marshal.SizeOf(typeof(Input)));
-            }
-            catch
-            {
-
-            }
+            SendInput((uint)input.Length, input, Marshal.SizeOf(typeof(Input)));
         }
 
         [Flags]
@@ -108,150 +100,150 @@ namespace Cross_Game.Server
 
         public enum DirectXKeyStrokes
         {
-            DIK_UNKNOW      = 0x00,
+            DIK_UNKNOW = 0x00,
 
-            Escape          = 0x01,
-            D1              = 0x02,
-            D2              = 0x03,
-            D3              = 0x04,
-            D4              = 0x05,
-            D5              = 0x06,
-            D6              = 0x07,
-            D7              = 0x08,
-            D8              = 0x09,
-            D9              = 0x0A,
-            D0              = 0x0B,
+            Escape = 0x01,
+            D1 = 0x02,
+            D2 = 0x03,
+            D3 = 0x04,
+            D4 = 0x05,
+            D5 = 0x06,
+            D6 = 0x07,
+            D7 = 0x08,
+            D8 = 0x09,
+            D9 = 0x0A,
+            D0 = 0x0B,
             OemOpenBrackets = 0x0C, // '
-            Oem6            = 0x0D, // ¡
-            Back            = 0x0E,
+            Oem6 = 0x0D, // ¡
+            Back = 0x0E,
 
-            Tab             = 0x0F,
-            Q               = 0x10,
-            W               = 0x11,
-            E               = 0x12,
-            R               = 0x13,
-            T               = 0x14,
-            Y               = 0x15,
-            U               = 0x16,
-            I               = 0x17,
-            O               = 0x18,
-            P               = 0x19,
-            Oem1            = 0x1A, // `
-            OemPlus         = 0x1B,
-            Return          = 0x1C,
+            Tab = 0x0F,
+            Q = 0x10,
+            W = 0x11,
+            E = 0x12,
+            R = 0x13,
+            T = 0x14,
+            Y = 0x15,
+            U = 0x16,
+            I = 0x17,
+            O = 0x18,
+            P = 0x19,
+            Oem1 = 0x1A, // `
+            OemPlus = 0x1B,
+            Return = 0x1C,
 
-            LeftCtrl        = 0x1D,
-            A               = 0x1E,
-            S               = 0x1F,
-            D               = 0x20,
-            F               = 0x21,
-            G               = 0x22,
-            H               = 0x23,
-            J               = 0x24,
-            K               = 0x25,
-            L               = 0x26,
-            Oem3            = 0x27, // ñ
-            OemQuotes       = 0x28, // ´
-            Oem5            = 0x29, // º
+            LeftCtrl = 0x1D,
+            A = 0x1E,
+            S = 0x1F,
+            D = 0x20,
+            F = 0x21,
+            G = 0x22,
+            H = 0x23,
+            J = 0x24,
+            K = 0x25,
+            L = 0x26,
+            Oem3 = 0x27, // ñ
+            OemQuotes = 0x28, // ´
+            Oem5 = 0x29, // º
 
-            LeftShift       = 0x2A,
-            OemQuestion     = 0x2B, // ç
-            Z               = 0x2C,
-            X               = 0x2D,
-            C               = 0x2E,
-            V               = 0x2F,
-            B               = 0x30,
-            N               = 0x31,
-            M               = 0x32,
-            OemComma        = 0x33,
-            OemPeriod       = 0x34,
-            OemMinus        = 0x35,
-            RightShift      = 0x36,
+            LeftShift = 0x2A,
+            OemQuestion = 0x2B, // ç
+            Z = 0x2C,
+            X = 0x2D,
+            C = 0x2E,
+            V = 0x2F,
+            B = 0x30,
+            N = 0x31,
+            M = 0x32,
+            OemComma = 0x33,
+            OemPeriod = 0x34,
+            OemMinus = 0x35,
+            RightShift = 0x36,
 
-            Multiply        = 0x37,
-            LeftAlt         = 0x38,
-            Space           = 0x39,
-            Capital         = 0x3A,
+            Multiply = 0x37,
+            LeftAlt = 0x38,
+            Space = 0x39,
+            Capital = 0x3A,
 
-            F1              = 0x3B,
-            F2              = 0x3C,
-            F3              = 0x3D,
-            F4              = 0x3E,
-            F5              = 0x3F,
-            F6              = 0x40,
-            F7              = 0x41,
-            F8              = 0x42,
-            F9              = 0x43,
-            F10             = 0x44,
-            NumLock         = 0x45,
-            Scroll          = 0x46,
+            F1 = 0x3B,
+            F2 = 0x3C,
+            F3 = 0x3D,
+            F4 = 0x3E,
+            F5 = 0x3F,
+            F6 = 0x40,
+            F7 = 0x41,
+            F8 = 0x42,
+            F9 = 0x43,
+            F10 = 0x44,
+            NumLock = 0x45,
+            Scroll = 0x46,
 
-            NumPad7         = 0x47,
-            NumPad8         = 0x48,
-            NumPad9         = 0x49,
-            Subtract        = 0x4A,
+            NumPad7 = 0x47,
+            NumPad8 = 0x48,
+            NumPad9 = 0x49,
+            Subtract = 0x4A,
 
-            NumPad4         = 0x4B,
-            NumPad5         = 0x4C,
-            NumPad6         = 0x4D,
-            Add             = 0x4E,
+            NumPad4 = 0x4B,
+            NumPad5 = 0x4C,
+            NumPad6 = 0x4D,
+            Add = 0x4E,
 
-            NumPad1         = 0x4F,
-            NumPad2         = 0x50,
-            NumPad3         = 0x51,
-            NumPad0         = 0x52,
-            Decimal         = 0x53,
+            NumPad1 = 0x4F,
+            NumPad2 = 0x50,
+            NumPad3 = 0x51,
+            NumPad0 = 0x52,
+            Decimal = 0x53,
 
-            Snapshot        = 0x54,
+            Snapshot = 0x54,
 
-            DIK_UNKNOW2     = 0x55,
+            DIK_UNKNOW2 = 0x55,
 
-            OemBackslash    = 0x56, // <
-            F11             = 0x57,
-            F12             = 0x58,
+            OemBackslash = 0x56, // <
+            F11 = 0x57,
+            F12 = 0x58,
 
-            Clear           = 0x59, // Posiblemente no sea eso pero realiza el mismo evento que NumPad5
+            Clear = 0x59, // Posiblemente no sea eso pero realiza el mismo evento que NumPad5
 
-            DIK_UNKNOW3     = 0x5A,
-            DIK_UNKNOW4     = 0x5B, // no funciona
-            DIK_UNKNOW5     = 0x5C, // no funciona
-            DIK_UNKNOW6     = 0x5D,
-            DIK_UNKNOW7     = 0x5E,
-            DIK_UNKNOW8     = 0x5F,
-            DIK_UNKNOW9     = 0x60,
-            DIK_UNKNOW10    = 0x61,
-            DIK_UNKNOW11    = 0x62,
-            DIK_UNKNOW12    = 0x63,
+            DIK_UNKNOW3 = 0x5A,
+            DIK_UNKNOW4 = 0x5B, // no funciona
+            DIK_UNKNOW5 = 0x5C, // no funciona
+            DIK_UNKNOW6 = 0x5D,
+            DIK_UNKNOW7 = 0x5E,
+            DIK_UNKNOW8 = 0x5F,
+            DIK_UNKNOW9 = 0x60,
+            DIK_UNKNOW10 = 0x61,
+            DIK_UNKNOW11 = 0x62,
+            DIK_UNKNOW12 = 0x63,
 
-            F13             = 0x64,
-            F14             = 0x65,
-            F15             = 0x66,
+            F13 = 0x64,
+            F14 = 0x65,
+            F15 = 0x66,
 
-            DIK_UNKNOW13    = 0x67,
-            DIK_UNKNOW14    = 0x68,
-            DIK_UNKNOW15    = 0x69,
-            DIK_UNKNOW16    = 0x6A,
-            DIK_UNKNOW17    = 0x6B,
-            DIK_UNKNOW18    = 0x6C,
-            DIK_UNKNOW19    = 0x6D,
-            DIK_UNKNOW20    = 0x6E,
-            DIK_UNKNOW21    = 0x6F,
-            DIK_KANA        = 0x70,
-            DIK_UNKNOW22    = 0x71,
-            DIK_UNKNOW23    = 0x72,
-            DIK_ABNT_C1     = 0x73, // /? on Brazilian keyboard
-            DIK_UNKNOW24    = 0x74,
-            DIK_UNKNOW25    = 0x75,
-            DIK_UNKNOW26    = 0x76,
-            DIK_UNKNOW27    = 0x77,
-            DIK_UNKNOW28    = 0x78,
-            DIK_CONVERT     = 0x79,
-            DIK_UNKNOW29    = 0x7A,
-            DIK_NOCONVERT   = 0x7B,
-            DIK_TAB         = 0x7C,
-            DIK_YEN         = 0x7D,
-            DIK_ABNT_C2     = 0x7E, //  Numpad . on Brazilian keyboard
-            DIK_UNKNOW30    = 0x7F,
+            DIK_UNKNOW13 = 0x67,
+            DIK_UNKNOW14 = 0x68,
+            DIK_UNKNOW15 = 0x69,
+            DIK_UNKNOW16 = 0x6A,
+            DIK_UNKNOW17 = 0x6B,
+            DIK_UNKNOW18 = 0x6C,
+            DIK_UNKNOW19 = 0x6D,
+            DIK_UNKNOW20 = 0x6E,
+            DIK_UNKNOW21 = 0x6F,
+            DIK_KANA = 0x70,
+            DIK_UNKNOW22 = 0x71,
+            DIK_UNKNOW23 = 0x72,
+            DIK_ABNT_C1 = 0x73, // /? on Brazilian keyboard
+            DIK_UNKNOW24 = 0x74,
+            DIK_UNKNOW25 = 0x75,
+            DIK_UNKNOW26 = 0x76,
+            DIK_UNKNOW27 = 0x77,
+            DIK_UNKNOW28 = 0x78,
+            DIK_CONVERT = 0x79,
+            DIK_UNKNOW29 = 0x7A,
+            DIK_NOCONVERT = 0x7B,
+            DIK_TAB = 0x7C,
+            DIK_YEN = 0x7D,
+            DIK_ABNT_C2 = 0x7E, //  Numpad . on Brazilian keyboard
+            DIK_UNKNOW30 = 0x7F,
 
             Insert = NumPad0,
             Delete = Decimal,

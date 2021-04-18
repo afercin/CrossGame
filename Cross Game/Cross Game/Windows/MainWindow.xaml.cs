@@ -1,11 +1,14 @@
 ﻿using Cross_Game.Controllers;
 using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
 
-namespace Cross_Game
+namespace Cross_Game.Windows
 {
     /// <summary>
     /// Lógica de interacción para MainWindow.xaml
@@ -34,7 +37,7 @@ namespace Cross_Game
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-
+            new prueba().Show();
         }
 
         private void Accept_Click(object sender, RoutedEventArgs e)
@@ -71,6 +74,33 @@ namespace Cross_Game
                 case PressedButton.Close: Close(); break;
                 case PressedButton.Maximize: WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized; break;
                 case PressedButton.Minimize: WindowState = WindowState.Minimized; break;
+            }
+        }
+
+        private void ActiveServer_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleButton toogle = sender as ToggleButton;
+            if (toogle.IsChecked == true)
+            {
+                toogle.Background = new SolidColorBrush(Color.FromRgb(153, 153, 153));
+                progress.Visibility = Visibility.Visible;
+                new Thread(()=>
+                {                
+                    Thread.Sleep(3000);
+                    Dispatcher.Invoke(() => progress.Visibility = Visibility.Hidden);
+                    Dispatcher.Invoke(() => toogle.Background = new SolidColorBrush(Color.FromRgb(0, 99, 177)));
+                }).Start();
+            }
+            else
+            {
+                toogle.Background = new SolidColorBrush(Color.FromRgb(153, 153, 153));
+                progress.Visibility = Visibility.Visible;
+                new Thread(() =>
+                {
+                    Thread.Sleep(3000);
+                    Dispatcher.Invoke(() => progress.Visibility = Visibility.Hidden);
+                    Dispatcher.Invoke(() => toogle.Background = new SolidColorBrush(Color.FromRgb(0, 99, 177)));
+                }).Start();
             }
         }
     }

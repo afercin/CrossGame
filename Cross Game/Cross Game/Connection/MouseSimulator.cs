@@ -1,26 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Runtime.InteropServices;
-using System.Threading;
 
-namespace Cross_Game.Server
+namespace Cross_Game.Connection
 {
     class MouseSimulator
     {
-        private static Dictionary<Actions, MouseOperations.MouseEventFlags> mouseMapper = new Dictionary<Actions, MouseOperations.MouseEventFlags>()
+        private static Dictionary<Petition, MouseOperations.MouseEventFlags> mouseMapper = new Dictionary<Petition, MouseOperations.MouseEventFlags>()
         {
-            { Actions.MouseLButtonDown, MouseOperations.MouseEventFlags.LeftDown },
-            { Actions.MouseRButtonDown, MouseOperations.MouseEventFlags.RightDown },
-            { Actions.MouseMButtonDown, MouseOperations.MouseEventFlags.MiddleDown },
-            { Actions.MouseLButtonUp, MouseOperations.MouseEventFlags.LeftUp },
-            { Actions.MouseRButtonUp, MouseOperations.MouseEventFlags.RightUp },
-            { Actions.MouseMButtonUp, MouseOperations.MouseEventFlags.MiddleUp }
+            { Petition.MouseLButtonDown, MouseOperations.MouseEventFlags.LeftDown },
+            { Petition.MouseRButtonDown, MouseOperations.MouseEventFlags.RightDown },
+            { Petition.MouseMButtonDown, MouseOperations.MouseEventFlags.MiddleDown },
+            { Petition.MouseLButtonUp, MouseOperations.MouseEventFlags.LeftUp },
+            { Petition.MouseRButtonUp, MouseOperations.MouseEventFlags.RightUp },
+            { Petition.MouseMButtonUp, MouseOperations.MouseEventFlags.MiddleUp }
         };
 
         public static void Move(int x, int y) => MouseOperations.SetCursorPosition(x, y);
 
-        public static void Button(Actions action) => MouseOperations.MouseEvent(mouseMapper[action]);
+        public static void Button(Petition petition) => MouseOperations.MouseEvent(mouseMapper[petition]);
 
         public static void Wheel(int delta) => MouseOperations.MouseEvent(MouseOperations.MouseEventFlags.Wheel, delta);
 

@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace Cross_Game
+namespace Cross_Game.Windows
 {
     /// <summary>
     /// Lógica de interacción para CustomMessageBox.xaml

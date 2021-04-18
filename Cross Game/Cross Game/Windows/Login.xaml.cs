@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace Cross_Game
+namespace Cross_Game.Windows
 {
     /// <summary>
     /// Lógica de interacción para LoginRegister.xaml
@@ -24,7 +24,6 @@ namespace Cross_Game
         public Login()
         {
             InitializeComponent();
-
             emailWatermark = true;
             passwordWatermark = true;
             Error.Visibility = Visibility.Hidden;
@@ -154,7 +153,9 @@ namespace Cross_Game
                                     bw.Write(md5 ? password : DBConnection.CreateMD5(password));
                                 }
                             }
-                            new MainWindow().Show();
+                            //new MainWindow().Show();
+
+                            new PruebaSockets().Show();
                             Close();
                         }
                         else

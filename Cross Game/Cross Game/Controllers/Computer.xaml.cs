@@ -1,4 +1,5 @@
-﻿using MahApps.Metro.IconPacks;
+﻿using Cross_Game.Windows;
+using MahApps.Metro.IconPacks;
 using System;
 using System.Windows;
 using System.Windows.Controls;
@@ -113,9 +114,7 @@ namespace Cross_Game.Controllers
                 currentIcon = Icon.Kind;
             }
             else
-            {
-                //error
-            }            
+                throw new Exception("Invalid computer status.");
         }
 
         private void ComputerName_MouseEnter(object sender, MouseEventArgs e)

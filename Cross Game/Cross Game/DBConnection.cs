@@ -2,12 +2,8 @@
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-
 namespace Cross_Game
 {
     class DBConnection
@@ -15,10 +11,10 @@ namespace Cross_Game
         public static int User_ID = -1;
         public static string User_NickName = "Pepe el butanero";
         private static MySqlConnection connection = new MySqlConnection(
-            "SERVER=localhost;" +
+            "SERVER=crossgame.sytes.net;" +
             "DATABASE=CrossGame;" +
-            "UID=root;" +
-            "PASSWORD=;"
+            "UID=client;" +
+            "PASSWORD=Patata_123;"
         );
         
         private static bool OpenConnection()
@@ -30,16 +26,18 @@ namespace Cross_Game
             }
             catch (MySqlException ex)
             {
+                LogUtils.AppendLogHeader(LogUtils.DatabaseErrorsLog);
                 switch (ex.Number)
                 {
                     case 0:
-                        Console.WriteLine("Cannot connect to server.  Contact administrator");
+                        LogUtils.AppendLogError(LogUtils.DatabaseErrorsLog, "Cannot connect to server.  Contact administrator");
                         break;
 
                     case 1045:
-                        Console.WriteLine("Invalid username/password, please try again");
+                        LogUtils.AppendLogError(LogUtils.DatabaseErrorsLog, "Invalid username/password, please try again");
                         break;
                 }
+                LogUtils.AppendLogFooter(LogUtils.DatabaseErrorsLog);
                 return false;
             }
         }
@@ -53,7 +51,9 @@ namespace Cross_Game
             }
             catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                LogUtils.AppendLogHeader(LogUtils.DatabaseErrorsLog);
+                LogUtils.AppendLogError(LogUtils.DatabaseErrorsLog, ex.Message);
+                LogUtils.AppendLogFooter(LogUtils.DatabaseErrorsLog);
                 return false;
             }
         }
