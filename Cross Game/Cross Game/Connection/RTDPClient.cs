@@ -127,30 +127,22 @@ namespace Cross_Game.Connection
 
         private void ReceiveData()
         {
-            while (IsConnected)
+            try
             {
-                byte[] data = new byte[MaxPacketSize];
-                int dataSize;
-                try
+                while (IsConnected)
                 {
+                    byte[] data = new byte[MaxPacketSize];
+                    int dataSize;
+
                     dataSize = dataSocket.Receive(data, MaxPacketSize, 0);
                     ReceivedData.Invoke(dataSocket, new ReceivedBufferEventArgs(data, dataSize));
                 }
-                catch (SocketException e)
-                {
-                    LogUtils.AppendLogHeader(LogUtils.ClientConnectionLog);
-                    switch (e.SocketErrorCode)
-                    {
-                        case SocketError.Interrupted:
-                            LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, "La conexión con el servidor ha sido interrumpida.");
-                            break;
-                        default:
-                            LogUtils.AppendLogError(LogUtils.ClientConnectionLog, e.Message);
-                            LogUtils.AppendLogError(LogUtils.ClientConnectionLog, e.StackTrace);
-                            break;
-                    }
-                    LogUtils.AppendLogFooter(LogUtils.ClientConnectionLog);
-                }
+            }
+            catch (SocketException e)
+            {
+                LogUtils.AppendLogHeader(LogUtils.ClientConnectionLog);
+                LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, e.Message + $" ({e.SocketErrorCode})");
+                LogUtils.AppendLogFooter(LogUtils.ClientConnectionLog);
             }
         }
 
@@ -158,7 +150,8 @@ namespace Cross_Game.Connection
 
         public override void Close()
         {
-            SendBuffer(petitionsSocket, new byte[] { Convert.ToByte(Petition.EndConnetion) });
+            if (IsConnected)
+                SendBuffer(petitionsSocket, new byte[] { Convert.ToByte(Petition.EndConnetion) });
             petitionsSocket.Close();
             dataSocket.Close();
             IsConnected = false;

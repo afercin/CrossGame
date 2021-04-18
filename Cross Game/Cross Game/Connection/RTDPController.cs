@@ -97,33 +97,42 @@ namespace Cross_Game.Connection
         {
             RTDPServer server = connection as RTDPServer;
             byte imageCount = 1;
-            while (audio != null)
+            bool endConnection = false;
+            while (audio != null && !endConnection)
             {
                 Task.Run(() =>
                 {
-                    byte[] imageBytes = Screen.CaptureScreen(), info = new byte[5];
-                    int dataleft = imageBytes.Length, offset = 0, packetSize;
-                    lock (server)
+                    try
                     {
-                        info[0] = imageCount;
-                        imageCount = (byte) (imageCount % 254 + 1);
+                        byte[] imageBytes = Screen.CaptureScreen(), info = new byte[5];
+                        int dataleft = imageBytes.Length, offset = 0, packetSize;
+                        lock (server)
+                        {
+                            info[0] = imageCount;
+                            imageCount = (byte) (imageCount % 254 + 1);
+                        }
+                        BitConverter.GetBytes(dataleft).CopyTo(info, 1);
+                        server.SendData(info);
+
+                        while (dataleft > 0)
+                        {
+                            byte[] rtdpPacket;
+                            packetSize = dataleft + 1 > RTDProtocol.MaxPacketSize ? RTDProtocol.MaxPacketSize : dataleft + 1;
+
+                            rtdpPacket = new byte[packetSize];
+                            rtdpPacket[0] = info[0];
+                            Array.Copy(imageBytes, offset, rtdpPacket, 1, packetSize - 1);
+
+                            server.SendData(rtdpPacket);
+
+                            dataleft -= packetSize - 1;
+                            offset += packetSize - 1;
+                        }
                     }
-                    BitConverter.GetBytes(dataleft).CopyTo(info, 1);
-                    server.SendData(info);
-
-                    while (dataleft > 0)
+                    catch (ObjectDisposedException)
                     {
-                        byte[] rtdpPacket;
-                        packetSize = dataleft + 1 > RTDProtocol.MaxPacketSize ? RTDProtocol.MaxPacketSize : dataleft + 1;
-
-                        rtdpPacket = new byte[packetSize];
-                        rtdpPacket[0] = info[0];
-                        Array.Copy(imageBytes, offset, rtdpPacket, 1, packetSize - 1);
-
-                        server.SendData(rtdpPacket);
-
-                        dataleft -= packetSize - 1;
-                        offset += packetSize - 1;
+                        Console.WriteLine("CaptureScreen, conexión destruida.");
+                        endConnection = true;
                     }
                 });
 
@@ -138,18 +147,25 @@ namespace Cross_Game.Connection
 
             currentCursor = pci.hCursor;
 
-            while (audio != null)
+            try
             {
-                pci.cbSize = Marshal.SizeOf(typeof(User32.CURSORINFO));
-                User32.GetCursorInfo(out pci);
-
-                if (currentCursor != pci.hCursor && (int)pci.hCursor <= 0x1001F)
+                while (audio != null)
                 {
-                    (connection as RTDPServer).SendData(new byte[] { 0xFF, (byte)pci.hCursor });
-                    currentCursor = pci.hCursor;
-                }
+                    pci.cbSize = Marshal.SizeOf(typeof(User32.CURSORINFO));
+                    User32.GetCursorInfo(out pci);
 
-                Thread.Sleep(timeRate);
+                    if (currentCursor != pci.hCursor && (int)pci.hCursor <= 0x1001F)
+                    {
+                        (connection as RTDPServer).SendData(new byte[] { 0xFF, (byte)pci.hCursor });
+                        currentCursor = pci.hCursor;
+                    }
+
+                    Thread.Sleep(timeRate);
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                Console.WriteLine("CursorThread, conexión destruida.");
             }
         }
 

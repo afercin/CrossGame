@@ -40,9 +40,9 @@ namespace Cross_Game.Windows
                 Password.Password = "";
                 CheckLogin(email, md5_pass, true);
             }
-            catch
+            catch (IOException)
             {
-                // No existe el fichero;
+                Console.WriteLine("No existe el fichero de autologin, se le solicitarán las credenciales al usuario");
             }
 
         }

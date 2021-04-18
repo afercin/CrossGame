@@ -106,7 +106,8 @@ namespace Cross_Game.Connection
             clientSockets.Values.CopyTo(collection, 0);
             foreach (Sockets sockets in collection)
             {
-                SendBuffer(sockets.tcpSocket, new byte[] { Convert.ToByte(Petition.EndConnetion) });
+                if (IsConnected)
+                    SendBuffer(sockets.tcpSocket, new byte[] { Convert.ToByte(Petition.EndConnetion) });
                 sockets.tcpSocket.Close();
                 sockets.udpSocket.Close();
             }
@@ -133,15 +134,8 @@ namespace Cross_Game.Connection
 
         public void SendData(byte[] data)
         {
-            try
-            {
-                foreach (Sockets sockets in clientSockets.Values)
-                    SendBuffer(sockets.udpSocket, data);
-            }
-            catch (InvalidOperationException)
-            {
-                Console.WriteLine("Se ha desconectado un cliente.");
-            }
+            foreach (Sockets sockets in clientSockets.Values)
+                SendBuffer(sockets.udpSocket, data);
         }
 
         public void SendWaveFormat(Socket newClientSocket, byte[] waveFormat)

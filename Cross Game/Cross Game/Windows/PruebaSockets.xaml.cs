@@ -38,7 +38,7 @@ namespace Cross_Game.Windows
         }
         private void Client_Click(object sender, RoutedEventArgs e)
         {
-            if (client == null)
+            if (client == null || !client.IsConnected)
             {
                 client = new RTDPController(3030, 3031, "192.168.1.2");
                 client.ImageBuilt += Client_ImageBuilt;
@@ -53,7 +53,7 @@ namespace Cross_Game.Windows
 
         private void Server_Click(object sender, RoutedEventArgs e)
         {
-            if (server == null)
+            if (server == null || !server.IsConnected)
                 server = new RTDPController(3030, 3031, 1, 20);
             else
             {

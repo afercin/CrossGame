@@ -73,24 +73,9 @@ namespace Cross_Game.Connection
         protected void SendBuffer(Socket s, byte[] buffer)
         {
             if (buffer.Length > MaxPacketSize)
-                throw new ArgumentException("El tamaño del dato introducido supera el valor de " + MaxPacketSize + " bytes.");            
-            try
-            {
-                lock (s)
-                    s.Send(buffer, buffer.Length, 0);
-            }
-            catch (SocketException e)
-            {
-                if (e.SocketErrorCode == SocketError.Interrupted) // El host remoto ha cerrado la conexión
-                    if (this is RTDPServer)
-                        (this as RTDPServer).Close(((IPEndPoint)s.RemoteEndPoint).Address.ToString());
-                    else
-                        Close();
-            }
-            catch (ObjectDisposedException)
-            {
-                // Se ha hecho Socket.Close()
-            }
+                throw new ArgumentException("El tamaño del dato introducido supera el valor de " + MaxPacketSize + " bytes.");
+            lock (s)
+                s.Send(buffer, buffer.Length, 0);
         }
 
         protected void ReceiveBuffer(Socket s, out byte[] buffer, out int bufferSize)
@@ -103,7 +88,7 @@ namespace Cross_Game.Connection
         public abstract void Close();
 
         protected void ReceivePetition(Socket s)
-        {
+        {            
             try
             {
                 while (IsConnected)
@@ -114,15 +99,13 @@ namespace Cross_Game.Connection
             }
             catch (SocketException e)
             {
-                if (e.SocketErrorCode == SocketError.Interrupted) // El host remoto ha cerrado la conexión
-                    if (this is RTDPServer)
-                        (this as RTDPServer).Close(((IPEndPoint)s.RemoteEndPoint).Address.ToString());
-                    else
-                        Close();
-            }
-            catch (ObjectDisposedException)
-            {
-                // Se ha hecho Socket.Close()
+                string logFile = (this is RTDPClient) ? LogUtils.ClientConnectionLog : LogUtils.ServerConnectionLog;
+
+                LogUtils.AppendLogHeader(logFile);
+                LogUtils.AppendLogWarn(logFile, $"Conexión anulada por el host remoto ({e.SocketErrorCode}).");
+                LogUtils.AppendLogFooter(logFile);
+
+                IsConnected = false;
             }
         }
     }

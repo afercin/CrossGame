@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 
 namespace Cross_Game
 {
@@ -21,34 +22,41 @@ namespace Cross_Game
             if (!Directory.Exists(LogsFolder))
                 Directory.CreateDirectory(LogsFolder);
 
-            File.AppendAllLines(logPath, new string[]
-            {
-                @"                     _________                                 ________                                           ",
-				@"                     \_   ___ \_______  ____   ____  ______   /  _____/_____    _____   ____                      ",
-				@"                     /    \  \/\_  __ \/  _ \ /  _ \/  ___/  /   \  ___\__  \  /     \_/ __ \                     ",
-				@"                     \     \____|  | \(  <_> |  <_> )___ \   \    \_\  \/ __ \|  Y Y  \  ___/                     ",
-				@" __________________   \______  /|__|   \____/ \____/____  >   \______  (____  /__|_|  /\___  >   __________________",
-				@"/_____/_____/_____/          \/                         \/           \/     \/      \/     \/   /_____/_____/_____/"
-            });
+            AppendText(logPath, @"                     _________                                 ________                                            ");
+            AppendText(logPath, @"                     \_   ___ \_______  ____   ____  ______   /  _____/_____    _____   ____                       ");
+            AppendText(logPath, @"                     /    \  \/\_  __ \/  _ \ /  _ \/  ___/  /   \  ___\__  \  /     \_/ __ \                      ");
+            AppendText(logPath, @"                     \     \____|  | \(  <_> |  <_> )___ \   \    \_\  \/ __ \|  Y Y  \  ___/                      ");
+            AppendText(logPath, @" __________________   \______  /|__|   \____/ \____/____  >   \______  (____  /__|_|  /\___  >   __________________");
+            AppendText(logPath, @"/_____/_____/_____/          \/                         \/           \/     \/      \/     \/   /_____/_____/_____/");
         }
 
         public static void AppendLogFooter(string logPath)
         {
-            File.AppendAllLines(logPath, new string[]
-            {
-				@" __________________________________________________________________________________________________________________",
-				@"/_____/_____/_____/_____/_____/_____/_____/_____/_____/_____/_____/_____/_____/_____/_____/_____/_____/_____/_____/"
-            });
+            AppendText(logPath, @" __________________________________________________________________________________________________________________");
+            AppendText(logPath, @"/_____/_____/_____/_____/_____/_____/_____/_____/_____/_____/_____/_____/_____/_____/_____/_____/_____/_____/_____/");
         }
 
 
-        public static void AppendLogText(string logPath, string text) => AppendText(logPath, "[INFO] " + text);
+        public static void AppendLogText(string logPath, string text) => AppendText(logPath, GetCurrentDate() + "[INFO] " + text);
 
-        public static void AppendLogWarn(string logPath, string text) => AppendText(logPath, "[WARN] " + text);
+        public static void AppendLogWarn(string logPath, string text) => AppendText(logPath, GetCurrentDate() + "[WARN] " + text);
 
-        public static void AppendLogError(string logPath, string text) => AppendText(logPath, "[ERROR] " + text);
+        public static void AppendLogError(string logPath, string text) => AppendText(logPath, GetCurrentDate() + "[ERROR] " + text);
 
-        private static void AppendText(string logPath, string text) => File.AppendAllText(logPath, GetCurrentDate() + text + "\n");
+        private static void AppendText(string logPath, string text)
+        {
+            try
+            {
+                File.AppendAllText(logPath, text + "\n");
+            }
+            catch (IOException e)
+            {
+                Console.WriteLine(e.Message);
+                Console.WriteLine("Esperando 50ms antes de volver a intentar...");
+                Thread.Sleep(50);
+                AppendText(logPath, text);
+            }
+        }
 
         private static string GetCurrentDate()
         {
