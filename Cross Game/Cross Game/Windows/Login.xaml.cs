@@ -129,6 +129,8 @@ namespace Cross_Game.Windows
 
         private void CheckLogin(string email, string password, bool md5 = false)
         {
+            var transmission = new UserDisplay();
+            transmission.StartTransmission(3030, 3031, "192.168.1.2");
             if (email != watermakEmail && password != watermakPassword)
                 switch (DBConnection.CheckLogin(email, password, md5))
                 {
@@ -153,9 +155,8 @@ namespace Cross_Game.Windows
                                     bw.Write(md5 ? password : DBConnection.CreateMD5(password));
                                 }
                             }
-                            //new MainWindow().Show();
 
-                            new PruebaSockets().Show();
+                            new MainWindow().Show();
                             Close();
                         }
                         else

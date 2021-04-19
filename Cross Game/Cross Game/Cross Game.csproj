@@ -151,8 +151,8 @@
     <Compile Include="prueba.xaml.cs">
       <DependentUpon>prueba.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Windows\PruebaSockets.xaml.cs">
-      <DependentUpon>PruebaSockets.xaml</DependentUpon>
+    <Compile Include="Windows\UserDisplay.xaml.cs">
+      <DependentUpon>UserDisplay.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controllers\NumericUpDown.xaml.cs">
       <DependentUpon>NumericUpDown.xaml</DependentUpon>
@@ -193,7 +193,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Windows\PruebaSockets.xaml">
+    <Page Include="Windows\UserDisplay.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
