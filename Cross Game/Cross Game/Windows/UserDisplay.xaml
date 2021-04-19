@@ -4,9 +4,51 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Cross_Game"
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:controllers="clr-namespace:Cross_Game.Controllers"
         mc:Ignorable="d"
-        Title="UserDisplay" Height="300" Width="500"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        WindowState="Maximized"
+        Title="UserDisplay" Height="720" Width="1280"
         Closing="Window_Closing">
+    <Window.Resources>
+
+        <Style x:Key="FlatTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#E6E6E6"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        
+        <Style x:Key="FlatButtonStyle" TargetType="Button">
+            <Setter Property="Margin" Value="3"/>
+            <Setter Property="Background" Value="#3095bf"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#1c98ea"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#007acc"/>
+                </Trigger>
+            </Style.Triggers>
+            <Style.Resources>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource FlatTextStyle}"/>
+            </Style.Resources>
+        </Style>
+    </Window.Resources>
     <Grid KeyDown="ClientDisplay_KeyDown">
         <Image Name="ClientDisplay"
                MouseMove="ClientDisplay_MouseMove"
@@ -21,5 +63,52 @@
                    VerticalAlignment="Top"
                    HorizontalAlignment="Left"
                    Padding="3 0"/>
+        <Grid Background="#9000">
+            <Border Name="logWindow"
+                Background="#111"
+                Width="300"
+                Height="100"
+                CornerRadius="4">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="22"/>
+                        <RowDefinition/>
+                        <RowDefinition Height="30"/>
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <Image Source="/Images/CrossGameLogo.png"
+                               Width="22"
+                               HorizontalAlignment="Left"/>
+                        <TextBlock Foreground="#E0E0E0"
+                                   Text="Cross Game"
+                                   FontWeight="DemiBold"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Center"/>
+                    </Grid>
+                    <StackPanel Grid.Row="1"
+                            Margin="10 0"
+                            Orientation="Horizontal">
+                        <mah:ProgressRing x:Name="progress"
+                                      Foreground="White"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Left"
+                                      Width="10"/>
+                        <TextBlock Name="LogText"
+                               Text="Reconectando con el servidor..."
+                               Margin="10 0 0 0"
+                               Foreground="#E0E0E0"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Left"/>
+                    </StackPanel>
+                    <Button Grid.Row="2"
+                        Width="80"
+                        HorizontalAlignment="Right"
+                        Margin="5"
+                        Style="{StaticResource FlatButtonStyle}">
+                        <TextBlock Text="Cancelar"/>
+                    </Button>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </Window>
