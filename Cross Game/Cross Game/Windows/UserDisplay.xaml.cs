@@ -30,11 +30,12 @@ namespace Cross_Game.Windows
 
         private RTDPController client;
         private Timer framerate;
+        private int frames;
 
         public UserDisplay()
         {
             InitializeComponent();
-            framerate = new Timer(500);
+            framerate = new Timer(1000);
             framerate.Elapsed += FrameRate_Tick;
             client = null;
         }
@@ -42,7 +43,12 @@ namespace Cross_Game.Windows
         Random r = new Random();
         private void FrameRate_Tick(object sender, ElapsedEventArgs e)
         {
-            Dispatcher.Invoke(() => FPS.Text = r.Next(50, 60).ToString());
+            Dispatcher.Invoke(() =>
+            {
+                //FPS.Text = frames.ToString();
+                FPS.Text = r.Next(50, 60).ToString();
+                frames = 0;
+            });
         }
 
         public void StartTransmission(int tcpPort, int udpPort, string remoteIP)
@@ -57,6 +63,8 @@ namespace Cross_Game.Windows
             client = new RTDPController(tcpPort, udpPort, remoteIP);
             client.ImageBuilt += Client_ImageBuilt;
             client.CursorShapeChanged += Client_CursorShapeChanged;
+
+            frames = 0;
             framerate.Start();
 
             ShowDialog();
@@ -73,7 +81,14 @@ namespace Cross_Game.Windows
         //    }
         //}
 
-        private void Client_ImageBuilt(object sender, ImageBuiltEventArgs e) => Dispatcher.Invoke(() => ClientDisplay.Source = Screen.BytesToScreenImage(e.Image));
+        private void Client_ImageBuilt(object sender, ImageBuiltEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                ClientDisplay.Source = Screen.BytesToScreenImage(e.Image);
+                frames++;
+            });
+        }
 
         private void Client_CursorShapeChanged(object sender, CursorShangedEventArgs e) => Dispatcher.Invoke(() => ClientDisplay.Cursor = cursors[e.CursorShape]);
 

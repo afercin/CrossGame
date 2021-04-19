@@ -1,11 +1,9 @@
 ﻿using Cross_Game.Controllers;
 using System;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
 
 namespace Cross_Game.Windows
@@ -15,16 +13,10 @@ namespace Cross_Game.Windows
     /// </summary>
     public partial class MainWindow : Window
     {
-        private OptionButton currentOption;
+        public string UserName { get => DBConnection.CurrentUser.Name; }
+        public string UserNumber { get => DBConnection.CurrentUser.Number.ToString(); }
 
-        public string UserName
-        {
-            get => DBConnection.User_NickName.Split('#')[0];
-        }
-        public string UserNumber
-        {
-            get => DBConnection.User_NickName.Split('#')[1];
-        }
+        private OptionButton currentOption;
 
         public MainWindow()
         {
@@ -38,6 +30,9 @@ namespace Cross_Game.Windows
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             new prueba().Show();
+            var w = new WaitingWindow();
+            w.Show();
+            w.SetText("Reconectando con el servidor...");
         }
 
         private void Accept_Click(object sender, RoutedEventArgs e)
@@ -59,10 +54,10 @@ namespace Cross_Game.Windows
 
         private void ChangeMenuVisibility(string name, Visibility visibility)
         {
-            switch (currentOption.Name)
+            switch (name)
             {
                 case "Ordenadores": break;
-                case "Amigos": break;
+                case "Amigos": new WaitingWindow().Show(); break;
                 case "Transmisión": break;
             }
         }
@@ -102,6 +97,11 @@ namespace Cross_Game.Windows
                     Dispatcher.Invoke(() => toogle.Background = new SolidColorBrush(Color.FromRgb(0, 99, 177)));
                 }).Start();
             }
+        }
+
+        private void MainWindow_Closed(object sender, EventArgs e)
+        {
+            DBConnection.LogOut();
         }
     }
 }

@@ -13,7 +13,12 @@
         MouseDown="Login_OnMouseDown"
         Title="Cross Game - Login" Height="450" Width="380">
     <Window.Resources>
-        <ResourceDictionary Source="/Styles/LoginStyles.xaml"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Styles/Styles.xaml"/>
+                <ResourceDictionary Source="/Styles/LoginStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary> 
     </Window.Resources>
     <Grid>
         <Grid>
@@ -85,9 +90,14 @@
                                Text="Email o contraseña incorrectos" 
                                IsVisibleChanged="Error_IsVisibleChanged"
                                Style="{StaticResource ErrorTextStyle}"/>
-                    <Border Style="{StaticResource LoginButtonStyle}" Margin="0 0 0 5">
-                        <Button Content="Iniciar sesión"
-                                Click="Button_Click"/>
+                    <Border Style="{StaticResource RoundButtonStyle}" 
+                            Margin="0 0 0 5"
+                            Height="36">
+                        <Button Click="Button_Click">
+                            <TextBlock Text="Iniciar sesión"
+                                       Margin="0 0 0 3"
+                                       FontSize="20"/>
+                        </Button>
                     </Border>
                     <TextBlock Text="¿Todavía no tienes una cuenta? Registrate ahora."
                                MouseDown="TextBlock_MouseDown" 

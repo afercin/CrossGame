@@ -31,8 +31,15 @@ namespace Cross_Game
         }
 
         public static bool InternetConnection() => new Ping().Send("8.8.8.8").Status == IPStatus.Success;
+        
+        public static void GetComputerNetworkInfo(out string localIP, out string publicIP, out string mac)
+        {
+            localIP = GetLocalIPAddress();
+            publicIP = GetPublicIPAddress();
+            mac = GetMacByIP(localIP);
+        }
 
-        public static string GetPublicIPAddress()
+        private static string GetPublicIPAddress()
         {
             if (!InternetConnection())
                 throw new InternetConnectionException("You has not internet connection");
@@ -50,14 +57,14 @@ namespace Cross_Game
             return address.Substring(first, last - first);
         }
 
-        public static string GetLocalIPAddress()
+        private static string GetLocalIPAddress()
         {
             if (!InternetConnection())
                 throw new InternetConnectionException("You has not internet connection");
             return ((IPEndPoint)new UdpClient("8.8.8.8", 1).Client.LocalEndPoint).Address.ToString();
         }
 
-        public static string GetMacByIP(string ipAddress)
+        private static string GetMacByIP(string ipAddress)
         {
             var query = NetworkInterface.GetAllNetworkInterfaces()
                 .Where(n =>

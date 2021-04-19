@@ -4,77 +4,85 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Cross_Game.Controllers"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
+             Background="Transparent"
              Height="32" d:DesignWidth="800"
              Name="Header">
     <UserControl.Resources>
-        <Style x:Key="OptionButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Margin" Value="3 0 0 0"/>
-            <Setter Property="BorderThickness" Value="5 0 0 0"/>
-            <Setter Property="BorderBrush" Value="#0078d7"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#7F292728"/>
-                </Trigger>
-                <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="#292728"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Styles/Styles.xaml"/>
+                <ResourceDictionary>
+                    <Style x:Key="OptionButtonStyle" TargetType="Button">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Margin" Value="3 0 0 0"/>
+                        <Setter Property="BorderThickness" Value="5 0 0 0"/>
+                        <Setter Property="BorderBrush" Value="#0078d7"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#7F292728"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#292728"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </UserControl.Resources>
-    <StackPanel  Background="#111" 
+    <Border CornerRadius="4"
+            BorderThickness="0 2 0 0"
+            BorderBrush="#3095bf">
+        <StackPanel  Background="#111" 
                  MouseLeftButtonDown="Header_MouseLeftButtonDown"
                  MouseLeftButtonUp="Header_MouseLeftButtonUp"
                  MouseMove="Header_MouseMove">
 
-        <Canvas Background="#3095bf" 
-                Height="2"/>
+            <Grid Height="30">
 
-        <Grid Height="30">
-            
-            <Image Margin="6 3" 
+                <Image Margin="6 3" 
                    HorizontalAlignment="Left"
                    Source="/Images/CrossGameLogo.png"/>
 
-            <TextBlock Name="Caption"
+                <TextBlock Name="Caption"
                        Text="Cross Game" 
                        HorizontalAlignment="Center"
                        Margin="0 3"
-                       Foreground="#E0E0E0" 
-                       FontWeight="Bold" 
-                       FontSize="16"/>
+                       Style="{StaticResource FlatTextStyle}"/>
 
-            <StackPanel HorizontalAlignment="Right" 
+                <StackPanel HorizontalAlignment="Right" 
                         Orientation="Horizontal">
-                <Button Name="Minimize"
+                    <Button Name="Minimize"
                         Click="Button_Click"
                         Style="{StaticResource OptionButtonStyle}">
-                    <Image Source="/Images/minimize.png"/>
-                </Button>
+                        <Image Source="/Images/minimize.png"/>
+                    </Button>
 
-                <Button Name="Maximize"
+                    <Button Name="Maximize"
                         Click="Button_Click"
                         Style="{StaticResource OptionButtonStyle}">
-                    <Image Source="/Images/maximize.png"/>
-                </Button>
+                        <Image Source="/Images/maximize.png"/>
+                    </Button>
 
-                <Button Name="Close"
+                    <Button Name="Close"
                         Click="Button_Click"
                         Style="{StaticResource OptionButtonStyle}">
-                    <Image Source="/Images/cross.png"/>
-                </Button>
+                        <Image Source="/Images/cross.png"/>
+                    </Button>
 
-            </StackPanel>
-        </Grid>
-    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </Border>
+    
 </UserControl>

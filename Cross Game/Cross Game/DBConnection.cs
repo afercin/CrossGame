@@ -8,8 +8,7 @@ namespace Cross_Game
 {
     class DBConnection
     {
-        public static int User_ID = -1;
-        public static string User_NickName = "Pepe el butanero";
+        public static User CurrentUser = null;
         private static MySqlConnection connection = new MySqlConnection(
             "SERVER=crossgame.sytes.net;" +
             "DATABASE=CrossGame;" +
@@ -76,8 +75,9 @@ namespace Cross_Game
                 if (dataReader.HasRows)
                 {
                     dataReader.Read();
-                    User_ID = (int)dataReader["user_id"];
-                    User_NickName = dataReader["name"] + "#" + (int)dataReader["number"];
+                    CurrentUser = new User((int)dataReader["user_id"],
+                                           (string)dataReader["name"],
+                                           (int)dataReader["number"]);
                     return_value = 1;
                     dataReader.Close();
                 }
@@ -92,7 +92,7 @@ namespace Cross_Game
 
         public static void LogOut(string LocalMAC)
         {
-            NonQuery("UPDATE users SET status = 0 WHERE user_id = " + User_ID);
+            NonQuery("UPDATE users SET status = 0 WHERE user_id = " + CurrentUser.ID);
             NonQuery("UPDATE computers SET status = 0 WHERE MAC = " + LocalMAC);
         }
 
@@ -116,7 +116,7 @@ namespace Cross_Game
 
             if (OpenConnection())
             {
-                MySqlDataReader dataReader = Query($"SELECT MAC FROM computers WHERE owner = {User_ID}");
+                MySqlDataReader dataReader = Query($"SELECT MAC FROM computers WHERE owner = {CurrentUser.ID}");
                 if (dataReader.HasRows)                
                     while (dataReader.Read())
                         myComputers.Add((string)dataReader["MAC"]);
@@ -129,27 +129,27 @@ namespace Cross_Game
         }
 
 
-        internal static void GetComputerData(Computer computer)
+        internal static void GetComputerData(PC pc)
         {
-            computer.Status = -1;
+            pc.Status = -1;
             if (OpenConnection())
             {
                 MySqlDataReader dataReader = Query(
                     "SELECT LocalIP, PublicIP, TCP, UDP, name, n_connections, max_connections, status " +
                     "FROM computers " +
-                    "WHERE MAC = '" + computer.ComputerMAC + "'"
+                    "WHERE MAC = '" + pc.MAC + "'"
                     );
                 if (dataReader.HasRows)
                 {
                     dataReader.Read();
-                    computer.LocalIP = (string)dataReader["LocalIP"];
-                    computer.PublicIP = (string)dataReader["PublicIP"];
-                    computer.Tcp = (int)dataReader["TCP"];
-                    computer.Udp = (int)dataReader["UDP"];
-                    computer.ComputerName.Text = (string)dataReader["name"];
-                    computer.N_connections = (int)dataReader["n_connections"];
-                    computer.Max_connections = (int)dataReader["max_connections"];
-                    computer.Status = (int)dataReader["status"];
+                    pc.LocalIP = (string)dataReader["LocalIP"];
+                    pc.PublicIP = (string)dataReader["PublicIP"];
+                    pc.Tcp = (int)dataReader["TCP"];
+                    pc.Udp = (int)dataReader["UDP"];
+                    pc.Name = (string)dataReader["name"];
+                    pc.N_connections = (int)dataReader["n_connections"];
+                    pc.Max_connections = (int)dataReader["max_connections"];
+                    pc.Status = (int)dataReader["status"];
                 }
 
                 dataReader.Close();
@@ -157,54 +157,67 @@ namespace Cross_Game
             }
         }
 
-        internal static void SyncComputerData(Computer computer)
+        internal static void SyncLocalMachinerData(PC pc)
         {
-            computer.Tcp = 3030;
-            computer.Udp = 3031;
-            computer.ComputerName.Text = computer.PublicIP;
-            computer.Max_connections = 1;
-            computer.N_connections = 0;
+            pc.Tcp = 3030;
+            pc.Udp = 3031;
+            pc.Name = pc.PublicIP;
+            pc.Max_connections = 1;
+            pc.N_connections = 0;
             if (OpenConnection())
             {
                 MySqlDataReader dataReader = Query(
                     "SELECT TCP, UDP, name, n_connections, max_connections " +
                     "FROM computers " +
-                    "WHERE MAC = '" + computer.ComputerMAC + "'"
+                    "WHERE MAC = '" + pc.MAC + "'"
                     );
                 if (dataReader.HasRows)
                 {
                     dataReader.Read();
-                    computer.Tcp = (int)dataReader["TCP"];
-                    computer.Udp = (int)dataReader["UDP"];
-                    computer.ComputerName.Text = (string)dataReader["name"];
-                    computer.N_connections = (int)dataReader["n_connections"];
-                    computer.Max_connections = (int)dataReader["max_connections"];
+                    pc.Tcp = (int)dataReader["TCP"];
+                    pc.Udp = (int)dataReader["UDP"];
+                    pc.Name = (string)dataReader["name"];
+                    pc.N_connections = (int)dataReader["n_connections"];
+                    pc.Max_connections = (int)dataReader["max_connections"];
 
                     dataReader.Close();
 
                     NonQuery("UPDATE computers " +
-                            $"SET LocalIP = '{computer.LocalIP}', PublicIP = '{computer.PublicIP}', status = {computer.Status} " +
-                            $"WHERE MAC = '{computer.ComputerMAC}'");
+                            $"SET LocalIP = '{pc.LocalIP}', PublicIP = '{pc.PublicIP}', status = {pc.Status} " +
+                            $"WHERE MAC = '{pc.MAC}'");
                 }
                 else
                 {
                     dataReader.Close();
 
                     NonQuery("INSERT INTO computers VALUES " +
-                            $"('{computer.ComputerMAC}', '{computer.LocalIP}', '{computer.PublicIP}', {computer.Tcp}, {computer.Udp}, " +
-                            $"'{computer.ComputerName.Text}', {computer.N_connections}, {computer.Max_connections}, {computer.Status}, {User_ID})");
+                            $"('{pc.MAC}', '{pc.LocalIP}', '{pc.PublicIP}', {pc.Tcp}, {pc.Udp}, " +
+                            $"'{pc.Name}', {pc.N_connections}, {pc.Max_connections}, {pc.Status}, {CurrentUser.ID})");
                 }
+                NonQuery($"UPDATE computers " +
+                            $"SET LocalIP = '{pc.LocalIP}', PublicIP = '{pc.PublicIP}', status = {pc.Status} " +
+                            $"WHERE MAC = '{pc.MAC}'");
                 CloseConnection();
             }
         }
 
-        internal static void UpdateComputerInfo(Computer computer)
+        public static void UpdateComputerInfo(Computer computer)
         {
             if (OpenConnection())
             {
                 NonQuery("UPDATE computers " +
-                        $"SET TCP = {computer.Tcp}, UDP = {computer.Udp}, name = '{computer.ComputerName.Text}', max_connections = '{computer.Max_connections}' " +
-                        $"WHERE MAC = '{computer.ComputerMAC}'");
+                        $"SET TCP = {computer.pc.Tcp}, UDP = {computer.pc.Udp}, name = '{computer.ComputerName.Text}', max_connections = '{computer.pc.Max_connections}' " +
+                        $"WHERE MAC = '{computer.pc.MAC}'");
+                CloseConnection();
+            }
+        }
+
+        public static void LogOut()
+        {
+            if (OpenConnection())
+            {
+                NonQuery($"UPDATE computers SET status = 0, n_connections = 0 WHERE MAC = '{CurrentUser.localMachine.MAC}'");
+                NonQuery($"UPDATE users SET status = 0 WHERE user_id = '{CurrentUser.ID}'");
                 CloseConnection();
             }
         }

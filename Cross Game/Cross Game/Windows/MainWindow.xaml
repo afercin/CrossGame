@@ -9,88 +9,93 @@
         UseLayoutRounding="True"
         WindowStyle="None"
         AllowsTransparency="True"
+        Background="Transparent"
         ResizeMode="CanResizeWithGrip"
         WindowStartupLocation="CenterScreen"        
         Title="MainWindow" Height="450" Width="800" 
         MinHeight="282"
         Name="mainWindow"
         Loaded="Window_Loaded"    
-        SourceInitialized="Window_SourceInitialized">
+        SourceInitialized="Window_SourceInitialized"
+        Closed="MainWindow_Closed">
     <Window.Resources>
         <ResourceDictionary Source="/Styles/Styles.xaml"/>
     </Window.Resources>
-    <Grid Background="#111">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="180"/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="32"/>
-            <RowDefinition/>
-            <RowDefinition Height="30"/>
-        </Grid.RowDefinitions>
-        <controllers:WindowHeader x:Name="Header"
+    <Border Background="#111"
+            CornerRadius="4">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="180"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="32"/>
+                <RowDefinition/>
+                <RowDefinition Height="30"/>
+            </Grid.RowDefinitions>
+            <controllers:WindowHeader x:Name="Header"
                                   HeaderText="Cross Game"
                                   Grid.Row="0"
                                   Grid.ColumnSpan="2"
                                   MenuButtonClick="WindowHeader_MenuButtonClick"/>
 
-        <StackPanel Grid.Row="1"
+            <StackPanel Grid.Row="1"
                     Grid.Column="0"
                     Margin="6,0,0,0">
-            <controllers:OptionButton x:Name="Ordenadores" MouseLeftButtonDown="OptionButton_MouseLeftButtonDown"/>
-            <controllers:OptionButton x:Name="Amigos" MouseLeftButtonDown="OptionButton_MouseLeftButtonDown"/>
-            <controllers:OptionButton x:Name="Tranmisión" MouseLeftButtonDown="OptionButton_MouseLeftButtonDown"/>
-        </StackPanel>
+                <controllers:OptionButton x:Name="Ordenadores" MouseLeftButtonDown="OptionButton_MouseLeftButtonDown"/>
+                <controllers:OptionButton x:Name="Amigos" MouseLeftButtonDown="OptionButton_MouseLeftButtonDown"/>
+                <controllers:OptionButton x:Name="Tranmisión" MouseLeftButtonDown="OptionButton_MouseLeftButtonDown"/>
+            </StackPanel>
 
-        <Grid Grid.Row="1" 
+            <Grid Grid.Row="1" 
               Grid.Column="1" 
               Background="#292728"
               Margin="0 0 3 3">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="30"/>
-            </Grid.RowDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="30"/>
+                </Grid.RowDefinitions>
 
-            <controllers:MyComputers x:Name="MyComputers"/>
-            <!--local:TransmissionOptions x:Name="tOptions"/>
+                <!--controllers:MyComputers x:Name="MyComputers"/>
+                <local:TransmissionOptions x:Name="tOptions"/>
             <Button Name="Accept" Grid.Row="1" Margin="3 3 139 3" Style="{StaticResource FlatButtonStyle}" Width="130" HorizontalAlignment="Right" Click="Accept_Click">
                 <TextBlock Text="Aceptar"/>
             </Button>
             <Button Name="Cancel" Grid.Row="1" Margin="3" Style="{StaticResource FlatButtonStyle}" Width="130" HorizontalAlignment="Right" Click="Cancel_Click">
                 <TextBlock Text="Cancelar"/>
             </Button-->
-        </Grid>
-        <StackPanel Grid.Row="2"
+            </Grid>
+            <StackPanel Grid.Row="2"
                     Orientation="Horizontal"
                     VerticalAlignment="Center"
                     HorizontalAlignment="Center">
 
-            <Ellipse Width="8"
+                <Ellipse Width="8"
                      Height="8"
                      Margin="-10 3 2 0"
                      Stroke="Black"
                      StrokeThickness="1"
                      Fill="Green"/>
 
-            <TextBlock Text="{Binding UserName, ElementName=mainWindow}" Foreground="#E0E0E0"/>
-            <TextBlock Text="#" Foreground="Gray"/>
-            <TextBlock Text="{Binding UserNumber, ElementName=mainWindow}" Foreground="#E0E0E0"/>
+                <TextBlock Text="{Binding UserName, ElementName=mainWindow}" Foreground="#E0E0E0"/>
+                <TextBlock Text="#" Foreground="Gray"/>
+                <TextBlock Text="{Binding UserNumber, ElementName=mainWindow}" Foreground="#E0E0E0"/>
 
-        </StackPanel>
-        <Grid Grid.Row="2"
+            </StackPanel>
+            <Grid Grid.Row="2"
               Grid.Column="1"
               HorizontalAlignment="Left">
-            <StackPanel Orientation="Horizontal" >
-                <ToggleButton Height="20" HorizontalAlignment="Left"    VerticalAlignment="Top" Width="109" IsEnabled="True" Foreground="White">Timeout</ToggleButton>
-                <ToggleButton x:Name="ActiveServer" FontFamily="Sergio UI" FontSize="16"
+                <StackPanel Orientation="Horizontal" >
+                    <ToggleButton Height="20" HorizontalAlignment="Left"    VerticalAlignment="Top" Width="109" IsEnabled="True" Foreground="White">Timeout</ToggleButton>
+                    <ToggleButton x:Name="ActiveServer" FontFamily="Sergio UI" FontSize="16"
                           Style="{DynamicResource ToggleSwitchLeftStyle}"
                           IsChecked="False"
                           Width="55"
                           Click="ActiveServer_Click"/>
-                <mah:ProgressRing x:Name="progress" Height="21" Margin="0,3,0,6" Width="10" Foreground="White"/>
-            </StackPanel>
-        </Grid>
+                    <mah:ProgressRing x:Name="progress" Height="21" Margin="0,3,0,6" Width="10" Foreground="White"/>
+                </StackPanel>
+            </Grid>
 
-    </Grid>
+        </Grid>
+    </Border>
 </Window>

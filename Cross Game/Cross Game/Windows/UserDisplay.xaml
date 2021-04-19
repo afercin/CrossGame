@@ -13,41 +13,7 @@
         Title="UserDisplay" Height="720" Width="1280"
         Closing="Window_Closing">
     <Window.Resources>
-
-        <Style x:Key="FlatTextStyle" TargetType="TextBlock">
-            <Setter Property="Foreground" Value="#E6E6E6"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="TextAlignment" Value="Center"/>
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-        </Style>
-        
-        <Style x:Key="FlatButtonStyle" TargetType="Button">
-            <Setter Property="Margin" Value="3"/>
-            <Setter Property="Background" Value="#3095bf"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}">
-                            <ContentPresenter HorizontalAlignment="Center" 
-                                              VerticalAlignment="Center"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#1c98ea"/>
-                </Trigger>
-                <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="#007acc"/>
-                </Trigger>
-            </Style.Triggers>
-            <Style.Resources>
-                <Style TargetType="TextBlock" BasedOn="{StaticResource FlatTextStyle}"/>
-            </Style.Resources>
-        </Style>
+        <ResourceDictionary Source="/Styles/Styles.xaml"/>
     </Window.Resources>
     <Grid KeyDown="ClientDisplay_KeyDown">
         <Image Name="ClientDisplay"
@@ -100,13 +66,19 @@
                                VerticalAlignment="Center"
                                HorizontalAlignment="Left"/>
                     </StackPanel>
-                    <Button Grid.Row="2"
-                        Width="80"
-                        HorizontalAlignment="Right"
-                        Margin="5"
-                        Style="{StaticResource FlatButtonStyle}">
-                        <TextBlock Text="Cancelar"/>
-                    </Button>
+                    <Border Grid.Row="2" 
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Right"
+                            Width="80"
+                            Height="24"
+                            Margin="0 0 3 3"
+                            Style="{StaticResource RoundButtonStyle}">
+                        <Button>
+                            <TextBlock Text="Cancelar"
+                                       VerticalAlignment="Center"
+                                       FontSize="14"/>
+                        </Button>
+                    </Border>
                 </Grid>
             </Border>
         </Grid>

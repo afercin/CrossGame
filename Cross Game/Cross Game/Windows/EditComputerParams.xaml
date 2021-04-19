@@ -13,7 +13,7 @@
         SourceInitialized="Window_SourceInitialized"
         Closing="EditComputer_Closing">
     <Window.Resources>
-        <ResourceDictionary Source="pack://application:,,,/Styles/PopUpWindowStyle.xaml"/>
+        <ResourceDictionary Source="/Styles/Styles.xaml"/>
     </Window.Resources>
     <Grid Background="#111">
         
@@ -48,7 +48,7 @@
             <TextBlock Text="Nombre:" 
                        Grid.Row="0" 
                        Grid.Column="0" 
-                       Style="{StaticResource DataTextStyle}"/>
+                       Style="{StaticResource FlatTextStyle}"/>
             
             <TextBox Name="ComputerName" 
                      Grid.Row="1" 
@@ -59,7 +59,7 @@
             <TextBlock Text="Puerto TCP:" 
                        Grid.Row="0" 
                        Grid.Column="1" 
-                       Style="{StaticResource DataTextStyle}"/>
+                       Style="{StaticResource FlatTextStyle}"/>
             <controllers:NumericUpDown x:Name="TCP" 
                                        Grid.Row="1" 
                                        Grid.Column="1"
@@ -72,7 +72,7 @@
             <TextBlock Text="Conexiones máximas:"
                        Grid.Row="2" 
                        Grid.Column="0" 
-                       Style="{StaticResource DataTextStyle}"/>
+                       Style="{StaticResource FlatTextStyle}"/>
             
             <controllers:NumericUpDown x:Name="MaxConections" 
                                        Grid.Row="3" 
@@ -84,7 +84,7 @@
             <TextBlock Text="Puerto UDP:" 
                        Grid.Row="2" 
                        Grid.Column="1" 
-                       Style="{StaticResource DataTextStyle}"/>
+                       Style="{StaticResource FlatTextStyle}"/>
             
             <controllers:NumericUpDown x:Name="UDP" 
                                        Grid.Row="3" 

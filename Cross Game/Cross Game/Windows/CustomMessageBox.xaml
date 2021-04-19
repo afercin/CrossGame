@@ -6,12 +6,14 @@
         xmlns:controllers="clr-namespace:Cross_Game.Controllers"
         WindowStyle="None"
         ResizeMode="NoResize"
+        AllowsTransparency="True"
+        Background="Transparent"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         Title="CustomMessageBox" Height="122" Width="400"
         SourceInitialized="Window_SourceInitialized">
     <Window.Resources>
-        <ResourceDictionary Source="/Styles/PopUpWindowStyle.xaml"/>
+        <ResourceDictionary Source="/Styles/Styles.xaml"/>
     </Window.Resources>
     <Grid Background="#111">
         <Grid.RowDefinitions>
@@ -19,8 +21,6 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <controllers:WindowHeader x:Name="Header"
-                                  MinimizeButton="False"
-                                  MaximizeButton="False"
                                   MenuButtonClick="WindowHeader_MenuButtonClick"/>
         <Grid Grid.Row="1" Background="#292728" Margin="3,0,3,3">
             <Grid.ColumnDefinitions>
@@ -32,18 +32,24 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <TextBlock Name="Text"
-                       Text="Soy un mensaje de ehemplo" 
+                       Text="Soy un mensaje de ejemplo" 
+                       VerticalAlignment="Center"
                        Grid.Row="0" 
                        Grid.ColumnSpan="2" 
-                       Style="{StaticResource DataTextStyle}"/>
+                       Style="{StaticResource FlatTextStyle}"/>
             <Button Grid.Row="4" 
                     Grid.Column="0" 
+                    Margin="3"
+                    Height="30"
                     Style="{StaticResource FlatButtonStyle}"
                     Click="OkButton_Click">
-                <TextBlock Text="Guardar cambios"/>
+                <TextBlock Text="Guardar cambios"
+                           FontSize="14"/>
             </Button>
             <Button Grid.Row="4" 
                     Grid.Column="1" 
+                    Margin="3"
+                    Height="30"
                     Style="{StaticResource FlatButtonStyle}"
                     Click="CancelButton_Click">
                 <TextBlock Text="Cancelar"/>

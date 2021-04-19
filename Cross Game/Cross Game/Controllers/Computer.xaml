@@ -5,13 +5,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d"
-             Height="125" d:DesignWidth="150"
+             Height="135" d:DesignWidth="160"
              Name="ComputerTemplate"
              MouseDown="Computer_MouseDown">
     <UserControl.Resources>
         <ResourceDictionary Source="pack://application:,,,/Styles/MainWindowStyles.xaml"/>
     </UserControl.Resources>
-    <Grid Style="{StaticResource ComputerGridStyle}">
+    <Grid Margin="5"
+          Style="{StaticResource ComputerGridStyle}">
         <Border Name="ComputerBorder" 
                 BorderThickness="4" 
                 CornerRadius="4" 

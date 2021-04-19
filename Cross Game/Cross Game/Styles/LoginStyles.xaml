@@ -2,64 +2,6 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:Cross_Game.Styles">
 
-    <Style x:Key="LoginButtonStyle" TargetType="Border">
-        <Setter Property="Height" Value="35"/>
-        <Setter Property="BorderBrush" Value="#267799"/>
-        <Setter Property="Background" Value="#3095bf"/>
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="CornerRadius" Value="5"/>
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Cursor" Value="Hand"/>
-            </Trigger>
-            <Trigger Property="IsMouseOver" Value="False">
-                <Setter Property="Cursor" Value="Arrow"/>
-            </Trigger>
-            <EventTrigger RoutedEvent="MouseMove">
-                <BeginStoryboard>
-                    <Storyboard>
-                        <ColorAnimation To="#267799" Duration="0:0:0.25"
-                                        Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"/>
-                    </Storyboard>
-                </BeginStoryboard>
-            </EventTrigger>
-            <EventTrigger RoutedEvent="MouseLeave">
-                <BeginStoryboard>
-                    <Storyboard>
-                        <ColorAnimation To="#3095bf" Duration="0:0:0.25"
-                                        Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"/>
-                    </Storyboard>
-                </BeginStoryboard>
-            </EventTrigger>
-        </Style.Triggers>
-        <Style.Resources>
-            <Style TargetType="Button">
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="Height" Value="32"/>
-                <Setter Property="Foreground" Value="White"/>
-                <Setter Property="FontSize" Value="20"/>
-                <Setter Property="FontWeight" Value="DemiBold"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="Button">
-                            <Border Background="{TemplateBinding Background}">
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Height="33"/>
-                            </Border>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-                <Style.Triggers>
-                    <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="Background" Value="Transparent"/>
-                    </Trigger>
-                    <Trigger Property="IsPressed" Value="True">
-                        <Setter Property="Background" Value="Transparent"/>
-                    </Trigger>
-                </Style.Triggers>
-            </Style>
-        </Style.Resources>
-    </Style>
-
     <Style x:Key="LinkTextStyle" TargetType="TextBlock">
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="Foreground" Value="#3095bf"/>
