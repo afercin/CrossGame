@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d"
-             Height="135" d:DesignWidth="160"
+             Height="135" Width="160"
              Name="ComputerTemplate"
              MouseDown="Computer_MouseDown">
     <UserControl.Resources>
@@ -21,6 +21,8 @@
             <StackPanel HorizontalAlignment="Center">
 
                 <TextBlock Name="ComputerName" 
+                           Width="120"
+                           TextAlignment="Center"
                            Text="Potato PC (local)"
                            Foreground="{Binding BorderBrush, ElementName=ComputerBorder}"
                            FontWeight="SemiBold"

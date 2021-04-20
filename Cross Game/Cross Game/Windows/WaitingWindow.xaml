@@ -13,6 +13,7 @@
         Title="Waiting_Window"
         Width="300" Height="100"
         Name="waitingWindow"
+        WindowStartupLocation="CenterScreen"
         SourceInitialized="Window_SourceInitialized">
     <Window.Resources>
         <ResourceDictionary Source="/Styles/Styles.xaml"/>
@@ -31,12 +32,12 @@
             <StackPanel Grid.Row="1"
                         Margin="10 0"
                         Orientation="Horizontal">
-                <mah:ProgressRing x:Name="progress"
+                <mah:ProgressRing x:Name="Progress"
                                   Foreground="White"
                                   VerticalAlignment="Center"
                                   HorizontalAlignment="Left"
                                   Width="10"/>
-                <TextBlock Name="LogText"
+                <TextBlock Name="WaitText"
                            Text="Mensaje de espera..."
                            Margin="10 0 0 0"
                            Foreground="#E0E0E0"
@@ -51,7 +52,7 @@
                     Height="24"
                     Margin="0 0 3 3"
                     Style="{StaticResource RoundButtonStyle}">
-                <Button>
+                <Button Click="Button_Click">
                     <TextBlock Text="Cancelar"
                                VerticalAlignment="Center"
                                FontSize="14"/>

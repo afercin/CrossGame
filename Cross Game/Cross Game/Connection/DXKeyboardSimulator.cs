@@ -259,6 +259,11 @@ namespace Cross_Game.Connection
 
             Prior = PageUp,
             Next = PageDown,
+            System = LeftAlt,
+            RightCtrl = 0x9D,
+            RightAlt = 0xB8,
+            LWin = 0xDB,
+            RWin = 0xDC,
             /* *
                         DIK_NUMPADEQUALS = 0x8D,    // = on numeric keypad (NEC PC98) //
                         DIK_PREVTRACK = 0x90,    // Previous Track (DIK_CIRCUMFLEX on Japanese keyboard) //

@@ -125,8 +125,8 @@
     <Compile Include="Controllers\OptionButton.xaml.cs">
       <DependentUpon>OptionButton.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controllers\Slider.xaml.cs">
-      <DependentUpon>Slider.xaml</DependentUpon>
+    <Compile Include="Controllers\WaitSlider.xaml.cs">
+      <DependentUpon>WaitSlider.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controllers\WindowHeader.xaml.cs">
       <DependentUpon>WindowHeader.xaml</DependentUpon>
@@ -174,13 +174,21 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Controllers\Slider.xaml">
+    <Page Include="Controllers\WaitSlider.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controllers\WindowHeader.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Resources\Icons.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Resources\IconsNonShared.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Styles\Styles.xaml">
       <SubType>Designer</SubType>
@@ -263,6 +271,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <Resource Include="Resources\Entypo.ttf" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -275,6 +284,12 @@
     <Resource Include="Images\maximize.png" />
     <Resource Include="Images\minimize.png" />
     <Resource Include="Images\up.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\WindowsIcons-license.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Entypo-license.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

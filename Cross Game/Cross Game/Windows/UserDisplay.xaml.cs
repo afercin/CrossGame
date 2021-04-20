@@ -29,6 +29,7 @@ namespace Cross_Game.Windows
         };
 
         private RTDPController client;
+        private WaitingWindow waitingWindow;
         private Timer framerate;
         private int frames;
 
@@ -40,19 +41,19 @@ namespace Cross_Game.Windows
             client = null;
         }
 
-        Random r = new Random();
         private void FrameRate_Tick(object sender, ElapsedEventArgs e)
         {
             Dispatcher.Invoke(() =>
             {
-                //FPS.Text = frames.ToString();
-                FPS.Text = r.Next(50, 60).ToString();
+                FPS.Text = frames.ToString();
                 frames = 0;
             });
         }
 
         public void StartTransmission(int tcpPort, int udpPort, string remoteIP)
         {
+            Show();
+
             if (client != null && client.IsConnected)
             {
                 client.Dispose();
@@ -60,14 +61,20 @@ namespace Cross_Game.Windows
                 client.CursorShapeChanged -= Client_CursorShapeChanged;
                 framerate.Stop();
             }
-            client = new RTDPController(tcpPort, udpPort, remoteIP);
-            client.ImageBuilt += Client_ImageBuilt;
-            client.CursorShapeChanged += Client_CursorShapeChanged;
 
             frames = 0;
             framerate.Start();
 
-            ShowDialog();
+            waitingWindow = new WaitingWindow();
+            waitingWindow.WaitStopped += (s, a) => Dispatcher.Invoke(() => Close());
+            waitingWindow.WaitEnd += (s, a) => { if (!client.IsConnected) Dispatcher.Invoke(() => Close()); };
+            waitingWindow.Wait(new System.Threading.ThreadStart(() =>
+            {
+                client = new RTDPController(tcpPort, udpPort, remoteIP);
+                client.ImageBuilt += Client_ImageBuilt;
+                client.CursorShapeChanged += Client_CursorShapeChanged;
+            }), $"Conectando con {remoteIP}...");
+
         }
 
         //private void Server_Click(object sender, RoutedEventArgs e)
@@ -110,9 +117,9 @@ namespace Cross_Game.Windows
                 client.SendMouseButton(e.ChangedButton, false);
         }
 
-        private void ClientDisplay_KeyDown(object sender, KeyEventArgs e)
+        private void ClientDisplay_KeyPress(object sender, KeyEventArgs e)
         {
-            if (client != null && client.IsConnected)
+            if (client != null && client.IsConnected && e.Key != Key.DeadCharProcessed && e.Key != Key.OemFinish)
                 client.SendKey(e.Key, e.IsDown);
         }
 
@@ -126,6 +133,7 @@ namespace Cross_Game.Windows
         {
             framerate.Stop();
             client?.Dispose();
+            waitingWindow?.Close();
         }
     }
 }

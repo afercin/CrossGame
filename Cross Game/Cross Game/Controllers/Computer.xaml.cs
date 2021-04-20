@@ -1,4 +1,5 @@
-﻿using Cross_Game.Windows;
+﻿using Cross_Game.Connection;
+using Cross_Game.Windows;
 using MahApps.Metro.IconPacks;
 using System;
 using System.Windows;
@@ -40,7 +41,10 @@ namespace Cross_Game.Controllers
             {
                 UpdateStatus();
                 if (pc.N_connections < pc.Max_connections)
-                    MessageBox.Show("conectandose no más");
+                {
+                    var display = new UserDisplay();
+                    display.StartTransmission(pc.Tcp, pc.Udp, pc.PublicIP == DBConnection.CurrentUser.localMachine.PublicIP ? pc.LocalIP : pc.PublicIP);
+                }
             }
             else if (new EditComputerParams().Show(this) == true)
             {

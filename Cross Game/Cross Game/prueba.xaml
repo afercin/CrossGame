@@ -67,6 +67,5 @@
 
     <Grid x:Name="LayoutRoot" Background="#01000000" MouseDown="LayoutRoot_MouseDown">
         <CheckBox Name="Check" HorizontalAlignment="Center" Style="{DynamicResource OrangeSwitchStyle}" VerticalAlignment="Center"/>
-        <Controllers:Slider HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0 50 0 0"></Controllers:Slider>
     </Grid>
 </Window>

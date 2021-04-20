@@ -61,7 +61,7 @@ namespace Cross_Game.Connection
             connectedThread.Start();
             //connectedThread.Join();
 
-            if (!connectedThread.Join(5000))
+            if (!connectedThread.Join(10000))
                 if (err == 0)
                 {
                     LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "No se ha logrado establecer conexión (TimedOut).");

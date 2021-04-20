@@ -10,77 +10,26 @@
         WindowStyle="None"
         ResizeMode="NoResize"
         WindowState="Maximized"
-        Title="UserDisplay" Height="720" Width="1280"
-        Closing="Window_Closing">
+        Title="UserDisplay" Height="300" Width="400"
+        Closing="Window_Closing"
+        KeyDown="ClientDisplay_KeyPress"
+        KeyUp="ClientDisplay_KeyPress">
     <Window.Resources>
         <ResourceDictionary Source="/Styles/Styles.xaml"/>
     </Window.Resources>
-    <Grid KeyDown="ClientDisplay_KeyDown">
-        <Image Name="ClientDisplay"
-               MouseMove="ClientDisplay_MouseMove"
-               MouseDown="ClientDisplay_MouseDown"
-               MouseUp="ClientDisplay_MouseUp"               
-               MouseWheel="ClientDisplay_MouseWheel"/>
+    <Grid  
+        MouseMove="ClientDisplay_MouseMove"
+        MouseDown="ClientDisplay_MouseDown"
+        MouseUp="ClientDisplay_MouseUp"               
+        MouseWheel="ClientDisplay_MouseWheel">
+        <Image Name="ClientDisplay"/>
         <TextBlock Name="FPS" 
                    Background="#9000" 
-                   Text="60"
+                   Text="0"
                    Foreground="White"
                    FontSize="8"
                    VerticalAlignment="Top"
                    HorizontalAlignment="Left"
                    Padding="3 0"/>
-        <Grid Background="#9000">
-            <Border Name="logWindow"
-                Background="#111"
-                Width="300"
-                Height="100"
-                CornerRadius="4">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="22"/>
-                        <RowDefinition/>
-                        <RowDefinition Height="30"/>
-                    </Grid.RowDefinitions>
-                    <Grid>
-                        <Image Source="/Images/CrossGameLogo.png"
-                               Width="22"
-                               HorizontalAlignment="Left"/>
-                        <TextBlock Foreground="#E0E0E0"
-                                   Text="Cross Game"
-                                   FontWeight="DemiBold"
-                                   VerticalAlignment="Center"
-                                   HorizontalAlignment="Center"/>
-                    </Grid>
-                    <StackPanel Grid.Row="1"
-                            Margin="10 0"
-                            Orientation="Horizontal">
-                        <mah:ProgressRing x:Name="progress"
-                                      Foreground="White"
-                                      VerticalAlignment="Center"
-                                      HorizontalAlignment="Left"
-                                      Width="10"/>
-                        <TextBlock Name="LogText"
-                               Text="Reconectando con el servidor..."
-                               Margin="10 0 0 0"
-                               Foreground="#E0E0E0"
-                               VerticalAlignment="Center"
-                               HorizontalAlignment="Left"/>
-                    </StackPanel>
-                    <Border Grid.Row="2" 
-                            VerticalAlignment="Center"
-                            HorizontalAlignment="Right"
-                            Width="80"
-                            Height="24"
-                            Margin="0 0 3 3"
-                            Style="{StaticResource RoundButtonStyle}">
-                        <Button>
-                            <TextBlock Text="Cancelar"
-                                       VerticalAlignment="Center"
-                                       FontSize="14"/>
-                        </Button>
-                    </Border>
-                </Grid>
-            </Border>
-        </Grid>
     </Grid>
 </Window>

@@ -24,8 +24,6 @@ namespace Cross_Game.Controllers
             }
         }
 
-        public delegate void ClickEventHandler(object sender, ClickEventArgs e);
-
         public event ClickEventHandler MenuButtonClick;
 
         private string headerText;

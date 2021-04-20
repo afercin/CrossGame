@@ -13,9 +13,17 @@ namespace Cross_Game
         Minimize
     }
 
+    public delegate void ClickEventHandler(object sender, ClickEventArgs e);
     public class ClickEventArgs : EventArgs
     {
-        public PressedButton PressedButton;
+        public PressedButton PressedButton { get; set; }
         public ClickEventArgs(PressedButton pressedButton) : base() => PressedButton = pressedButton;
+    }
+
+    public delegate void ActiveChangedEventHandler(object sender, ActiveChangedEventArgs e);
+    public class ActiveChangedEventArgs : EventArgs
+    {
+        public bool IsActived { get; set; }
+        public ActiveChangedEventArgs(bool isActived) : base() => IsActived = isActived;
     }
 }
