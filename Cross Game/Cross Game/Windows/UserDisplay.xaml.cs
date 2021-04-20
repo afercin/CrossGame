@@ -132,7 +132,14 @@ namespace Cross_Game.Windows
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             framerate.Stop();
-            client?.Dispose();
+            if (client != null && client.IsConnected)
+            {
+                waitingWindow = new WaitingWindow();
+                waitingWindow.Wait(new System.Threading.ThreadStart(() =>
+                {
+                    client.Dispose();
+                }), "Cerrando la conexión...");
+            }
             waitingWindow?.Close();
         }
     }

@@ -42,7 +42,8 @@ namespace Cross_Game.Windows
                 t.IsBackground = true;
                 t.Start();
                 t.Join();
-                WaitEnd.Invoke(null, null);
+                if (WaitEnd != null)
+                    WaitEnd.Invoke(null, null);
                 Dispatcher.Invoke(() => Close());
             });
             waitThread.IsBackground = true;
@@ -63,7 +64,8 @@ namespace Cross_Game.Windows
         private void StopWaiting()
         {
             waitThread.Abort();
-            WaitStopped.Invoke(null, null);
+            if (WaitStopped != null)
+                WaitStopped.Invoke(null, null);
             Close();
         }
     }

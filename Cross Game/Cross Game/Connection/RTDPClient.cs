@@ -152,6 +152,7 @@ namespace Cross_Game.Connection
         {
             if (IsConnected)
                 SendBuffer(petitionsSocket, new byte[] { Convert.ToByte(Petition.EndConnetion) });
+            Thread.Sleep(500);
             petitionsSocket.Close();
             dataSocket.Close();
             IsConnected = false;

@@ -107,6 +107,10 @@ namespace Cross_Game.Connection
 
                 IsConnected = false;
             }
+            catch (ObjectDisposedException)
+            {
+
+            }
         }
     }
 }
