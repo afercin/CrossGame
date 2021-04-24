@@ -65,10 +65,12 @@ namespace Cross_Game.Controllers
             Storyboard.SetTargetProperty(rightAnimation, new PropertyPath(MarginProperty));
         }
 
-        public void SetActions(ThreadStart active, ThreadStart deactive)
+        public delegate void Action();
+
+        public void SetActions(Action active, Action deactive)
         {
-            activeAction = active;
-            deactiveAction = deactive;
+            activeAction = new ThreadStart(active);
+            deactiveAction = new ThreadStart(deactive);
         }
 
         private void Slider_MouseDown(object sender, MouseButtonEventArgs e)

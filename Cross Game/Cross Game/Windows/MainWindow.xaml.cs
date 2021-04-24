@@ -1,7 +1,6 @@
 ﻿using Cross_Game.Connection;
 using Cross_Game.Controllers;
 using System;
-using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 
@@ -23,8 +22,8 @@ namespace Cross_Game.Windows
             InitializeComponent();
             currentOption = Ordenadores;
             Ordenadores.Active = true;
-            
-            WaitSlider.SetActions(new ThreadStart(() => server = new RTDPController(3030, 3031, 1, 60)), new ThreadStart(() => server.Dispose()));
+
+            WaitSlider.SetActions(() => server = new RTDPController(3030, 3031, 1, 30), () => server.Dispose());
         }
 
         private void Window_SourceInitialized(object sender, EventArgs e) => Header.SetWindowHandler(this);
