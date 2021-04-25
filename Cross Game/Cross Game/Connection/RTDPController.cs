@@ -34,6 +34,7 @@ namespace Cross_Game.Connection
         public bool IsConnected { get => connection.IsConnected; }
 
         private readonly Dictionary<int, ScreenImage> images;
+        private byte skipImage;
 
         private Thread CaptureScreen;
         private Thread CheckCursorShape;
@@ -54,6 +55,7 @@ namespace Cross_Game.Connection
             client.ReceivedData += RTDPClient_ReceivedData;
 
             images = new Dictionary<int, ScreenImage>();
+            skipImage = 255;
 
             connection = client;
             client.Start();
@@ -183,19 +185,25 @@ namespace Cross_Game.Connection
                 }
                 else // Agregar buffer a la imagen correspondiente
                 {
-                    int img = e.Buffer[0];
+                    byte img = e.Buffer[0];
                     try
                     {
-                        if (images[img].AppendBuffer(e.Buffer, 1, e.BufferSize - 1))
+                        if (img != skipImage && images[img].AppendBuffer(e.Buffer, 1, e.BufferSize - 1))
+                        {
                             ImageBuilt.Invoke(this, new ImageBuiltEventArgs(images[img].ImageBytes));
+                            if (img == (skipImage + 5) % 254)
+                                skipImage = 255;
+                        }
                     }
                     catch (KeyNotFoundException)
                     {
                         Console.WriteLine("No ha llegado a tiempo el paquete que inicializaba el fotograma nº" + img);
+                        skipImage = img;
                     }
                     catch (ArgumentException)
                     {
                         Console.WriteLine("No ha llegado a tiempo el paquete que inicializaba el fotograma nº" + img);
+                        skipImage = img;
                     }
                 }
             }
