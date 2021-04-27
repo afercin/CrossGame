@@ -3,6 +3,7 @@ using MySql.Data.MySqlClient;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+
 namespace Cross_Game
 {
     class DBConnection
@@ -34,6 +35,11 @@ namespace Cross_Game
                     case 1045:
                         LogUtils.AppendLogError(LogUtils.DatabaseErrorsLog, "Invalid username/password, please try again");
                         break;
+
+                    default:
+                        LogUtils.AppendLogError(LogUtils.DatabaseErrorsLog, ex.Message);
+                        break;
+
                 }
                 LogUtils.AppendLogFooter(LogUtils.DatabaseErrorsLog);
                 return false;
