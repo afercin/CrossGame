@@ -1,33 +1,33 @@
-﻿using System;
+﻿using Cross_Game.DataManipulation;
+using NAudio.Wave;
+using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Windows;
+using System.Windows.Input;
 
 namespace Cross_Game.Connection
 {
     class RTDPClient : RTDProtocol
     {
-        public event ReceivedBufferEventHandler ReceivedData;
+        public event CursorShangedEventHandler CursorShapeChanged;
+        public event ImageBuiltEventHandler ImageBuilt;
+        public event ReconectingEventHandler Reconnecting;
 
         private readonly IPEndPoint clientEP;
-        private readonly Thread receivePetitionThread;
-        private readonly Thread receiveDataThread;
-        private readonly Socket petitionsSocket;
-        private readonly Socket dataSocket;
+        private Thread receivePetitionThread;
+        private Thread receiveDataThread;
+        private Socket petitionsSocket;
+        private Socket dataSocket;
+        private Dictionary<int, ScreenImage> images;
+        private byte skipImage;
 
         public RTDPClient(int tcpPort, int udpPort, string serverIP) : base()
         {
             clientEP = new IPEndPoint(IPAddress.Any, udpPort);
             serverEP = new IPEndPoint(IPAddress.Parse(serverIP), tcpPort);
-
-            petitionsSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            dataSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-
-            receivePetitionThread = new Thread(() => ReceivePetition(petitionsSocket));
-            receivePetitionThread.IsBackground = true;
-
-            receiveDataThread = new Thread(ReceiveData);
-            receiveDataThread.IsBackground = true;
         }
 
         public override void Start()
@@ -35,94 +35,160 @@ namespace Cross_Game.Connection
             int err = 0;
             bool connected = false;
 
-            Thread connectedThread = new Thread(() =>
+            if (ConnectionUtils.Ping(serverEP.Address.ToString()))
             {
-                LogUtils.AppendLogHeader(LogUtils.ClientConnectionLog);
-                LogUtils.AppendLogText(LogUtils.ClientConnectionLog, $"Intentando conectar con {serverEP.Address.ToString()}:{serverEP.Port}");
-                while (!connected && err < 5)
+                Thread connectedThread = new Thread(() =>
                 {
-                    LogUtils.AppendLogText(LogUtils.ClientConnectionLog, $"Intento de conexión {err + 1} de 5...");
-                    try
+                    LogUtils.AppendLogHeader(LogUtils.ClientConnectionLog);
+                    LogUtils.AppendLogText(LogUtils.ClientConnectionLog, $"Intentando conectar con {serverEP.Address.ToString()}:{serverEP.Port}");
+
+                    petitionsSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+                    while (!connected && err < 5)
                     {
-                        petitionsSocket.Connect(serverEP);
-                        connected = true;
-                    }
-                    catch (SocketException e)
-                    {
-                        LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"No se ha logrado establecer la conexión ({e.SocketErrorCode}).");
-                        if (e.SocketErrorCode == SocketError.TimedOut)
-                            err = 5;
-                        err++;
-                    }
-                }
-            });
-            connectedThread.IsBackground = true;
-
-            connectedThread.Start();
-            //connectedThread.Join();
-
-            if (!connectedThread.Join(10000))
-                if (err == 0)
-                {
-                    LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "No se ha logrado establecer conexión (TimedOut).");
-                    connectedThread.Abort();
-                }
-                else
-                    connectedThread.Join();
-
-            if (connected)
-            {
-                LogUtils.AppendLogText(LogUtils.ClientConnectionLog, "Mandando credenciales al equipo servidor.");
-
-                /****** Mandar credenciales y esperar confirmación *******/
-
-                byte[] credentials = new byte[] { 0 }, buffer = new byte[] { 0 };
-                SendBuffer(petitionsSocket, credentials);
-                connectedThread = new Thread(()=>
-                {
-                    try
-                    {
-                        ReceiveBuffer(petitionsSocket, out buffer, out int bufferSize);
-                    }
-                    catch (SocketException)
-                    {
-                        LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "Se ha cerrado el socket antes de recibir una respuesta del servidor.");
+                        LogUtils.AppendLogText(LogUtils.ClientConnectionLog, $"Intento de conexión {err + 1} de 5...");
+                        try
+                        {
+                            petitionsSocket.Connect(serverEP);
+                            connected = true;
+                        }
+                        catch (SocketException e)
+                        {
+                            LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"No se ha logrado establecer la conexión ({e.SocketErrorCode}).");
+                            if (e.SocketErrorCode == SocketError.TimedOut)
+                                err = 5;
+                            err++;
+                        }
                     }
                 });
                 connectedThread.IsBackground = true;
-
                 connectedThread.Start();
-                if (!connectedThread.Join(5000))
+
+                if (!connectedThread.Join(10000))
+                    if (err == 0)
+                    {
+                        LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "No se ha logrado establecer conexión (TimedOut).");
+                        connectedThread.Abort();
+                    }
+                    else
+                        connectedThread.Join();
+
+                if (connected)
                 {
-                    LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "No se ha obtenido la respuesta del servidor (TimedOut).");
-                    connectedThread.Abort();
+                    LogUtils.AppendLogText(LogUtils.ClientConnectionLog, "Mandando credenciales al equipo servidor.");
+
+                    /****** Mandar credenciales y esperar confirmación *******/
+
+                    byte[] credentials = new byte[] { 0 }, buffer = new byte[] { 0 };
+                    SendBuffer(petitionsSocket, credentials);
+                    connectedThread = new Thread(() =>
+                    {
+                        try
+                        {
+                            ReceiveBuffer(petitionsSocket, out buffer, out int bufferSize);
+                        }
+                        catch (SocketException)
+                        {
+                            LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "Se ha cerrado el socket antes de recibir una respuesta del servidor.");
+                        }
+                    });
+                    connectedThread.IsBackground = true;
+
+                    connectedThread.Start();
+                    if (!connectedThread.Join(5000))
+                    {
+                        LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "No se ha obtenido la respuesta del servidor (TimedOut).");
+                        connectedThread.Abort();
+                    }
+
+                    /*********************************************************/
+
+                    if (((Petition)buffer[0]) == Petition.ConnectionAccepted)
+                    {
+                        LogUtils.AppendLogText(LogUtils.ClientConnectionLog, "Conexión establecida con éxito.");
+                        Init();
+                        LogUtils.AppendLogText(LogUtils.ClientConnectionLog, "Conexión de datos establecida, fin de la configuración.");
+                    }
+                    else
+                    {
+                        if (buffer[0] != 0)
+                            LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "La conexión ha sido rechazada por el servidor.");
+                        petitionsSocket.Close();
+                    }
                 }
-
-                /*********************************************************/
-
-                if (((Petition) buffer[0]) == Petition.ConnectionAccepted)
-                {
-                    LogUtils.AppendLogText(LogUtils.ClientConnectionLog, "Conexión establecida con éxito.");
-                    IsConnected = true;
-
-                    dataSocket.Bind(clientEP);
-
-                    receivePetitionThread.Start();
-                    receiveDataThread.Start();
-
-                    LogUtils.AppendLogText(LogUtils.ClientConnectionLog, "Conexión de datos establecida, fin de la configuración.");
-                }
-                else
-                {
-                    if (buffer[0] != 0)
-                        LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "La conexión ha sido rechazada por el servidor.");
-                    petitionsSocket.Close();
-                }
+                else if (err == 5)
+                    LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "El servidor no responde.");
             }
-            else if (err == 5)
-                LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "El servidor no responde.");
+            else
+            {
+                LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, "Servidor inalcanzable.");
+                if (!ConnectionUtils.InternetConnection())
+                    LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, "El equipo no tiene acceso a internet");
+            }
+        }
+
+        protected override void Init()
+        {
+            IsConnected = true;
+
+            images = new Dictionary<int, ScreenImage>();
+            skipImage = 255;
+
+            dataSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            dataSocket.Bind(clientEP);
+
+            receivePetitionThread = new Thread(() => ReceivePetition(petitionsSocket));
+            receivePetitionThread.IsBackground = true;
+            receivePetitionThread.Start();
+
+            receiveDataThread = new Thread(ReceiveData);
+            receiveDataThread.IsBackground = true;
+            receiveDataThread.Start();
+        }
+
+        public override void Stop()
+        {
+            LogUtils.AppendLogText(LogUtils.ClientConnectionLog, "Cerrando la conexión...");
+
+            IsConnected = false;
+
+            receivePetitionThread?.Abort();
+            receiveDataThread?.Abort();
+
+            petitionsSocket?.Close();
+            dataSocket?.Close();
 
             LogUtils.AppendLogFooter(LogUtils.ClientConnectionLog);
+        }
+
+        public void Restart(bool r = false)
+        {
+            if (r)
+                Reconnecting.Invoke(this, new ReconnectingEventArgs(true));
+            else
+            {
+                LogUtils.AppendLogText(LogUtils.ClientConnectionLog, "Reiniciando conexión...");
+                Stop();
+                Start();
+            }
+        }
+
+        protected override void ReceivePetition(byte[] buffer)
+        {
+            Petition petition = (Petition)buffer[0];
+            switch (petition)
+            {
+                //case Petition.EndConnetion:
+                //    Close();
+                //    break;
+                case Petition.SetWaveFormat:
+                    WasapiLoopbackCapture cosa = new WasapiLoopbackCapture();
+                    audio = new Audio();
+                    audio.StartPlayer(cosa.WaveFormat);
+                    break;
+                default:
+                    throw new Exception();
+            }
         }
 
         private void ReceiveData()
@@ -135,27 +201,119 @@ namespace Cross_Game.Connection
                     int dataSize;
 
                     dataSize = dataSocket.Receive(data, MaxPacketSize, 0);
-                    ReceivedData.Invoke(dataSocket, new ReceivedBufferEventArgs(data, dataSize));
+
+                    if (data[0] == 0x00) // Nuevo audio
+                    {
+                        audio?.PlayAudio(data);
+                    }
+                    else if (data[0] < 0xFF) // Nueva imagen
+                    {
+                        if (dataSize == 5) // Se empieza a transmitir una nueva imagen
+                        {
+                            images[data[0]] = new ScreenImage(BitConverter.ToInt32(data, 1));
+                        }
+                        else // Agregar buffer a la imagen correspondiente
+                        {
+                            byte img = data[0];
+                            try
+                            {
+                                if (img != skipImage && images[img].AppendBuffer(data, 1, dataSize - 1))
+                                {
+                                    ImageBuilt.Invoke(this, new ImageBuiltEventArgs(images[img].ImageBytes));
+                                    if (img == (skipImage + 5) % 254)
+                                        skipImage = 255;
+                                }
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"No ha llegado a tiempo el paquete que inicializaba el fotograma nº{img}");
+                                skipImage = img;
+                            }
+                            catch (ArgumentException)
+                            {
+                                LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"No ha llegado a tiempo el paquete que inicializaba el fotograma nº{img}");
+                                skipImage = img;
+                            }
+                        }
+                    }
+                    else // Nueva forma del cursor
+                    {
+                        CursorShapeChanged.Invoke(this, new CursorShangedEventArgs((CursorShape)data[1]));
+                    }
                 }
             }
             catch (SocketException e)
             {
-                LogUtils.AppendLogHeader(LogUtils.ClientConnectionLog);
-                LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, e.Message + $" ({e.SocketErrorCode})");
-                LogUtils.AppendLogFooter(LogUtils.ClientConnectionLog);
+                LogUtils.AppendLogError(LogUtils.ClientConnectionLog, e.Message + $" ({e.SocketErrorCode})");
             }
         }
 
-        public void SendPetition(byte[] petition) => SendBuffer(petitionsSocket, petition);
+        private void SendPetition(byte[] petition) => SendBuffer(petitionsSocket, petition);
 
-        public override void Close()
+        public void SendMousePosition(Point position, Size RenderSize)
         {
-            if (IsConnected)
-                SendBuffer(petitionsSocket, new byte[] { Convert.ToByte(Petition.EndConnetion) });
-            Thread.Sleep(500);
-            petitionsSocket.Close();
-            dataSocket.Close();
-            IsConnected = false;
+            byte[] petition = new byte[9];
+
+            petition[0] = Convert.ToByte(Petition.MouseMove);
+            BitConverter.GetBytes(Convert.ToSingle(position.X * 100.0 / RenderSize.Width)).CopyTo(petition, 1);
+            BitConverter.GetBytes(Convert.ToSingle(position.Y * 100.0 / RenderSize.Height)).CopyTo(petition, 5);
+
+            SendPetition(petition);
+        }
+
+        public void SendMouseButton(MouseButton mouseButton, bool isPressed)
+        {
+            switch (mouseButton)
+            {
+                case MouseButton.Left: SendOtherEvents(isPressed ? Petition.MouseLButtonDown : Petition.MouseLButtonUp); break;
+                case MouseButton.Right: SendOtherEvents(isPressed ? Petition.MouseRButtonDown : Petition.MouseRButtonUp); break;
+                case MouseButton.Middle: SendOtherEvents(isPressed ? Petition.MouseMButtonDown : Petition.MouseMButtonUp); break;
+            }
+        }
+
+        public void SendMouseScroll(int delta)
+        {
+            byte[] petition = new byte[5];
+
+            petition[0] = Convert.ToByte(Petition.MouseWheel);
+            BitConverter.GetBytes(delta).CopyTo(petition, 1);
+
+            SendPetition(petition);
+        }
+
+        public void SendKey(Key key, bool isPressed)
+        {
+            byte[] petition = new byte[2];
+
+            petition[0] = Convert.ToByte(isPressed ? Petition.KeyboardKeyDown : Petition.KeyboardKeyUp);
+            petition[1] = Convert.ToByte(key);
+
+            SendPetition(petition);
+        }
+
+        public void SendOtherEvents(Petition petition) => SendPetition(new byte[] { Convert.ToByte(petition) });
+
+        private class ScreenImage
+        {
+            public byte[] ImageBytes { get; set; }
+
+            private int imageSize;
+            private int currentSize;
+
+            public ScreenImage(int size)
+            {
+                ImageBytes = new byte[size];
+                imageSize = size;
+                currentSize = 0;
+            }
+
+            public bool AppendBuffer(byte[] buffer, int offset, int bufferSize)
+            {
+                Array.Copy(buffer, offset, ImageBytes, currentSize, bufferSize);
+                currentSize += bufferSize;
+
+                return currentSize == imageSize;
+            }
         }
     }
 }

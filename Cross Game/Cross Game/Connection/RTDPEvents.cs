@@ -26,6 +26,17 @@ namespace Cross_Game.Connection
         }
     }
 
+    public delegate void ReconectingEventHandler(object sender, ReconnectingEventArgs e);
+    public class ReconnectingEventArgs : EventArgs
+    {
+        public bool Reconnecting;
+
+        public ReconnectingEventArgs(bool reconnecting)
+        {
+            Reconnecting = reconnecting;
+        }
+    }
+
     public delegate void CursorShangedEventHandler(object sender, CursorShangedEventArgs e);
     public class CursorShangedEventArgs : EventArgs
     {

@@ -112,7 +112,6 @@
     </ApplicationDefinition>
     <Compile Include="PC.cs" />
     <Compile Include="Connection\RTDPClient.cs" />
-    <Compile Include="Connection\RTDPController.cs" />
     <Compile Include="Connection\RTDPEvents.cs" />
     <Compile Include="Connection\RTDProtocol.cs" />
     <Compile Include="Connection\RTDPServer.cs" />

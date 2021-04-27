@@ -1,4 +1,5 @@
-﻿using NAudio.Wave;
+﻿using Cross_Game.DataManipulation;
+using NAudio.Wave;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -57,13 +58,28 @@ namespace Cross_Game.Connection
         EndConnetion = 0xFF,
     }
 
+    public enum CursorShape
+    {
+        None = 0x00,
+        Arrow = 0x03,
+        IBeam = 0x05,
+        ArrowCD = 0x07,
+        Cross = 0x15,
+        SizeNWSE = 0x0D,
+        SizeNESW = 0x0F,
+        SizeWE = 0x11,
+        SizeNS = 0x13,
+        Wait = 0x19,
+        Hand = 0x1F
+    }
+
     abstract class RTDProtocol
     {
         public bool IsConnected { get; protected set; }
-        public event ReceivedBufferEventHandler ReceivedPetition;
 
         public const int MaxPacketSize = 65507;
         protected IPEndPoint serverEP;
+        protected Audio audio;
 
         protected RTDProtocol()
         {
@@ -84,9 +100,6 @@ namespace Cross_Game.Connection
             bufferSize = s.Receive(buffer, MaxPacketSize, 0);
         }
 
-        public abstract void Start();
-        public abstract void Close();
-
         protected void ReceivePetition(Socket s)
         {            
             try
@@ -94,23 +107,31 @@ namespace Cross_Game.Connection
                 while (IsConnected)
                 {
                     ReceiveBuffer(s, out byte[] buffer, out int bufferSize);
-                    ReceivedPetition.Invoke(s, new ReceivedBufferEventArgs(buffer, bufferSize));
+                    ReceivePetition(buffer);
                 }
             }
             catch (SocketException e)
             {
-                string logFile = (this is RTDPClient) ? LogUtils.ClientConnectionLog : LogUtils.ServerConnectionLog;
-
-                LogUtils.AppendLogHeader(logFile);
-                LogUtils.AppendLogWarn(logFile, $"Conexión anulada por el host remoto ({e.SocketErrorCode}).");
-                LogUtils.AppendLogFooter(logFile);
-
-                IsConnected = false;
-            }
-            catch (ObjectDisposedException)
-            {
-
+                if (IsConnected)
+                {
+                    if (this is RTDPClient)
+                    {
+                        LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"Se ha perdido la conexión con el servidor ({e.SocketErrorCode}).");
+                        (this as RTDPClient).Restart(true);
+                    }
+                    else
+                    {
+                        string IP = (s.RemoteEndPoint as IPEndPoint).Address.ToString();
+                        LogUtils.AppendLogWarn(LogUtils.ServerConnectionLog, $"Se ha perdido la conexión con el cliente {IP} ({e.SocketErrorCode}).");
+                        (this as RTDPServer).CloseConnection(IP);
+                    }
+                }
             }
         }
+
+        protected abstract void ReceivePetition(byte[] buffer);
+        protected abstract void Init();
+        public abstract void Start();
+        public abstract void Stop();
     }
 }
