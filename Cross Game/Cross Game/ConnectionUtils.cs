@@ -30,7 +30,9 @@ namespace Cross_Game
             return output.ToArray();
         }
 
-        public static bool InternetConnection() => new Ping().Send("8.8.8.8").Status == IPStatus.Success;
+        public static bool Ping(string IP) => new Ping().Send(IP).Status == IPStatus.Success;
+
+        public static bool InternetConnection() => Ping("8.8.8.8");
         
         public static void GetComputerNetworkInfo(out string localIP, out string publicIP, out string mac)
         {

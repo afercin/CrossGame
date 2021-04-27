@@ -15,7 +15,7 @@ namespace Cross_Game.Windows
         public string UserNumber { get => DBConnection.CurrentUser.Number.ToString(); }
 
         private OptionButton currentOption;
-        private RTDPController server;
+        private RTDPServer server;
 
         public MainWindow()
         {
@@ -23,7 +23,13 @@ namespace Cross_Game.Windows
             currentOption = Ordenadores;
             Ordenadores.Active = true;
 
-            WaitSlider.SetActions(() => server = new RTDPController(3030, 3031, 1, 30), () => server.Dispose());
+            WaitSlider.SetActions(() => 
+            {
+                server = new RTDPServer(3030, 3031);
+                server.MaxConnections = 1;
+                server.TimeRate = 1000 / 30;
+                server.Start();
+            }, () => server.Stop());
         }
 
         private void Window_SourceInitialized(object sender, EventArgs e) => Header.SetWindowHandler(this);
@@ -53,7 +59,10 @@ namespace Cross_Game.Windows
             {
                 case "Ordenadores": break;
                 case "Amigos": new WaitingWindow().Show(); break;
-                case "Transmisión": new RTDPController(3030,3031,"127.0.0.1") ; break;
+                case "Transmisión":
+                    var display = new UserDisplay();
+                    display.StartTransmission(3030, 3031, "127.0.0.1");
+                    break;
             }
         }
 

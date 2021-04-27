@@ -33,12 +33,13 @@ namespace Cross_Game.Windows
 
         private void Window_SourceInitialized(object sender, EventArgs e) => Header.SetWindowHandler(this);
 
-        public void Wait(ThreadStart task, string waitText)
+        public delegate void Action();
+        public void Wait(Action waitTask, string waitText)
         {
             WaitText.Text = waitText;
             waitThread = new Thread(()=>
             {
-                Thread t = new Thread(task);
+                Thread t = new Thread(new ThreadStart(waitTask));
                 t.IsBackground = true;
                 t.Start();
                 t.Join();

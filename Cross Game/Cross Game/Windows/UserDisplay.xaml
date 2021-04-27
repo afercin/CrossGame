@@ -12,6 +12,7 @@
         WindowState="Maximized"
         Title="UserDisplay" Height="300" Width="400"
         Closing="Window_Closing"
+        Closed="Window_Closed"
         KeyDown="ClientDisplay_KeyPress"
         KeyUp="ClientDisplay_KeyPress">
     <Window.Resources>

@@ -28,7 +28,7 @@ namespace Cross_Game.Windows
             { CursorShape.Wait, Cursors.Wait }
         };
 
-        private RTDPController client;
+        private RTDPClient client;
         private WaitingWindow waitingWindow;
         private Timer framerate;
         private int frames;
@@ -56,7 +56,7 @@ namespace Cross_Game.Windows
 
             if (client != null && client.IsConnected)
             {
-                client.Dispose();
+                client.Stop();
                 client.ImageBuilt -= Client_ImageBuilt;
                 client.CursorShapeChanged -= Client_CursorShapeChanged;
                 framerate.Stop();
@@ -68,13 +68,33 @@ namespace Cross_Game.Windows
             waitingWindow = new WaitingWindow();
             waitingWindow.WaitStopped += (s, a) => Dispatcher.Invoke(() => Close());
             waitingWindow.WaitEnd += (s, a) => { if (!client.IsConnected) Dispatcher.Invoke(() => Close()); };
-            waitingWindow.Wait(new System.Threading.ThreadStart(() =>
+            waitingWindow.Wait(() =>
             {
-                client = new RTDPController(tcpPort, udpPort, remoteIP);
+                client = new RTDPClient(tcpPort, udpPort, remoteIP);
                 client.ImageBuilt += Client_ImageBuilt;
                 client.CursorShapeChanged += Client_CursorShapeChanged;
-            }), $"Conectando con {remoteIP}...");
+                client.Reconnecting += Client_Reconnecting;
+                client.Start();
+            }, $"Conectando con {remoteIP}...");
+        }
 
+        private void Client_Reconnecting(object sender, ReconnectingEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (e.Reconnecting)
+                {
+                    waitingWindow = new WaitingWindow();
+                    waitingWindow.WaitStopped += (s, a) => { if (!client.IsConnected) Dispatcher.Invoke(() => Close()); };
+                    waitingWindow.WaitEnd += (s, a) => { if (!client.IsConnected) Dispatcher.Invoke(() => Close()); };
+                    waitingWindow.Wait(() =>
+                    {
+                        client.Restart();
+                    }, $"Reconectando con el servidor...");
+                }
+                else
+                    waitingWindow.Close();
+            });
         }
 
         //private void Server_Click(object sender, RoutedEventArgs e)
@@ -131,15 +151,14 @@ namespace Cross_Game.Windows
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            framerate.Stop();
-            if (client != null && client.IsConnected)
-            {
-                waitingWindow = new WaitingWindow();
-                waitingWindow.Wait(new System.Threading.ThreadStart(() =>
-                {
-                    client.Dispose();
-                }), "Cerrando la conexión...");
-            }
+            e.Cancel = client != null && client.IsConnected &&
+                MessageBox.Show("¿Desea realmente cerrar la Transmisión?", "Cerrar la transmisión", MessageBoxButton.YesNo, MessageBoxImage.Exclamation) != MessageBoxResult.Yes;
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            framerate.Dispose();
+            client?.Stop();
             waitingWindow?.Close();
         }
     }
