@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -207,49 +208,58 @@ namespace Cross_Game.Connection
 
                     dataSize = dataSocket.Receive(data, MaxPacketSize, 0);
 
-                    if (data[0] == 0x00) // Nuevo audio
-                    {
-                        audio?.PlayAudio(data);
-                    }
-                    else if (data[0] < 0xFF) // Nueva imagen
-                    {
-                        if (dataSize == 5) // Se empieza a transmitir una nueva imagen
-                        {
-                            images[data[0]] = new ScreenImage(BitConverter.ToInt32(data, 1));
-                        }
-                        else // Agregar buffer a la imagen correspondiente
-                        {
-                            byte img = data[0];
-                            try
-                            {
-                                if (img != skipImage && images[img].AppendBuffer(data, 1, dataSize - 1))
-                                {
-                                    ImageBuilt.Invoke(this, new ImageBuiltEventArgs(images[img].ImageBytes));
-                                    if (img == (skipImage + 5) % 254)
-                                        skipImage = 255;
-                                }
-                            }
-                            catch (KeyNotFoundException)
-                            {
-                                LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"No ha llegado a tiempo el paquete que inicializaba el fotograma nº{img}");
-                                skipImage = img;
-                            }
-                            catch (ArgumentException)
-                            {
-                                LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"No ha llegado a tiempo el paquete que inicializaba el fotograma nº{img}");
-                                skipImage = img;
-                            }
-                        }
-                    }
-                    else // Nueva forma del cursor
-                    {
-                        CursorShapeChanged.Invoke(this, new CursorShangedEventArgs((CursorShape)data[1]));
-                    }
+                    new Task(() => ManageData(data, dataSize)).Start();
                 }
             }
             catch (SocketException e)
             {
                 LogUtils.AppendLogError(LogUtils.ClientConnectionLog, e.Message + $" ({e.SocketErrorCode})");
+            }
+        }
+
+        private void ManageData(byte[] data, int dataSize)
+        {
+            if (data[0] == 0x00) // Nuevo audio
+            {
+                lock(audio)
+                    audio?.PlayAudio(data);
+            }
+            else if (data[0] < 0xFF) // Nueva imagen
+            {
+                if (dataSize == 5) // Se empieza a transmitir una nueva imagen
+                {
+                    images[data[0]] = new ScreenImage(BitConverter.ToInt32(data, 1));
+                }
+                else // Agregar buffer a la imagen correspondiente
+                {
+                    lock (images)
+                    {
+                        byte img = data[0];
+                        try
+                        {
+                            if (img != skipImage && images[img].AppendBuffer(data, 1, dataSize - 1))
+                            {
+                                ImageBuilt.Invoke(this, new ImageBuiltEventArgs(images[img].ImageBytes));
+                                if (img == (skipImage + 5) % 254)
+                                    skipImage = 255;
+                            }
+                        }
+                        catch (KeyNotFoundException)
+                        {
+                            LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"No ha llegado a tiempo el paquete que inicializaba el fotograma nº{img}");
+                            skipImage = img;
+                        }
+                        catch (ArgumentException)
+                        {
+                            LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"No ha llegado a tiempo el paquete que inicializaba el fotograma nº{img}");
+                            skipImage = img;
+                        }
+                    }
+                }
+            }
+            else // Nueva forma del cursor
+            {
+                CursorShapeChanged.Invoke(this, new CursorShangedEventArgs((CursorShape)data[1]));
             }
         }
 
