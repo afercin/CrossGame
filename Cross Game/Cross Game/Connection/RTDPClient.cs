@@ -35,12 +35,13 @@ namespace Cross_Game.Connection
             int err = 0;
             bool connected = false;
 
+            LogUtils.AppendLogHeader(LogUtils.ClientConnectionLog);
+            LogUtils.AppendLogText(LogUtils.ClientConnectionLog, $"Intentando conectar con {serverEP.Address.ToString()}:{serverEP.Port}");
+
             if (ConnectionUtils.Ping(serverEP.Address.ToString()))
             {
                 Thread connectedThread = new Thread(() =>
                 {
-                    LogUtils.AppendLogHeader(LogUtils.ClientConnectionLog);
-                    LogUtils.AppendLogText(LogUtils.ClientConnectionLog, $"Intentando conectar con {serverEP.Address.ToString()}:{serverEP.Port}");
 
                     petitionsSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
@@ -58,6 +59,10 @@ namespace Cross_Game.Connection
                             if (e.SocketErrorCode == SocketError.TimedOut)
                                 err = 5;
                             err++;
+                        }
+                        catch (ObjectDisposedException)
+                        {
+                            LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"Se ha cerrado la conexión mientras se intentaba conectar al servidor.");
                         }
                     }
                 });
