@@ -33,17 +33,17 @@ namespace Cross_Game.Connection
 
     public enum Petition
     {
-        MouseMove = 0x00,
-        MouseLButtonUp = 0x01,
-        MouseLButtonDown = 0x02,
-        MouseRButtonUp = 0x03,
-        MouseRButtonDown = 0x04,
-        MouseMButtonUp = 0x05,
-        MouseMButtonDown = 0x06,
-        MouseWheel = 0x07,
-        KeyboardKeyUp = 0x08,
-        KeyboardKeyDown = 0x09,
-        CursorChanged = 0x0A,
+        MouseMove = 0x01,
+        MouseLButtonUp = 0x02,
+        MouseLButtonDown = 0x03,
+        MouseRButtonUp = 0x04,
+        MouseRButtonDown = 0x05,
+        MouseMButtonUp = 0x06,
+        MouseMButtonDown = 0x07,
+        MouseWheel = 0x08,
+        KeyboardKeyUp = 0x09,
+        KeyboardKeyDown = 0x0A,
+        CursorChanged = 0x0B,
 
         EmulatorInfo = 0x80,
         GameInfo = 0x81,
@@ -101,13 +101,34 @@ namespace Cross_Game.Connection
         }
 
         protected void ReceivePetition(Socket s)
-        {            
+        {
+            int errors = 0;
             try
             {
                 while (IsConnected)
                 {
                     ReceiveBuffer(s, out byte[] buffer, out int bufferSize);
-                    ReceivePetition(buffer);
+                    if (buffer[0] == 0)
+                    {
+                        errors++;
+                        if (errors == 5)
+                            if (this is RTDPClient)
+                            {
+                                LogUtils.AppendLogError(LogUtils.ClientConnectionLog, $"Se ha entrado en un bucle de fallos, reiniciando el cliente.");
+                                (this as RTDPClient).Restart(true);
+                            }
+                            else
+                            {
+                                string IP = (s.RemoteEndPoint as IPEndPoint).Address.ToString();
+                                LogUtils.AppendLogWarn(LogUtils.ServerConnectionLog, $"Parece que la aplicación del cliente {IP} ha crasheado.");
+                                (this as RTDPServer).CloseConnection(IP);
+                            }
+                    }
+                    else
+                    {
+                        errors = 0;
+                        ReceivePetition(buffer);
+                    }
                 }
             }
             catch (SocketException e)
