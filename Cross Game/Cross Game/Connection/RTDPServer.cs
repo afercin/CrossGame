@@ -250,7 +250,7 @@ namespace Cross_Game.Connection
         private void CheckCursorShapeThread()
         {
             IntPtr currentCursor;
-            User32.GetCursorInfo(out User32.CURSORINFO pci);
+            Win32API.GetCursorInfo(out CURSORINFO pci);
 
             currentCursor = pci.hCursor;
 
@@ -258,8 +258,8 @@ namespace Cross_Game.Connection
             {
                 while (IsConnected)
                 {
-                    pci.cbSize = Marshal.SizeOf(typeof(User32.CURSORINFO));
-                    User32.GetCursorInfo(out pci);
+                    pci.cbSize = Marshal.SizeOf(typeof(CURSORINFO));
+                    Win32API.GetCursorInfo(out pci);
 
                     if (currentCursor != pci.hCursor && (int)pci.hCursor <= 0x1001F)
                     {
@@ -327,28 +327,6 @@ namespace Cross_Game.Connection
         {
             public Socket tcpSocket;
             public Socket udpSocket;
-        }
-
-        private class User32
-        {
-            [StructLayout(LayoutKind.Sequential)]
-            public struct POINT
-            {
-                public int x;
-                public int y;
-            }
-
-            [StructLayout(LayoutKind.Sequential)]
-            public struct CURSORINFO
-            {
-                public int cbSize;
-                public int flags;
-                public IntPtr hCursor;
-                public POINT ptScreenPos;
-            }
-
-            [DllImport("user32.dll")]
-            public static extern bool GetCursorInfo(out CURSORINFO pci);
         }
     }
 }

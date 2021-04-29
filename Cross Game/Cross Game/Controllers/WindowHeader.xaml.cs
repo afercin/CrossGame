@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Cross_Game.DataManipulation;
+using System;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -45,7 +46,7 @@ namespace Cross_Game.Controllers
         {
             this.parentWindow = parentWindow;
             IntPtr mWindowHandle = (new WindowInteropHelper(parentWindow)).Handle;
-            HwndSource.FromHwnd(mWindowHandle).AddHook(new HwndSourceHook(User32.WindowProc));
+            HwndSource.FromHwnd(mWindowHandle).AddHook(new HwndSourceHook(WindowProc));
 
             if (!MaximizeButton)
                 Maximize.Visibility = Visibility.Hidden;
@@ -86,124 +87,56 @@ namespace Cross_Game.Controllers
 
                 parentWindow.WindowState = WindowState.Normal;
 
-                User32.GetCursorPos(out User32.POINT lMousePosition);
+                Win32API.GetCursorPos(out POINT lMousePosition);
 
-                parentWindow.Left = lMousePosition.X - targetHorizontal;
-                parentWindow.Top = lMousePosition.Y - targetVertical;
+                parentWindow.Left = lMousePosition.x - targetHorizontal;
+                parentWindow.Top = lMousePosition.y - targetVertical;
 
                 parentWindow.DragMove();
             }
         }
-
-        internal class User32
+        public static IntPtr WindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
-            enum MonitorOptions : uint
+            switch (msg)
             {
-                MONITOR_DEFAULTTONULL = 0x00000000,
-                MONITOR_DEFAULTTOPRIMARY = 0x00000001,
-                MONITOR_DEFAULTTONEAREST = 0x00000002
+                case 0x0024:
+                    WmGetMinMaxInfo(hwnd, lParam);
+                    break;
+            }
+            return IntPtr.Zero;
+        }
+
+        public static void WmGetMinMaxInfo(IntPtr hwnd, IntPtr lParam)
+        {
+            Win32API.GetCursorPos(out POINT lMousePosition);
+
+            IntPtr lPrimaryScreen = Win32API.MonitorFromPoint(new POINT { x = 0, y = 0 }, MonitorOptions.MONITOR_DEFAULTTOPRIMARY);
+            MONITORINFO lPrimaryScreenInfo = new MONITORINFO();
+            if (Win32API.GetMonitorInfo(lPrimaryScreen, lPrimaryScreenInfo) == false)
+            {
+                return;
             }
 
-            [StructLayout(LayoutKind.Sequential)]
-            public struct POINT
-            {
-                public int X;
-                public int Y;
+            IntPtr lCurrentScreen = Win32API.MonitorFromPoint(lMousePosition, MonitorOptions.MONITOR_DEFAULTTONEAREST);
 
-                public POINT(int x, int y)
-                {
-                    X = x;
-                    Y = y;
-                }
+            MINMAXINFO lMmi = (MINMAXINFO)Marshal.PtrToStructure(lParam, typeof(MINMAXINFO));
+
+            if (lPrimaryScreen.Equals(lCurrentScreen) == true)
+            {
+                lMmi.ptMaxPosition.x = lPrimaryScreenInfo.rcWork.left;
+                lMmi.ptMaxPosition.y = lPrimaryScreenInfo.rcWork.top;
+                lMmi.ptMaxSize.x = lPrimaryScreenInfo.rcWork.right - lPrimaryScreenInfo.rcWork.left;
+                lMmi.ptMaxSize.y = lPrimaryScreenInfo.rcWork.bottom - lPrimaryScreenInfo.rcWork.top;
+            }
+            else
+            {
+                lMmi.ptMaxPosition.x = lPrimaryScreenInfo.rcMonitor.left;
+                lMmi.ptMaxPosition.y = lPrimaryScreenInfo.rcMonitor.top;
+                lMmi.ptMaxSize.x = lPrimaryScreenInfo.rcMonitor.right - lPrimaryScreenInfo.rcMonitor.left;
+                lMmi.ptMaxSize.y = lPrimaryScreenInfo.rcMonitor.bottom - lPrimaryScreenInfo.rcMonitor.top;
             }
 
-            [StructLayout(LayoutKind.Sequential)]
-            private struct MINMAXINFO
-            {
-                public POINT ptReserved;
-                public POINT ptMaxSize;
-                public POINT ptMaxPosition;
-                public POINT ptMinTrackSize;
-                public POINT ptMaxTrackSize;
-            };
-
-            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-            private class MONITORINFO
-            {
-                public int cbSize = Marshal.SizeOf(typeof(MONITORINFO));
-                public RECT rcMonitor = new RECT();
-                public RECT rcWork = new RECT();
-                public int dwFlags = 0;
-            }
-
-            [StructLayout(LayoutKind.Sequential)]
-            private struct RECT
-            {
-                public int Left, Top, Right, Bottom;
-
-                public RECT(int left, int top, int right, int bottom)
-                {
-                    Left = left;
-                    Top = top;
-                    Right = right;
-                    Bottom = bottom;
-                }
-            }
-
-            [DllImport("user32.dll")]
-            [return: MarshalAs(UnmanagedType.Bool)]
-            public static extern bool GetCursorPos(out POINT lpPoint);
-
-            [DllImport("user32.dll", SetLastError = true)]
-            private static extern IntPtr MonitorFromPoint(POINT pt, MonitorOptions dwFlags);
-
-            [DllImport("user32.dll")]
-            private static extern bool GetMonitorInfo(IntPtr hMonitor, MONITORINFO lpmi);
-
-            public static IntPtr WindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
-            {
-                switch (msg)
-                {
-                    case 0x0024:
-                        WmGetMinMaxInfo(hwnd, lParam);
-                        break;
-                }
-
-                return IntPtr.Zero;
-            }
-
-            public static void WmGetMinMaxInfo(IntPtr hwnd, IntPtr lParam)
-            {
-                GetCursorPos(out POINT lMousePosition);
-
-                IntPtr lPrimaryScreen = MonitorFromPoint(new POINT(0, 0), MonitorOptions.MONITOR_DEFAULTTOPRIMARY);
-                MONITORINFO lPrimaryScreenInfo = new MONITORINFO();
-                if (GetMonitorInfo(lPrimaryScreen, lPrimaryScreenInfo) == false)
-                {
-                    return;
-                }
-
-                IntPtr lCurrentScreen = MonitorFromPoint(lMousePosition, MonitorOptions.MONITOR_DEFAULTTONEAREST);
-
-                MINMAXINFO lMmi = (MINMAXINFO)Marshal.PtrToStructure(lParam, typeof(MINMAXINFO));
-
-                if (lPrimaryScreen.Equals(lCurrentScreen) == true)
-                {
-                    lMmi.ptMaxPosition.X = lPrimaryScreenInfo.rcWork.Left;
-                    lMmi.ptMaxPosition.Y = lPrimaryScreenInfo.rcWork.Top;
-                    lMmi.ptMaxSize.X = lPrimaryScreenInfo.rcWork.Right - lPrimaryScreenInfo.rcWork.Left;
-                    lMmi.ptMaxSize.Y = lPrimaryScreenInfo.rcWork.Bottom - lPrimaryScreenInfo.rcWork.Top;
-                }
-                else
-                {
-                    lMmi.ptMaxPosition.X = lPrimaryScreenInfo.rcMonitor.Left;
-                    lMmi.ptMaxPosition.Y = lPrimaryScreenInfo.rcMonitor.Top;
-                    lMmi.ptMaxSize.X = lPrimaryScreenInfo.rcMonitor.Right - lPrimaryScreenInfo.rcMonitor.Left;
-                    lMmi.ptMaxSize.Y = lPrimaryScreenInfo.rcMonitor.Bottom - lPrimaryScreenInfo.rcMonitor.Top;
-                }
-
-                Marshal.StructureToPtr(lMmi, lParam, true);
-            }
+            Marshal.StructureToPtr(lMmi, lParam, true);
         }
     }
 }

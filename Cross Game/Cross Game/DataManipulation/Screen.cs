@@ -2,30 +2,46 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Windows.Media.Imaging;
 using System.Windows;
 
 namespace Cross_Game.DataManipulation
 {
+    /// <summary>
+    /// Clase para trabajar con capturas de pantallas como array de bytes.
+    /// </summary>
     class Screen
     {
+        /// <summary>
+        /// Clase de apoyo que guarda información relativa a la ventana a ser capturada.
+        /// </summary>
         internal static class Display
         {
+            /// <summary>
+            /// Handler a la ventana que acaba de ser capturada.
+            /// </summary>
             public static IntPtr Handle { get; set; } = IntPtr.Zero;
+            /// <summary>
+            /// Ancho de la ventana que acaba de ser capturada.
+            /// </summary>
             public static int Width { get; set; } = (int)SystemParameters.PrimaryScreenWidth;
+            /// <summary>
+            /// Alto de la ventana que acaba de ser capturada.
+            /// </summary>
             public static int Height { get; set; } = (int)SystemParameters.PrimaryScreenHeight;
         }
-
+        /// <summary>
+        /// Realiza una captura de pantalla y devuelve la imagen en un array de bytes.
+        /// </summary>
         public static byte[] CaptureScreen()
         {
             byte[] data;
-            using (Bitmap b = CaptureWindow(WIN32_API.GetDesktopWindow()))
+            using (Bitmap b = CaptureDesktop())
             {
-                using (Bitmap resizedImg = new Bitmap(1280, 720))
+                using (Bitmap resizedImg = new Bitmap(1024, 576))
                 {
                     using (Graphics g = Graphics.FromImage(resizedImg))
-                        g.DrawImage(b, 0, 0, 1280, 720);
+                        g.DrawImage(b, 0, 0, resizedImg.Width, resizedImg.Height);
                     using (MemoryStream ms = new MemoryStream())
                     {
                         resizedImg.Save(ms, ImageFormat.Jpeg);
@@ -35,11 +51,13 @@ namespace Cross_Game.DataManipulation
             }
             return data;
         }
-
-        public static BitmapImage BytesToScreenImage(byte[] data)
+        /// <summary>
+        /// Devuelve la imagen correspondiente al array de bytes pasado por parametro.
+        /// </summary>
+        public static BitmapImage BytesToScreenImage(byte[] imageBytes)
         {
             BitmapImage bitmap = new BitmapImage();
-            using (MemoryStream stream = new MemoryStream(data))
+            using (MemoryStream stream = new MemoryStream(imageBytes))
             {
                 bitmap.BeginInit();
                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
@@ -48,89 +66,55 @@ namespace Cross_Game.DataManipulation
             }
             return bitmap;
         }
-        private static Bitmap CaptureWindow(IntPtr handle)
+        /// <summary>
+        /// Detecta la ventana que se está ejecutando en primer plano y le realiza una captura de pantalla.
+        /// </summary>
+        private static Bitmap CaptureDesktop()
         {
-            if (Display.Handle != handle)
-            {
-                Display.Handle = handle;
-                WIN32_API.RECT windowRect = new WIN32_API.RECT();
+            IntPtr currentView = Win32API.GetDesktopWindow();
 
-                WIN32_API.GetWindowRect(Display.Handle, ref windowRect);
+            if (Display.Handle != currentView)
+            {
+                Display.Handle = currentView;
+                RECT windowRect = new RECT();
+
+                Win32API.GetWindowRect(Display.Handle, ref windowRect);
                 Display.Width = windowRect.right - windowRect.left;
                 Display.Height = windowRect.bottom - windowRect.top;
             }
 
-            IntPtr hdcSrc = WIN32_API.GetWindowDC(Display.Handle);
+            IntPtr hdcSrc = Win32API.GetWindowDC(Display.Handle),
+                   hdcDest = Win32API.CreateCompatibleDC(hdcSrc),
+                   hBitmap = Win32API.CreateCompatibleBitmap(hdcSrc, Display.Width, Display.Height),
+                   hOld = Win32API.SelectObject(hdcDest, hBitmap);
 
-            IntPtr hdcDest = WIN32_API.CreateCompatibleDC(hdcSrc),
-                   hBitmap = WIN32_API.CreateCompatibleBitmap(hdcSrc, Display.Width, Display.Height),
-                   hOld = WIN32_API.SelectObject(hdcDest, hBitmap);
+            Win32API.BitBlt(hdcDest, 0, 0, Display.Width, Display.Height, hdcSrc, 0, 0, Win32API.SRCCOPY);
+            Win32API.SelectObject(hdcDest, hOld);
 
-            WIN32_API.BitBlt(hdcDest, 0, 0, Display.Width, Display.Height, hdcSrc, 0, 0, WIN32_API.SRCCOPY);
-            WIN32_API.SelectObject(hdcDest, hOld);
-
-            WIN32_API.DeleteDC(hdcDest);
-            WIN32_API.ReleaseDC(Display.Handle, hdcSrc);
+            Win32API.DeleteDC(hdcDest);
+            Win32API.ReleaseDC(Display.Handle, hdcSrc);
 
             Bitmap img = Image.FromHbitmap(hBitmap);
-            WIN32_API.DeleteObject(hBitmap);
+            Win32API.DeleteObject(hBitmap);
 
             return img;
         }
-
-        private class WIN32_API
+        /// <summary>
+        /// Devuelve el handler del escritorio o de la ventana con la que se está trabajando si está en pantalla completa.
+        /// </summary>
+        private static IntPtr GetCurrentView()
         {
-            #region User_32
+            RECT a = new RECT(),
+                 b = new RECT();
 
-            [StructLayout(LayoutKind.Sequential)]
-            public struct RECT
-            {
-                public int left;
-                public int top;
-                public int right;
-                public int bottom;
-            }
+            IntPtr foreground = Win32API.GetForegroundWindow(),
+                   desktop = Win32API.GetDesktopWindow();
 
-            [DllImport("user32.dll")]
-            public static extern IntPtr GetDesktopWindow();
+            Win32API.GetWindowRect(foreground, ref b);
+            Win32API.GetWindowRect(desktop, ref a);
 
-            [DllImport("user32.dll")]
-            public static extern IntPtr GetWindowDC(IntPtr hWnd);
-
-            [DllImport("user32.dll")]
-            public static extern IntPtr ReleaseDC(IntPtr hWnd, IntPtr hDC);
-
-            [DllImport("user32.dll")]
-            public static extern IntPtr GetWindowRect(IntPtr hWnd, ref RECT rect);
-
-            #endregion
-
-            #region GDI_32
-
-            public const int SRCCOPY = 0x00CC0020; // BitBlt dwRop parameter
-
-            [DllImport("gdi32.dll")]
-            public static extern bool BitBlt(IntPtr hObject, int nXDest, int nYDest,
-                int nWidth, int nHeight, IntPtr hObjectSource,
-                int nXSrc, int nYSrc, int dwRop);
-
-            [DllImport("gdi32.dll")]
-            public static extern IntPtr CreateCompatibleBitmap(IntPtr hDC, int nWidth,
-                int nHeight);
-
-            [DllImport("gdi32.dll")]
-            public static extern bool DeleteDC(IntPtr hDC);
-
-            [DllImport("gdi32.dll")]
-            public static extern bool DeleteObject(IntPtr hObject);
-
-            [DllImport("gdi32.dll")]
-            public static extern IntPtr CreateCompatibleDC(IntPtr hDC);
-
-            [DllImport("gdi32.dll")]
-            public static extern IntPtr SelectObject(IntPtr hDC, IntPtr hObject);
-
-            #endregion
+            return a.left == b.left && a.right == b.right &&
+                   a.top == b.top && a.bottom == b.bottom ? foreground : desktop;
         }
     }
 }
