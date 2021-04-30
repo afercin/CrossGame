@@ -23,19 +23,22 @@ namespace Cross_Game.Windows
             InitializeComponent();
             currentOption = Ordenadores;
             Ordenadores.Active = true;
-
-            WaitSlider.SetActions(() =>
-            {
-                server = new RTDPServer(3030, 3031);
-                server.MaxConnections = 2;
-                server.TimeRate = 1000 / 60;
-                server.Start();
-            }, () => server.Stop());
         }
 
         private void Window_SourceInitialized(object sender, EventArgs e)
         {
             Header.SetWindowHandler(this);
+
+            UserName.Text = CurrentUser.Name;
+            UserNumber.Text = CurrentUser.Number.ToString();
+
+            WaitSlider.SetActions(() =>
+            {
+                server = new RTDPServer(3030, 3031);
+                server.MaxConnections = 2;
+                server.TimeRate = 1000 / 45;
+                server.Start();
+            }, () => server.Stop());
 
             foreach (string mac in DBConnection.GetMyComputers(CurrentUser))
                 if (mac != CurrentUser.localMachine.MAC)
@@ -52,13 +55,6 @@ namespace Cross_Game.Windows
                         MessageBox.Show(ex.Message);
                     }
                 }
-        }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            //var w = new WaitingWindow();
-            //w.Show();
-            //w.SetText("Reconectando con el servidor...");
         }
 
         private void OptionButton_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
