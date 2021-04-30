@@ -219,12 +219,12 @@ namespace Cross_Game
 
         public static void LogOut()
         {
-            if (OpenConnection())
-            {
-                NonQuery($"UPDATE computers SET status = 0, n_connections = 0 WHERE MAC = '{CurrentUser.localMachine.MAC}'");
-                NonQuery($"UPDATE users SET status = 0 WHERE user_id = '{CurrentUser.ID}'");
-                CloseConnection();
-            }
+            //if (OpenConnection())
+            //{
+            //    NonQuery($"UPDATE computers SET status = 0, n_connections = 0 WHERE MAC = '{CurrentUser.localMachine.MAC}'");
+            //    NonQuery($"UPDATE users SET status = 0 WHERE user_id = '{CurrentUser.ID}'");
+            //    CloseConnection();
+            //}
         }
     }
 }

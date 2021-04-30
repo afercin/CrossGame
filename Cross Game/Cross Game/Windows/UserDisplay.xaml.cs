@@ -108,12 +108,16 @@ namespace Cross_Game.Windows
         //    }
         //}
 
+        DateTime time = DateTime.Now;
+
         private void Client_ImageBuilt(object sender, ImageBuiltEventArgs e)
         {
             Dispatcher.Invoke(() =>
             {
                 ClientDisplay.Source = Screen.BytesToScreenImage(e.Image);
                 frames++;
+                Console.WriteLine((DateTime.Now - time).TotalMilliseconds);
+                time = DateTime.Now;
             });
         }
 

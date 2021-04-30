@@ -96,8 +96,8 @@ namespace Cross_Game.DataManipulation
     {
         public int dx;
         public int dy;
-        public uint mouseData;
-        public uint dwFlags;
+        public int mouseData;
+        public int dwFlags;
         public uint time;
         public IntPtr dwExtraInfo;
     }

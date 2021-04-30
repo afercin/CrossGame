@@ -140,9 +140,9 @@ namespace Cross_Game.Connection
             images = new Dictionary<int, ScreenImage>();
             skipImage = 255;
 
-            for (int i = 1; i <= 15; i++)
+            for (int i = 1; i <= 2; i++)
             {
-                images[i] = new ScreenImage(400000);
+                images[i] = new ScreenImage(450000);
             }
 
             dataSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
@@ -215,8 +215,7 @@ namespace Cross_Game.Connection
 
                     if (data[0] == 0x00) // Nuevo audio
                     {
-                        lock (audio)
-                            audio?.PlayAudio(data);
+                        //audio?.PlayAudio(data);
                     }
                     else if (data[0] < 0xFF) // Nueva imagen
                     {
@@ -228,9 +227,12 @@ namespace Cross_Game.Connection
                         }
                         else // Agregar buffer a la imagen correspondiente
                         {
-                            try
+                            Task.Run(() =>
                             {
-                                if (img != skipImage && images[img].AppendBuffer(data, 1, dataSize - 1))
+                                
+                            }); try
+                            {
+                                if (img != skipImage && images[img].AppendBuffer(data, 1, dataSize - 1, data[0] & 0x0F))
                                 {
                                     byte[] i = images[img].ImageBytes;
                                     Array.Resize(ref i, images[img].imageSize);
@@ -249,7 +251,7 @@ namespace Cross_Game.Connection
                                 LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"No ha llegado a tiempo el paquete que inicializaba el fotograma nº{img}");
                                 skipImage = img;
                             }
-                        }
+                        }                            
                     }
                     else // Nueva forma del cursor
                     {
@@ -322,9 +324,9 @@ namespace Cross_Game.Connection
                 currentSize = 0;
             }
 
-            public bool AppendBuffer(byte[] buffer, int offset, int bufferSize)
+            public bool AppendBuffer(byte[] buffer, int offset, int bufferSize, int bufferIndex)
             {
-                Array.Copy(buffer, offset, ImageBytes, currentSize, bufferSize);
+                Array.Copy(buffer, offset, ImageBytes,/**/ currentSize /**bufferIndex * (MaxPacketSize - 1) /**/, bufferSize);
                 currentSize += bufferSize;
                 return currentSize == imageSize;
             }

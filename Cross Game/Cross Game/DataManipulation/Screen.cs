@@ -33,15 +33,14 @@ namespace Cross_Game.DataManipulation
         /// <summary>
         /// Realiza una captura de pantalla y devuelve la imagen en un array de bytes.
         /// </summary>
+
         public static byte[] CaptureScreen()
         {
             byte[] data;
             using (Bitmap b = CaptureDesktop())
             {
-                using (Bitmap resizedImg = new Bitmap(1024, 576))
+                using (Bitmap resizedImg = new Bitmap(b, 1280, 720))
                 {
-                    using (Graphics g = Graphics.FromImage(resizedImg))
-                        g.DrawImage(b, 0, 0, resizedImg.Width, resizedImg.Height);
                     using (MemoryStream ms = new MemoryStream())
                     {
                         resizedImg.Save(ms, ImageFormat.Jpeg);

@@ -1,5 +1,6 @@
 ﻿using Cross_Game.Connection;
 using Cross_Game.Controllers;
+using Cross_Game.DataManipulation;
 using System;
 using System.Windows;
 using System.Windows.Input;
@@ -19,6 +20,7 @@ namespace Cross_Game.Windows
 
         public MainWindow()
         {
+            Screen.CaptureScreen();
             InitializeComponent();
             currentOption = Ordenadores;
             Ordenadores.Active = true;
@@ -78,6 +80,7 @@ namespace Cross_Game.Windows
 
         private void MainWindow_Closed(object sender, EventArgs e)
         {
+            server?.Stop();
             DBConnection.LogOut();
         }
     }

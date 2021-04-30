@@ -212,20 +212,21 @@ namespace Cross_Game.Connection
                     try
                     {
                         byte[] imageBytes = Screen.CaptureScreen(), info = new byte[5];
-                        int dataleft = imageBytes.Length, offset = 0;
+                        int dataleft = imageBytes.Length, offset = 0, packetSize;
                         lock (this)
                         {
                             info[0] = (byte)(imageCount);
-                            imageCount = (byte)(imageCount % 15 + 1);
+                            imageCount = (byte)(imageCount % 2 + 1);
                         }
                         BitConverter.GetBytes(dataleft).CopyTo(info, 1);
                         SendData(info);
 
                         while (dataleft > 0)
                         {
-                            int packetSize = dataleft + 1 > MaxPacketSize ? MaxPacketSize : dataleft + 1;
-                            byte[] rtdpPacket = new byte[packetSize];
-                            
+                            byte[] rtdpPacket;
+                           packetSize = dataleft + 1 > MaxPacketSize ? MaxPacketSize : dataleft + 1;
+                           
+                            rtdpPacket = new byte[packetSize];                            
                             rtdpPacket[0] = info[0];
                             Array.Copy(imageBytes, offset, rtdpPacket, 1, packetSize - 1);
 
