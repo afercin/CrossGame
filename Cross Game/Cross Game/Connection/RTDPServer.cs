@@ -181,16 +181,14 @@ namespace Cross_Game.Connection
 
         public void SendData(byte[] data)
         {
-            foreach (Sockets sockets in clientSockets.Values)
+            try
             {
-                try
-                {
+                foreach (Sockets sockets in clientSockets.Values)
                     SendBuffer(sockets.udpSocket, data);
-                }
-                catch
-                {
+            }
+            catch (InvalidOperationException)
+            {
 
-                }
             }
         }
 
