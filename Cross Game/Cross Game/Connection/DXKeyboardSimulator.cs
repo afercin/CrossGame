@@ -8,10 +8,12 @@ namespace Cross_Game.Connection
     {
         public static void SendKey(int key, Petition petition)
         {
-            int keycode = (int)Enum.Parse(typeof(DirectXKeyStrokes), ((Key)key).ToString());
-
-            Win32API.SendInput(new Input[]
+            try
             {
+                int keycode = (int)Enum.Parse(typeof(DirectXKeyStrokes), ((Key)key).ToString());
+
+                Win32API.SendInput(new Input[]
+                {
                 new Input
                 {
                     type = (int) DataManipulation.InputType.Keyboard,
@@ -26,7 +28,12 @@ namespace Cross_Game.Connection
                         }
                     }
                 }
-            });
+                });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         public enum DirectXKeyStrokes
@@ -196,56 +203,56 @@ namespace Cross_Game.Connection
             LWin = 0xDB,
             RWin = 0xDC,
             /* *
-                        DIK_NUMPADEQUALS = 0x8D,    // = on numeric keypad (NEC PC98) //
-                        DIK_PREVTRACK = 0x90,    // Previous Track (DIK_CIRCUMFLEX on Japanese keyboard) //
-                        DIK_AT = 0x91,    //                     (NEC PC98) //
-                        DIK_COLON = 0x92,    //                     (NEC PC98) //
-                        DIK_UNDERLINE = 0x93, //                     (NEC PC98) //
-                        DIK_KANJI = 0x94,   // (Japanese keyboard)            //
-                        DIK_STOP = 0x95,    //                     (NEC PC98) //
-                        DIK_AX = 0x96,    //                     (Japan AX) //
-                        DIK_UNLABELED = 0x97,    //                        (J3100) //
-                        DIK_NEXTTRACK = 0x99,    // Next Track //
-                        DIK_NUMPADENTER = 0x9C,    // Enter on numeric keypad //
-                        DIK_RCONTROL = 0x9D,
-                        DIK_MUTE = 0xA0,    // Mute //
-                        DIK_CALCULATOR = 0xA1,    // Calculator //
-                        DIK_PLAYPAUSE = 0xA2,    // Play / Pause //
-                        DIK_MEDIASTOP = 0xA4,    // Media Stop //
-                        DIK_VOLUMEDOWN = 0xAE,    // Volume - //
-                        DIK_VOLUMEUP = 0xB0,    // Volume + //
-                        DIK_WEBHOME = 0xB2,    // Web home //
-                        DIK_NUMPADCOMMA = 0xB3,    // , on numeric keypad (NEC PC98) //
-                        DIK_DIVIDE = 0xB5,    // / on numeric keypad //
-                        DIK_SYSRQ = 0xB7,
-                        DIK_RMENU = 0xB8,    // right Alt //
-                        DIK_PAUSE = 0xC5,    // Pause //
-                        DIK_HOME = 0xC7,    // Home on arrow keypad //
-                        DIK_UP = 0xC8,    // UpArrow on arrow keypad //
-                        DIK_PRIOR = 0xC9,    // PgUp on arrow keypad //
-                        DIK_LEFT = 0xCB,    // LeftArrow on arrow keypad //
-                        DIK_RIGHT = 0xCD,    // RightArrow on arrow keypad //
-                        DIK_END = 0xCF,    // End on arrow keypad //
-                        DIK_DOWN = 0xD0,    // DownArrow on arrow keypad //
-                        DIK_NEXT = 0xD1,    // PgDn on arrow keypad //
-                        DIK_INSERT = 0xD2,    // Insert on arrow keypad //
-                        DIK_DELETE = 0xD3,    // Delete on arrow keypad //
-                        DIK_LWIN = 0xDB,    // Left Windows key //
-                        DIK_RWIN = 0xDC,    // Right Windows key //
-                        DIK_APPS = 0xDD,    // AppMenu key //
-                        DIK_POWER = 0xDE,    // System Power //
-                        DIK_SLEEP = 0xDF,    // System Sleep //
-                        DIK_WAKE = 0xE3,    // System Wake //
-                        DIK_WEBSEARCH = 0xE5,    // Web Search //
-                        DIK_WEBFAVORITES = 0xE6,    // Web Favorites //
-                        DIK_WEBREFRESH = 0xE7,    // Web Refresh //
-                        DIK_WEBSTOP = 0xE8,    // Web Stop //
-                        DIK_WEBFORWARD = 0xE9,    // Web Forward //
-                        DIK_WEBBACK = 0xEA,    // Web Back //
-                        DIK_MYCOMPUTER = 0xEB,    // My Computer //
-                        DIK_MAIL = 0xEC,    // Mail //
-                        DIK_MEDIASELECT = 0xED    // Media Select 
-                        /* */
+            DIK_NUMPADEQUALS = 0x8D,    // = on numeric keypad (NEC PC98) //
+            DIK_PREVTRACK = 0x90,    // Previous Track (DIK_CIRCUMFLEX on Japanese keyboard) //
+            DIK_AT = 0x91,    //                     (NEC PC98) //
+            DIK_COLON = 0x92,    //                     (NEC PC98) //
+            DIK_UNDERLINE = 0x93, //                     (NEC PC98) //
+            DIK_KANJI = 0x94,   // (Japanese keyboard)            //
+            DIK_STOP = 0x95,    //                     (NEC PC98) //
+            DIK_AX = 0x96,    //                     (Japan AX) //
+            DIK_UNLABELED = 0x97,    //                        (J3100) //
+            DIK_NEXTTRACK = 0x99,    // Next Track //
+            DIK_NUMPADENTER = 0x9C,    // Enter on numeric keypad //
+            DIK_RCONTROL = 0x9D,
+            DIK_MUTE = 0xA0,    // Mute //
+            DIK_CALCULATOR = 0xA1,    // Calculator //
+            DIK_PLAYPAUSE = 0xA2,    // Play / Pause //
+            DIK_MEDIASTOP = 0xA4,    // Media Stop //
+            DIK_VOLUMEDOWN = 0xAE,    // Volume - //
+            DIK_VOLUMEUP = 0xB0,    // Volume + //
+            DIK_WEBHOME = 0xB2,    // Web home //
+            DIK_NUMPADCOMMA = 0xB3,    // , on numeric keypad (NEC PC98) //
+            DIK_DIVIDE = 0xB5,    // / on numeric keypad //
+            DIK_SYSRQ = 0xB7,
+            DIK_RMENU = 0xB8,    // right Alt //
+            DIK_PAUSE = 0xC5,    // Pause //
+            DIK_HOME = 0xC7,    // Home on arrow keypad //
+            DIK_UP = 0xC8,    // UpArrow on arrow keypad //
+            DIK_PRIOR = 0xC9,    // PgUp on arrow keypad //
+            DIK_LEFT = 0xCB,    // LeftArrow on arrow keypad //
+            DIK_RIGHT = 0xCD,    // RightArrow on arrow keypad //
+            DIK_END = 0xCF,    // End on arrow keypad //
+            DIK_DOWN = 0xD0,    // DownArrow on arrow keypad //
+            DIK_NEXT = 0xD1,    // PgDn on arrow keypad //
+            DIK_INSERT = 0xD2,    // Insert on arrow keypad //
+            DIK_DELETE = 0xD3,    // Delete on arrow keypad //
+            DIK_LWIN = 0xDB,    // Left Windows key //
+            DIK_RWIN = 0xDC,    // Right Windows key //
+            DIK_APPS = 0xDD,    // AppMenu key //
+            DIK_POWER = 0xDE,    // System Power //
+            DIK_SLEEP = 0xDF,    // System Sleep //
+            DIK_WAKE = 0xE3,    // System Wake //
+            DIK_WEBSEARCH = 0xE5,    // Web Search //
+            DIK_WEBFAVORITES = 0xE6,    // Web Favorites //
+            DIK_WEBREFRESH = 0xE7,    // Web Refresh //
+            DIK_WEBSTOP = 0xE8,    // Web Stop //
+            DIK_WEBFORWARD = 0xE9,    // Web Forward //
+            DIK_WEBBACK = 0xEA,    // Web Back //
+            DIK_MYCOMPUTER = 0xEB,    // My Computer //
+            DIK_MAIL = 0xEC,    // Mail //
+            DIK_MEDIASELECT = 0xED    // Media Select 
+            /* */
         }
     }
 }
