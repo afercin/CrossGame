@@ -2,6 +2,8 @@
 using Cross_Game.DataManipulation;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Input;
@@ -31,7 +33,9 @@ namespace Cross_Game.Windows
         private RTDPClient client;
         private WaitingWindow waitingWindow;
         private Timer framerate;
+        private System.Threading.Thread paint;
         private int frames;
+        private byte[] latestImage;
 
         public UserDisplay()
         {
@@ -39,6 +43,26 @@ namespace Cross_Game.Windows
             framerate = new Timer(1000);
             framerate.Elapsed += FrameRate_Tick;
             client = null;
+            latestImage = null;
+        }
+
+        private void PaintThread()
+        {
+            while(true)
+            {
+                Task.Run(() =>
+                {
+                    if (latestImage != null)
+                    {
+                        Dispatcher.Invoke(() => ClientDisplay.Source = Screen.BytesToScreenImage(latestImage));
+                    }                        
+                    else
+                    {
+                        //default img
+                    }
+                });
+                System.Threading.Thread.Sleep(1000 / 60);
+            }
         }
 
         private void FrameRate_Tick(object sender, ElapsedEventArgs e)
@@ -60,10 +84,14 @@ namespace Cross_Game.Windows
                 client.ImageBuilt -= Client_ImageBuilt;
                 client.CursorShapeChanged -= Client_CursorShapeChanged;
                 framerate.Stop();
+                paint.Abort();
             }
 
             frames = 0;
             framerate.Start();
+            paint = new System.Threading.Thread(PaintThread);
+            paint.IsBackground = true;
+            paint.Start();
 
             waitingWindow = new WaitingWindow();
             waitingWindow.WaitStopped += (s, a) => Dispatcher.Invoke(() => Close());
@@ -112,13 +140,10 @@ namespace Cross_Game.Windows
 
         private void Client_ImageBuilt(object sender, ImageBuiltEventArgs e)
         {
-            Dispatcher.Invoke(() =>
-            {
-                ClientDisplay.Source = Screen.BytesToScreenImage(e.Image);
-                frames++;
-                Console.WriteLine((DateTime.Now - time).TotalMilliseconds);
-                time = DateTime.Now;
-            });
+            latestImage = e.Image;
+            frames++;
+            Console.WriteLine((DateTime.Now - time).TotalMilliseconds);
+            time = DateTime.Now;
         }
 
         private void Client_CursorShapeChanged(object sender, CursorShangedEventArgs e) => Dispatcher.Invoke(() => ClientDisplay.Cursor = cursors[e.CursorShape]);
@@ -162,6 +187,7 @@ namespace Cross_Game.Windows
         private void Window_Closed(object sender, EventArgs e)
         {
             framerate.Dispose();
+            paint.Abort();
             client?.Stop();
             waitingWindow?.Close();
         }
