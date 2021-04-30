@@ -29,7 +29,7 @@ namespace Cross_Game.Windows
             {
                 server = new RTDPServer(3030, 3031);
                 server.MaxConnections = 1;
-                server.TimeRate = 1000 / 30;
+                server.TimeRate = 1000 / 45;
                 server.Start();
             }, () => server.Stop());
         }

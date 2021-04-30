@@ -39,7 +39,7 @@ namespace Cross_Game.DataManipulation
             byte[] data;
             using (Bitmap b = CaptureDesktop())
             {
-                using (Bitmap resizedImg = new Bitmap(b, 1280, 720))
+                using (Bitmap resizedImg = new Bitmap(b, 800, 450))
                 {
                     using (MemoryStream ms = new MemoryStream())
                     {
