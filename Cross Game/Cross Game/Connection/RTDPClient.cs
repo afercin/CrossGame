@@ -216,7 +216,7 @@ namespace Cross_Game.Connection
 
                     if (data[0] == 0x00) // Nuevo audio
                     {
-                        //audio?.PlayAudio(data);
+                        audio?.PlayAudio(data);
                     }
                     else if (data[0] < 0xFF) // Nueva imagen
                     {
