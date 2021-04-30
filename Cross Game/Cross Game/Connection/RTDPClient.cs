@@ -64,6 +64,7 @@ namespace Cross_Game.Connection
                         catch (ObjectDisposedException)
                         {
                             LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"Se ha cerrado la conexión mientras se intentaba conectar al servidor.");
+                            err = 5;
                         }
                     }
                 });
