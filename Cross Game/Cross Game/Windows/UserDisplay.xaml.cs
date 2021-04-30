@@ -76,8 +76,6 @@ namespace Cross_Game.Windows
 
         public void StartTransmission(int tcpPort, int udpPort, string remoteIP)
         {
-            Show();
-
             if (client != null && client.IsConnected)
             {
                 client.Stop();

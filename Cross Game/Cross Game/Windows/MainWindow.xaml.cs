@@ -25,11 +25,11 @@ namespace Cross_Game.Windows
             currentOption = Ordenadores;
             Ordenadores.Active = true;
 
-            WaitSlider.SetActions(() => 
+            WaitSlider.SetActions(() =>
             {
                 server = new RTDPServer(3030, 3031);
-                server.MaxConnections = 1;
-                server.TimeRate = 1000 / 45;
+                server.MaxConnections = 2;
+                server.TimeRate = 1000 / 60;
                 server.Start();
             }, () => server.Stop());
         }
@@ -41,7 +41,7 @@ namespace Cross_Game.Windows
             //var w = new WaitingWindow();
             //w.Show();
             //w.SetText("Reconectando con el servidor...");
-        }   
+        }
 
         private void OptionButton_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -64,6 +64,17 @@ namespace Cross_Game.Windows
                 case "Transmisión":
                     var display = new UserDisplay();
                     display.StartTransmission(3030, 3031, "127.0.0.1");
+                    try
+                    {
+                        display.Visibility = Visibility.Visible;
+                        Hide();
+                        display.ShowDialog();
+                        Show();
+                    }
+                    catch
+                    {
+
+                    }
                     break;
             }
         }
