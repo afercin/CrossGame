@@ -23,7 +23,7 @@ namespace Cross_Game.Connection
         private Socket petitionsSocket;
         private Socket dataSocket;
         private Dictionary<int, ScreenImage> images;
-        private int skipImage;
+        private byte skipImage;
 
         public RTDPClient(int tcpPort, int udpPort, string serverIP) : base()
         {
@@ -140,7 +140,7 @@ namespace Cross_Game.Connection
             images = new Dictionary<int, ScreenImage>();
             skipImage = 255;
 
-            for (int i = 1; i <= 2; i++)
+            for (int i = 1; i <= CacheImages; i++)
             {
                 images[i] = new ScreenImage(450000);
             }
@@ -219,7 +219,7 @@ namespace Cross_Game.Connection
                     }
                     else if (data[0] < 0xFF) // Nueva imagen
                     {
-                        int img = data[0];
+                        byte img = data[0];
                         if (dataSize == 5) // Se empieza a transmitir una nueva imagen
                         {
                             images[img].currentSize = 0;
@@ -227,10 +227,7 @@ namespace Cross_Game.Connection
                         }
                         else // Agregar buffer a la imagen correspondiente
                         {
-                            Task.Run(() =>
-                            {
-                                
-                            }); try
+                            try
                             {
                                 if (img != skipImage && images[img].AppendBuffer(data, 1, dataSize - 1, data[0] & 0x0F))
                                 {

@@ -78,6 +78,7 @@ namespace Cross_Game.Connection
         public bool IsConnected { get; protected set; }
 
         public const int MaxPacketSize = 65507;
+        protected const int CacheImages = 32;
         protected IPEndPoint serverEP;
         protected Audio audio;
 

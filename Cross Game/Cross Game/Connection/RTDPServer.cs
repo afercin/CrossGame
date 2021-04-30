@@ -216,7 +216,7 @@ namespace Cross_Game.Connection
                         lock (this)
                         {
                             info[0] = (byte)(imageCount);
-                            imageCount = (byte)(imageCount % 2 + 1);
+                            imageCount = (byte)(imageCount % CacheImages + 1);
                         }
                         BitConverter.GetBytes(dataleft).CopyTo(info, 1);
                         SendData(info);
