@@ -130,42 +130,42 @@ namespace Cross_Game.Windows
         private void CheckLogin(string email, string password, bool md5 = false)
         {
             if (email != watermakEmail && password != watermakPassword)
-                switch (DBConnection.CheckLogin(email, password, md5))
+            {
+                UserData currentUser = DBConnection.CheckLogin(email, password, md5);
+
+                if (currentUser == null)
                 {
-                    case -1:
-                        Error.Text = "Error de conexión.";
-                        Error.Visibility = Visibility.Visible;
-                        break;
-                    case 0:
-                        Error.Text = "Email o contraseña incorrectos.";
-                        Error.Visibility = Visibility.Visible;
-                        break;
-                    case 1:
-                        if (DBConnection.CurrentUser != null)
-                        {
-                            if (RememberMe.IsChecked == true)
-                            {
-                                if (!Directory.Exists(Path.GetDirectoryName(AutoLoginPath)))
-                                    Directory.CreateDirectory(Path.GetDirectoryName(AutoLoginPath));
-                                using (BinaryWriter bw = new BinaryWriter(File.Open(AutoLoginPath, FileMode.Create)))
-                                {
-                                    bw.Write(email);
-                                    bw.Write(md5 ? password : DBConnection.CreateMD5(password));
-                                }
-                            }
-
-                            DBConnection.CurrentUser.SyncLocalMachine();
-
-                            new MainWindow().Show();
-                            Close();
-                        }
-                        else
-                        {
-                            Error.Text = "Algo ha salido mal, vuelve a intentarlo.";
-                            Error.Visibility = Visibility.Visible;
-                        }
-                        break;
+                    Error.Text = "Error de conexión.";
+                    Error.Visibility = Visibility.Visible;
                 }
+                else if (currentUser.ID == 0)
+                {
+                    Error.Text = "Email o contraseña incorrectos.";
+                    Error.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    if (RememberMe.IsChecked == true)
+                    {
+                        if (!Directory.Exists(Path.GetDirectoryName(AutoLoginPath)))
+                            Directory.CreateDirectory(Path.GetDirectoryName(AutoLoginPath));
+                        using (BinaryWriter bw = new BinaryWriter(File.Open(AutoLoginPath, FileMode.Create)))
+                        {
+                            bw.Write(email);
+                            bw.Write(md5 ? password : DBConnection.CreateMD5(password));
+                        }
+                    }
+
+                    currentUser.SyncLocalMachine();
+                    var mainWindow = new MainWindow
+                    {
+                        CurrentUser = currentUser
+                    };
+                    mainWindow.Show();
+                    Close();
+                }
+            }
+                
         }
     }
 }

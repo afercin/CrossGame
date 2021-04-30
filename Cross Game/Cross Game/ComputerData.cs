@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Cross_Game
 {
-    public class PC
+    public class ComputerData
     {
         private string mac;
         private string localIP;

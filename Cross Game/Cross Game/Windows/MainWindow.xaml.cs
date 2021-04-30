@@ -12,8 +12,7 @@ namespace Cross_Game.Windows
     /// </summary>
     public partial class MainWindow : Window
     {
-        public string UserName { get => DBConnection.CurrentUser.Name; }
-        public string UserNumber { get => DBConnection.CurrentUser.Number.ToString(); }
+        public UserData CurrentUser { get; set; }
 
         private OptionButton currentOption;
         private RTDPServer server;
@@ -34,7 +33,26 @@ namespace Cross_Game.Windows
             }, () => server.Stop());
         }
 
-        private void Window_SourceInitialized(object sender, EventArgs e) => Header.SetWindowHandler(this);
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
+            Header.SetWindowHandler(this);
+
+            foreach (string mac in DBConnection.GetMyComputers(CurrentUser))
+                if (mac != CurrentUser.localMachine.MAC)
+                {
+                    try
+                    {
+                        var computer = new Computer(mac);
+                        computer.ComputerClicked += Computer_Clicked;
+
+                        ComputerPanel.Children.Add(computer);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                }
+        }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -79,6 +97,24 @@ namespace Cross_Game.Windows
             }
         }
 
+        private void Computer_Clicked(object sender, EventArgs e)
+        {
+            ComputerData pc = (sender as ComputerData);
+            try
+            {
+                var display = new UserDisplay();
+                display.StartTransmission(pc.Tcp, pc.Udp, pc.PublicIP == CurrentUser.localMachine.PublicIP ? pc.LocalIP : pc.PublicIP);
+                display.Visibility = Visibility.Visible;
+                Hide();
+                display.ShowDialog();
+            }
+            catch { }
+            finally
+            {
+                Show();
+            }
+        }
+
         private void WindowHeader_MenuButtonClick(object sender, ClickEventArgs e)
         {
             switch (e.PressedButton)
@@ -92,7 +128,7 @@ namespace Cross_Game.Windows
         private void MainWindow_Closed(object sender, EventArgs e)
         {
             server?.Stop();
-            DBConnection.LogOut();
+            DBConnection.LogOut(CurrentUser);
         }
     }
 }

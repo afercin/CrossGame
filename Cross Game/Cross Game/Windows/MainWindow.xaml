@@ -59,7 +59,13 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="30"/>
                 </Grid.RowDefinitions>
-                <controllers:MyComputers x:Name="MyComputers"/>
+                <Border Padding="5" Name="MyComputers">
+                    <StackPanel Name="ComputerPanel"
+                                Width="auto"
+                                Orientation="Horizontal" 
+                                CanVerticallyScroll="true"
+                                VerticalAlignment="Top"/>
+                </Border>
                 <!--local:TransmissionOptions x:Name="tOptions"/>
             <Button Name="Accept" Grid.Row="1" Margin="3 3 139 3" Style="{StaticResource FlatButtonStyle}" Width="130" HorizontalAlignment="Right" Click="Accept_Click">
                 <TextBlock Text="Aceptar"/>

@@ -63,7 +63,8 @@ namespace Cross_Game.Connection
                     ReceiveBuffer(tcpClientSocket, out byte[] buffer, out int bufferSize);
 
                     /*********************************************************/
-                    if (DBConnection.CheckLogin("afercin@gmail.com", "patata123") == 1)
+                    UserData checkUser = DBConnection.CheckLogin("afercin@gmail.com", "patata123");
+                    if (checkUser != null && checkUser.ID != 0)
                     {
                         LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"Cliente {clientAddress.Address.ToString()} aceptado, procediendo a establecer canal de comunicación.");
 

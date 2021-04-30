@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace Cross_Game
 {
-    class User
+    public class UserData
     {
         public int ID { get; private set; }
         public string Name { get; private set; }
         public int Number { get; private set; }
 
-        public PC localMachine { get; set; }
+        public ComputerData localMachine { get; set; }
 
-        public User(int id, string name, int number)
+        public UserData(int id, string name, int number)
         {
             ID = id;
             Name = name;
@@ -25,13 +25,13 @@ namespace Cross_Game
         public void SyncLocalMachine()
         {
             ConnectionUtils.GetComputerNetworkInfo(out string localIP, out string publicIP, out string macAddress);
-            localMachine = new PC()
+            localMachine = new ComputerData()
             {
                 LocalIP = localIP,
                 PublicIP = publicIP,
                 MAC = macAddress
             };
-            DBConnection.SyncLocalMachinerData(localMachine);
+            DBConnection.SyncLocalMachinerData(this);
         }
     }
 }

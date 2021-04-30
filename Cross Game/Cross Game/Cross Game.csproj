@@ -111,16 +111,13 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="DataManipulation\Win32API.cs" />
-    <Compile Include="PC.cs" />
+    <Compile Include="ComputerData.cs" />
     <Compile Include="Connection\RTDPClient.cs" />
     <Compile Include="Connection\RTDPEvents.cs" />
     <Compile Include="Connection\RTDProtocol.cs" />
     <Compile Include="Connection\RTDPServer.cs" />
     <Compile Include="Controllers\Computer.xaml.cs">
       <DependentUpon>Computer.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Controllers\MyComputers.xaml.cs">
-      <DependentUpon>MyComputers.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controllers\OptionButton.xaml.cs">
       <DependentUpon>OptionButton.xaml</DependentUpon>
@@ -132,7 +129,7 @@
       <DependentUpon>WindowHeader.xaml</DependentUpon>
     </Compile>
     <Compile Include="CrossGameEvents.cs" />
-    <Compile Include="User.cs" />
+    <Compile Include="UserData.cs" />
     <Compile Include="Windows\WaitingWindow.xaml.cs">
       <DependentUpon>WaitingWindow.xaml</DependentUpon>
     </Compile>
@@ -163,10 +160,6 @@
       <DependentUpon>NumericUpDown.xaml</DependentUpon>
     </Compile>
     <Page Include="Controllers\Computer.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Controllers\MyComputers.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

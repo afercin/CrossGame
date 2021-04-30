@@ -14,23 +14,22 @@ namespace Cross_Game.Controllers
     /// </summary>
     public partial class Computer : UserControl
     {
+        public event EventHandler ComputerClicked;
+
         private readonly Brush red = new SolidColorBrush(Color.FromRgb(240, 30, 30));
         private readonly Brush blue = new SolidColorBrush(Color.FromRgb(50, 157, 201));
         private readonly Brush yellow = new SolidColorBrush(Color.FromRgb(240, 30, 30));
         private readonly Brush gray = new SolidColorBrush(Color.FromRgb(224, 224, 224));
 
-        public readonly PC pc;
-        private bool localMachine;
+        public readonly ComputerData pc;
         private bool editArea;
         private PackIconMaterialKind currentIcon;
 
-        public Computer(string _MAC = "")
+        public Computer(string _MAC)
         {
-
             InitializeComponent();
-            pc = new PC();
+            pc = new ComputerData();
             pc.MAC = _MAC;
-            localMachine = string.IsNullOrEmpty(pc.MAC);
 
             UpdateStatus();
         }
@@ -41,15 +40,11 @@ namespace Cross_Game.Controllers
             {
                 UpdateStatus();
                 if (pc.N_connections < pc.Max_connections)
-                {
-                    var display = new UserDisplay();
-                    display.StartTransmission(pc.Tcp, pc.Udp, pc.PublicIP == DBConnection.CurrentUser.localMachine.PublicIP ? pc.LocalIP : pc.PublicIP);
-                }
+                    ComputerClicked.Invoke(pc, new EventArgs());
             }
             else if (new EditComputerParams().Show(this) == true)
             {
                 DBConnection.UpdateComputerInfo(this);
-                ComputerName.Text += (localMachine ? " (local)" : "");
             }
             Icon.Kind = currentIcon;
             editArea = false;
@@ -62,8 +57,6 @@ namespace Cross_Game.Controllers
 
             if (pc.Status != -1)
             {
-                ComputerName.Text += (localMachine ? " (local)" : "");
-
                 Connections.Text = pc.Status == 1 ? $"{pc.N_connections}/{pc.Max_connections}" : "";
                 if (pc.N_connections == 0)
                 {
