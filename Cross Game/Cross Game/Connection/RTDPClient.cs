@@ -23,7 +23,7 @@ namespace Cross_Game.Connection
         private Socket petitionsSocket;
         private Socket dataSocket;
         private Dictionary<int, ScreenImage> images;
-        private byte skipImage;
+        private int skipImage;
 
         public RTDPClient(int tcpPort, int udpPort, string serverIP) : base()
         {
@@ -140,6 +140,11 @@ namespace Cross_Game.Connection
             images = new Dictionary<int, ScreenImage>();
             skipImage = 255;
 
+            for (int i = 1; i <= 15; i++)
+            {
+                images[i] = new ScreenImage(400000);
+            }
+
             dataSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             dataSocket.Bind(clientEP);
 
@@ -208,58 +213,53 @@ namespace Cross_Game.Connection
 
                     dataSize = dataSocket.Receive(data, MaxPacketSize, 0);
 
-                    new Task(() => ManageData(data, dataSize)).Start();
+                    if (data[0] == 0x00) // Nuevo audio
+                    {
+                        lock (audio)
+                            audio?.PlayAudio(data);
+                    }
+                    else if (data[0] < 0xFF) // Nueva imagen
+                    {
+                        int img = data[0];
+                        if (dataSize == 5) // Se empieza a transmitir una nueva imagen
+                        {
+                            images[img].currentSize = 0;
+                            images[img].imageSize = BitConverter.ToInt32(data, 1);
+                        }
+                        else // Agregar buffer a la imagen correspondiente
+                        {
+                            try
+                            {
+                                if (img != skipImage && images[img].AppendBuffer(data, 1, dataSize - 1))
+                                {
+                                    byte[] i = images[img].ImageBytes;
+                                    Array.Resize(ref i, images[img].imageSize);
+                                    ImageBuilt.Invoke(this, new ImageBuiltEventArgs(i));
+                                    if (img == (skipImage + 5) % 254)
+                                        skipImage = 255;
+                                }
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"No ha llegado a tiempo el paquete que inicializaba el fotograma nº{img}");
+                                skipImage = img;
+                            }
+                            catch (ArgumentException)
+                            {
+                                LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"No ha llegado a tiempo el paquete que inicializaba el fotograma nº{img}");
+                                skipImage = img;
+                            }
+                        }
+                    }
+                    else // Nueva forma del cursor
+                    {
+                        CursorShapeChanged.Invoke(this, new CursorShangedEventArgs((CursorShape)data[1]));
+                    }
                 }
             }
             catch (SocketException e)
             {
                 LogUtils.AppendLogError(LogUtils.ClientConnectionLog, e.Message + $" ({e.SocketErrorCode})");
-            }
-        }
-
-        private void ManageData(byte[] data, int dataSize)
-        {
-            if (data[0] == 0x00) // Nuevo audio
-            {
-                lock(audio)
-                    audio?.PlayAudio(data);
-            }
-            else if (data[0] < 0xFF) // Nueva imagen
-            {
-                if (dataSize == 5) // Se empieza a transmitir una nueva imagen
-                {
-                    images[data[0]] = new ScreenImage(BitConverter.ToInt32(data, 1));
-                }
-                else // Agregar buffer a la imagen correspondiente
-                {
-                    lock (images)
-                    {
-                        byte img = data[0];
-                        try
-                        {
-                            if (img != skipImage && images[img].AppendBuffer(data, 1, dataSize - 1))
-                            {
-                                ImageBuilt.Invoke(this, new ImageBuiltEventArgs(images[img].ImageBytes));
-                                if (img == (skipImage + 5) % 254)
-                                    skipImage = 255;
-                            }
-                        }
-                        catch (KeyNotFoundException)
-                        {
-                            LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"No ha llegado a tiempo el paquete que inicializaba el fotograma nº{img}");
-                            skipImage = img;
-                        }
-                        catch (ArgumentException)
-                        {
-                            LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"No ha llegado a tiempo el paquete que inicializaba el fotograma nº{img}");
-                            skipImage = img;
-                        }
-                    }
-                }
-            }
-            else // Nueva forma del cursor
-            {
-                CursorShapeChanged.Invoke(this, new CursorShangedEventArgs((CursorShape)data[1]));
             }
         }
 
@@ -312,8 +312,8 @@ namespace Cross_Game.Connection
         {
             public byte[] ImageBytes { get; set; }
 
-            private int imageSize;
-            private int currentSize;
+            public int imageSize;
+            public int currentSize;
 
             public ScreenImage(int size)
             {
@@ -326,7 +326,6 @@ namespace Cross_Game.Connection
             {
                 Array.Copy(buffer, offset, ImageBytes, currentSize, bufferSize);
                 currentSize += bufferSize;
-
                 return currentSize == imageSize;
             }
         }
