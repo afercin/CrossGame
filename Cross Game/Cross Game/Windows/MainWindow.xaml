@@ -36,23 +36,25 @@
                 <RowDefinition Height="30"/>
             </Grid.RowDefinitions>
             <controllers:WindowHeader x:Name="Header"
-                                  HeaderText="Cross Game"
-                                  Grid.Row="0"
-                                  Grid.ColumnSpan="2"
-                                  MenuButtonClick="WindowHeader_MenuButtonClick"/>
+                                      HeaderText="Cross Game"
+                                      Grid.Row="0"
+                                      Grid.ColumnSpan="2"
+                                      MaximizeButton="True"
+                                      MinimizeButton="True"
+                                      MenuButtonClick="WindowHeader_MenuButtonClick"/>
 
             <StackPanel Grid.Row="1"
-                    Grid.Column="0"
-                    Margin="6,0,0,0">
+                        Grid.Column="0"
+                        Margin="6,0,0,0">
                 <controllers:OptionButton x:Name="Ordenadores" MouseLeftButtonDown="OptionButton_MouseLeftButtonDown"/>
                 <controllers:OptionButton x:Name="Amigos" MouseLeftButtonDown="OptionButton_MouseLeftButtonDown"/>
                 <controllers:OptionButton x:Name="Transmisión" MouseLeftButtonDown="OptionButton_MouseLeftButtonDown"/>
             </StackPanel>
 
             <Grid Grid.Row="1" 
-              Grid.Column="1" 
-              Background="#292728"
-              Margin="0 0 3 3">
+                  Grid.Column="1" 
+                  Background="#292728"
+                  Margin="0 0 3 3">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="30"/>
@@ -67,16 +69,16 @@
             </Button-->
             </Grid>
             <StackPanel Grid.Row="2"
-                    Orientation="Horizontal"
-                    VerticalAlignment="Center"
-                    HorizontalAlignment="Center">
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center">
 
                 <Ellipse Width="8"
-                     Height="8"
-                     Margin="-10 3 2 0"
-                     Stroke="Black"
-                     StrokeThickness="1"
-                     Fill="Green"/>
+                         Height="8"
+                         Margin="-10 3 2 0"
+                         Stroke="Black"
+                         StrokeThickness="1"
+                         Fill="Green"/>
 
                 <TextBlock Text="{Binding UserName, ElementName=mainWindow}" Foreground="#E0E0E0"/>
                 <TextBlock Text="#" Foreground="Gray"/>
@@ -84,8 +86,8 @@
 
             </StackPanel>
             <Grid Grid.Row="2"
-              Grid.Column="1"
-              HorizontalAlignment="Left">
+                  Grid.Column="1"
+                  HorizontalAlignment="Left">
                 <StackPanel Orientation="Horizontal" >
                     <TextBlock Text="Modo servidor:"
                                Margin="0 0 5 0"

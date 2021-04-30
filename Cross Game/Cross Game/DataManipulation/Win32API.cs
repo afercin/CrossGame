@@ -40,7 +40,7 @@ namespace Cross_Game.DataManipulation
         MONITOR_DEFAULTTONEAREST = 0x00000002
     }
     /// <summary>
-    /// The RECT structure defines a rectangle by the coordinates of its upper-left and lower-right corners.
+    /// Defines a rectangle by the coordinates of its upper-left and lower-right corners.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     struct RECT
