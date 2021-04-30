@@ -31,7 +31,8 @@ namespace Cross_Game.Connection
 
         public override void Start()
         {
-            clientSockets = new Dictionary<string, Sockets>();
+            if (!IsConnected || NClients == 0)
+                clientSockets = new Dictionary<string, Sockets>();
 
             listenThread = new Thread(ConnectionThread);
             listenThread.IsBackground = true;
@@ -49,7 +50,7 @@ namespace Cross_Game.Connection
 
             listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             listenSocket.Bind(serverEP);
-            listenSocket.Listen(MaxConnections);
+            listenSocket.Listen(MaxConnections - NClients);
             try
             {
                 while (NClients < MaxConnections) // diseñar alguna forma de recibir clientes permanentemente
@@ -68,7 +69,7 @@ namespace Cross_Game.Connection
 
                         SendBuffer(tcpClientSocket, new byte[] { Convert.ToByte(Petition.ConnectionAccepted) });
 
-                        if (!IsConnected)
+                        if (NClients == 0)
                             Init();
 
                         SendWaveFormat(tcpClientSocket, new byte[] { 0 }); // TODO: Enviar waveformat
@@ -169,6 +170,11 @@ namespace Cross_Game.Connection
             {
                 LogUtils.AppendLogText(LogUtils.ServerConnectionLog, "Se han desconectado todos los clientes, reiniciando el servidor...");
                 Stop();
+                Start();
+            }
+            else if (NClients == MaxConnections - 1)
+            {
+                LogUtils.AppendLogText(LogUtils.ServerConnectionLog, "Se han desconectado un cliente, volviendo a pedir clientes...");
                 Start();
             }
         }
