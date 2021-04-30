@@ -17,7 +17,6 @@
         Title="MainWindow" Height="450" Width="800" 
         MinHeight="282"
         Name="mainWindow"
-        Loaded="Window_Loaded"    
         SourceInitialized="Window_SourceInitialized"
         Closed="MainWindow_Closed">
     <Window.Resources>
@@ -86,9 +85,9 @@
                          StrokeThickness="1"
                          Fill="Green"/>
 
-                <TextBlock Text="{Binding UserName, ElementName=mainWindow}" Foreground="#E0E0E0"/>
+                <TextBlock Text="patata" Name="UserName" Foreground="#E0E0E0"/>
                 <TextBlock Text="#" Foreground="Gray"/>
-                <TextBlock Text="{Binding UserNumber, ElementName=mainWindow}" Foreground="#E0E0E0"/>
+                <TextBlock Text="1234" Name="UserNumber" Foreground="#E0E0E0"/>
 
             </StackPanel>
             <Grid Grid.Row="2"
