@@ -14,8 +14,9 @@
         Background="Transparent"
         ResizeMode="CanResizeWithGrip"
         WindowStartupLocation="CenterScreen"        
-        Title="MainWindow" Height="450" Width="800" 
-        MinHeight="282"
+        Title="MainWindow"
+        MinWidth="833" MinHeight="450"
+        Width="833" Height="450" 
         Name="mainWindow"
         SourceInitialized="Window_SourceInitialized"
         Closed="MainWindow_Closed">
@@ -54,18 +55,17 @@
                   Grid.Column="1" 
                   Background="#292728"
                   Margin="0 0 3 3">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="30"/>
-                </Grid.RowDefinitions>
-
-                <Border Padding="5" Name="MyComputers">
-                    <StackPanel Name="ComputerPanel"
+                <ScrollViewer Name="MyComputers"
+                              Padding="5" 
+                              HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Auto">
+                    <WrapPanel  Name="ComputerPanel"
                                 Width="auto"
+                                Height="auto"
                                 Orientation="Horizontal" 
-                                CanVerticallyScroll="true"
                                 VerticalAlignment="Top"/>
-                </Border>
+                </ScrollViewer>
+                
                 <!--local:TransmissionOptions x:Name="tOptions"/>
             <Button Name="Accept" Grid.Row="1" Margin="3 3 139 3" Style="{StaticResource FlatButtonStyle}" Width="130" HorizontalAlignment="Right" Click="Accept_Click">
                 <TextBlock Text="Aceptar"/>
