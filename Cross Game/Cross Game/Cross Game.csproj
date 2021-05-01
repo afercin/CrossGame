@@ -137,9 +137,9 @@
       <DependentUpon>CustomMessageBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="DataManipulation\Audio.cs" />
-    <Compile Include="Connection\DXKeyboardSimulator.cs" />
+    <Compile Include="Connection\DXKeyboardSimulator.cs" />    
     <Compile Include="Connection\MouseSimulator.cs" />
-    <Compile Include="DataManipulation\SavingWaveProvider.cs" />
+	<Compile Include="DataManipulation\SavingWaveProvider.cs" />
     <Compile Include="DataManipulation\Screen.cs" />
     <Compile Include="DBConnection.cs" />
     <Compile Include="CrossGameExceptions.cs" />

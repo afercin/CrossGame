@@ -1,7 +1,5 @@
 ﻿using Cross_Game.DataManipulation;
 using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace Cross_Game.Connection
 {
@@ -18,17 +16,12 @@ namespace Cross_Game.Connection
             if (!Win32API.GetCursorPos(out POINT currentMousePosition))
                 currentMousePosition = new POINT { x = 0, y = 0 };
 
-            mouse_event
-                   ((int)value,
-                    currentMousePosition.x,
-                    currentMousePosition.y,
-                    delta,
-                    0)
-                   ;
-
+            Win32API.mouse_event((int)value,
+                                 currentMousePosition.x,
+                                 currentMousePosition.y,
+                                 delta,
+                                 0);
         }
-        [DllImport("user32.dll")]
-        private static extern void mouse_event(int dwFlags, int dx, int dy, int dwData, int dwExtraInfo);
 
     }
 }
