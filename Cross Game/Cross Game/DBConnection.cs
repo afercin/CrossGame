@@ -137,10 +137,11 @@ namespace Cross_Game
             currentMachine.Name = Environment.MachineName;
             currentMachine.Max_connections = 1;
             currentMachine.N_connections = 0;
+            currentMachine.Status = 1;
             if (OpenConnection())
             {
                 MySqlDataReader dataReader = Query(
-                    $"SELECT TCP, UDP, name, n_connections, max_connections, FPS " +
+                    $"SELECT TCP, UDP, name, max_connections, FPS " +
                     $"FROM computers " +
                     $"WHERE MAC = '{currentMachine.MAC}' " +
                     $"AND owner = '{currentUser.ID}'"
@@ -151,7 +152,6 @@ namespace Cross_Game
                     currentMachine.Tcp = (int)dataReader["TCP"];
                     currentMachine.Udp = (int)dataReader["UDP"];
                     currentMachine.Name = (string)dataReader["name"];
-                    currentMachine.N_connections = (int)dataReader["n_connections"];
                     currentMachine.Max_connections = (int)dataReader["max_connections"];
                     currentMachine.FPS = (int)dataReader["fps"];
 
@@ -166,6 +166,7 @@ namespace Cross_Game
                             $"('{currentMachine.MAC}', '{currentMachine.LocalIP}', '{currentMachine.PublicIP}', {currentMachine.Tcp}, {currentMachine.Udp}, '{currentMachine.Name}', " +
                             $"{currentMachine.N_connections}, {currentMachine.Max_connections}, {currentMachine.Status}, {currentUser.ID}, {currentMachine.FPS})");
                 }
+
                 CloseConnection();
 
                 if (!newComputer)
