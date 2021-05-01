@@ -1,5 +1,6 @@
 ﻿using Cross_Game.Controllers;
 using MySql.Data.MySqlClient;
+using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
@@ -131,7 +132,7 @@ namespace Cross_Game
         {
             currentUser.localMachine.Tcp = 3030;
             currentUser.localMachine.Udp = 3031;
-            currentUser.localMachine.Name = currentUser.localMachine.PublicIP;
+            currentUser.localMachine.Name = Environment.MachineName;
             currentUser.localMachine.Max_connections = 1;
             currentUser.localMachine.N_connections = 0;
             if (OpenConnection())
