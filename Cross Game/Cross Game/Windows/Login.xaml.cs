@@ -53,7 +53,7 @@ namespace Cross_Game.Windows
                 DragMove();
         }
 
-        private void TextBlock_MouseDown(object sender, MouseButtonEventArgs e) => Process.Start("http://localhost/codeigniter3/register");
+        private void TextBlock_MouseDown(object sender, MouseButtonEventArgs e) => Process.Start("http://crossgame.sytes.net/myaccount/register");
 
         private void Button_Click(object sender, RoutedEventArgs e) => CheckLogin(Email.Text, Password.Password);
 

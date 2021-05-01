@@ -2,6 +2,7 @@
 using Cross_Game.Controllers;
 using Cross_Game.DataManipulation;
 using System;
+using System.Timers;
 using System.Windows;
 using System.Windows.Input;
 
@@ -16,6 +17,7 @@ namespace Cross_Game.Windows
 
         private OptionButton currentOption;
         private RTDPServer server;
+        //private Timer updateInfo;
 
         public MainWindow()
         {
@@ -23,6 +25,9 @@ namespace Cross_Game.Windows
             InitializeComponent();
             currentOption = Ordenadores;
             Ordenadores.Active = true;
+            //updateInfo = new Timer();
+            //updateInfo.Elapsed += (s, e) => { };
+            //updateInfo.Start();
         }
 
         private void Window_SourceInitialized(object sender, EventArgs e)
