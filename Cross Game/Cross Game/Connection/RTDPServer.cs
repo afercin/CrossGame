@@ -163,6 +163,9 @@ namespace Cross_Game.Connection
                 }
             }
 
+            DXKeyboardSimulator.ReleaseAllKeys();
+            MouseSimulator.ReleaseAllClicks();
+
             Computer.N_connections = 0;
             Computer.Status = 0;
             DBConnection.UpdateComputerInfo(Computer);

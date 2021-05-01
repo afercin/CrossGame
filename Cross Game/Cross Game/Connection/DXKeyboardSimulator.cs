@@ -6,11 +6,17 @@ namespace Cross_Game.Connection
 {
     public class DXKeyboardSimulator
     {
+        private static bool[] pressed = new bool[0xFF];
         public static void SendKey(int key, Petition petition)
         {
             try
             {
-                int keycode = (int)Enum.Parse(typeof(DirectXKeyStrokes), ((Key)key).ToString());
+                DirectXKeyStrokes keycode = (DirectXKeyStrokes)Enum.Parse(typeof(DirectXKeyStrokes), ((Key)key).ToString());
+
+                if (pressed[(int)DirectXKeyStrokes.LeftCtrl] && pressed[(int)DirectXKeyStrokes.RightAlt] && (Key)key == Key.System)
+                    keycode = DirectXKeyStrokes.LeftCtrl;
+
+                pressed[(int)keycode] = petition == Petition.KeyboardKeyDown;
 
                 Win32API.SendInput(new Input[]
                 {
@@ -34,6 +40,13 @@ namespace Cross_Game.Connection
             {
                 Console.WriteLine(e.Message);
             }
+        }
+
+        public static void ReleaseAllKeys()
+        {
+            foreach(int key in Enum.GetValues(typeof(DirectXKeyStrokes)))
+                if (pressed[key])
+                    SendKey(key, Petition.KeyboardKeyUp);
         }
 
         public enum DirectXKeyStrokes
@@ -198,10 +211,12 @@ namespace Cross_Game.Connection
             Prior = PageUp,
             Next = PageDown,
             System = LeftAlt,
+
             RightCtrl = 0x9D,
             RightAlt = 0xB8,
             LWin = 0xDB,
             RWin = 0xDC,
+
             /* *
             DIK_NUMPADEQUALS = 0x8D,    // = on numeric keypad (NEC PC98) //
             DIK_PREVTRACK = 0x90,    // Previous Track (DIK_CIRCUMFLEX on Japanese keyboard) //
