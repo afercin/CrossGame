@@ -1,9 +1,7 @@
 ﻿using Cross_Game.Connection;
 using Cross_Game.Controllers;
-using Cross_Game.DataManipulation;
 using System;
 using System.Collections.Generic;
-using System.Timers;
 using System.Windows;
 using System.Windows.Input;
 
@@ -25,6 +23,7 @@ namespace Cross_Game.Windows
             InitializeComponent();
 
             computerList = new List<Computer>();
+            server = null;
 
             currentOption = Ordenadores;
             Ordenadores.Active = true;
@@ -41,9 +40,13 @@ namespace Cross_Game.Windows
             {
                 CurrentUser.SyncLocalMachine();
 
-                server = new RTDPServer(3030, 3031);
+                server = new RTDPServer();
                 server.Start(CurrentUser.localMachine);
-            }, () => server.Stop());
+            }, () =>
+            {
+                server.Stop();
+                server = null;
+            });
 
             foreach (string mac in DBConnection.GetMyComputers(CurrentUser))
                 if (mac != CurrentUser.localMachine.MAC)
@@ -83,7 +86,7 @@ namespace Cross_Game.Windows
                 case "Amigos": SyncData(); break;
                 case "Transmisión":
                     var display = new UserDisplay();
-                    display.StartTransmission(3030, 3031, "127.0.0.1");
+                    display.StartTransmission(CurrentUser.localMachine);
                     try
                     {
                         display.Visibility = Visibility.Visible;
@@ -114,7 +117,7 @@ namespace Cross_Game.Windows
             try
             {
                 var display = new UserDisplay();
-                display.StartTransmission(pc.Tcp, pc.Udp, pc.PublicIP == CurrentUser.localMachine.PublicIP ? pc.LocalIP : pc.PublicIP);
+                display.StartTransmission(pc);
                 display.Visibility = Visibility.Visible;
                 Hide();
                 display.ShowDialog();

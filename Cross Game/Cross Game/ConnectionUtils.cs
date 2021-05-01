@@ -20,7 +20,7 @@ namespace Cross_Game
             mac = GetMacByIP(localIP);
         }
 
-        private static string GetPublicIPAddress()
+        public static string GetPublicIPAddress()
         {
             if (!InternetConnection())
                 throw new InternetConnectionException("You has not internet connection");

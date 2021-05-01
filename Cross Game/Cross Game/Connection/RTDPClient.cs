@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -16,30 +15,31 @@ namespace Cross_Game.Connection
         public event CursorShangedEventHandler CursorShapeChanged;
         public event ImageBuiltEventHandler ImageBuilt;
         public event ReconectingEventHandler Reconnecting;
-
-        private readonly IPEndPoint clientEP;
+        
         private Thread receivePetitionThread;
         private Thread receiveDataThread;
         private Socket petitionsSocket;
         private Socket dataSocket;
         private Dictionary<int, ScreenImage> images;
         private byte skipImage;
+        private string serverIP;
 
-        public RTDPClient(int tcpPort, int udpPort, string serverIP) : base()
+        public RTDPClient() : base()
         {
-            clientEP = new IPEndPoint(IPAddress.Any, udpPort);
-            serverEP = new IPEndPoint(IPAddress.Parse(serverIP), tcpPort);
         }
 
-        public void Start()
+        public override void Start(ComputerData computerData)
         {
             int err = 0;
             bool connected = false;
 
-            LogUtils.AppendLogHeader(LogUtils.ClientConnectionLog);
-            LogUtils.AppendLogText(LogUtils.ClientConnectionLog, $"Intentando conectar con {serverEP.Address.ToString()}:{serverEP.Port}");
+            Computer = computerData;
+            serverIP = Computer.PublicIP == ConnectionUtils.GetPublicIPAddress() ? Computer.LocalIP : Computer.PublicIP;
 
-            if (ConnectionUtils.Ping(serverEP.Address.ToString()))
+            LogUtils.AppendLogHeader(LogUtils.ClientConnectionLog);
+            LogUtils.AppendLogText(LogUtils.ClientConnectionLog, $"Intentando conectar con {serverIP}:{Computer.Tcp}");
+
+            if (ConnectionUtils.Ping(serverIP))
             {
                 Thread connectedThread = new Thread(() =>
                 {
@@ -51,7 +51,7 @@ namespace Cross_Game.Connection
                         LogUtils.AppendLogText(LogUtils.ClientConnectionLog, $"Intento de conexión {err + 1} de 5...");
                         try
                         {
-                            petitionsSocket.Connect(serverEP);
+                            petitionsSocket.Connect(new IPEndPoint(IPAddress.Parse(serverIP), Computer.Tcp));
                             connected = true;
                         }
                         catch (SocketException e)
@@ -148,7 +148,7 @@ namespace Cross_Game.Connection
             }
 
             dataSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            dataSocket.Bind(clientEP);
+            dataSocket.Bind(new IPEndPoint(IPAddress.Parse(serverIP), Computer.Udp));
 
             receivePetitionThread = new Thread(() => ReceivePetition(petitionsSocket));
             receivePetitionThread.IsBackground = true;
@@ -182,7 +182,8 @@ namespace Cross_Game.Connection
             {
                 LogUtils.AppendLogText(LogUtils.ClientConnectionLog, "Reiniciando conexión...");
                 Stop();
-                Start();
+                DBConnection.UpdateComputerInfo(Computer);
+                Start(Computer);
             }
         }
 

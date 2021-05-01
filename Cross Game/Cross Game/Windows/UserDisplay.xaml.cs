@@ -48,7 +48,7 @@ namespace Cross_Game.Windows
 
         private void PaintThread()
         {
-            while(true)
+            while (true)
             {
                 Task.Run(() =>
                 {
@@ -74,7 +74,7 @@ namespace Cross_Game.Windows
             });
         }
 
-        public void StartTransmission(int tcpPort, int udpPort, string remoteIP)
+        public void StartTransmission(ComputerData serverComputer)
         {
             if (client != null && client.IsConnected)
             {
@@ -96,12 +96,12 @@ namespace Cross_Game.Windows
             waitingWindow.WaitEnd += (s, a) => { if (!client.IsConnected) Dispatcher.Invoke(() => Close()); };
             waitingWindow.Wait(() =>
             {
-                client = new RTDPClient(tcpPort, udpPort, remoteIP);
+                client = new RTDPClient();
                 client.ImageBuilt += Client_ImageBuilt;
                 client.CursorShapeChanged += Client_CursorShapeChanged;
                 client.Reconnecting += Client_Reconnecting;
-                client.Start();
-            }, $"Conectando con {remoteIP}...");
+                client.Start(serverComputer);
+            }, $"Conectando con {serverComputer.Name}...");
         }
 
         private void Client_Reconnecting(object sender, ReconnectingEventArgs e)

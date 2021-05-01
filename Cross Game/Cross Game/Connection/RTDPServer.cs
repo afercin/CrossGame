@@ -12,8 +12,6 @@ namespace Cross_Game.Connection
     class RTDPServer : RTDProtocol
     {
         private Dictionary<string, Sockets> clientSockets;
-        private readonly int udpPort;
-        private ComputerData currentComputer;
         private Thread listenThread;
         private Thread CaptureScreen;
         private Thread CheckCursorShape;
@@ -21,22 +19,21 @@ namespace Cross_Game.Connection
         private int frameRate;
 
 
-        public RTDPServer(int tcpPort, int udpPort) : base()
+        public RTDPServer() : base()
         {
-            serverEP = new IPEndPoint(IPAddress.Any, tcpPort);
-            this.udpPort = udpPort;
         }
 
-        public void Start(ComputerData computerData)
+        public override void Start(ComputerData computerData)
         {
             if (!IsConnected)
                 clientSockets = new Dictionary<string, Sockets>();
 
-            currentComputer = computerData;
-            frameRate = 1000 / currentComputer.FPS;
+            Computer = computerData;
+            frameRate = 1000 / Computer.FPS;
 
-            currentComputer.Status = 1;
-            DBConnection.UpdateComputerInfo(currentComputer);
+            Computer.Status = 1;
+            Computer.N_connections = 0;
+            DBConnection.UpdateComputerInfo(Computer);
 
             listenThread = new Thread(ConnectionThread);
             listenThread.IsBackground = true;
@@ -50,14 +47,14 @@ namespace Cross_Game.Connection
             IPEndPoint clientAddress;
             Thread receivePetitionThread;
             LogUtils.AppendLogHeader(LogUtils.ServerConnectionLog);
-            LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"Comenzando a recibir clientes por el puerto {serverEP.Port}");
+            LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"Comenzando a recibir clientes por el puerto {Computer.Tcp}");
 
             listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            listenSocket.Bind(serverEP);
-            listenSocket.Listen(currentComputer.Max_connections - currentComputer.N_connections);
+            listenSocket.Bind(new IPEndPoint(IPAddress.Any, Computer.Tcp));
+            listenSocket.Listen(Computer.Max_connections - Computer.N_connections);
             try
             {
-                while (currentComputer.N_connections < currentComputer.Max_connections) // diseñar alguna forma de recibir clientes permanentemente
+                while (Computer.N_connections < Computer.Max_connections) // diseñar alguna forma de recibir clientes permanentemente
                 {
                     tcpClientSocket = listenSocket.Accept();
                     clientAddress = tcpClientSocket.RemoteEndPoint as IPEndPoint;
@@ -74,13 +71,13 @@ namespace Cross_Game.Connection
 
                         SendBuffer(tcpClientSocket, new byte[] { Convert.ToByte(Petition.ConnectionAccepted) });
 
-                        if (currentComputer.N_connections == 0)
+                        if (Computer.N_connections == 0)
                             Init();
 
                         SendWaveFormat(tcpClientSocket, new byte[] { 0 }); // TODO: Enviar waveformat
 
                         udpClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                        udpClientSocket.Connect(new IPEndPoint(clientAddress.Address, udpPort));
+                        udpClientSocket.Connect(new IPEndPoint(clientAddress.Address, Computer.Udp));
 
                         clientSockets[clientAddress.Address.ToString()] = new Sockets()
                         {
@@ -92,9 +89,9 @@ namespace Cross_Game.Connection
                         receivePetitionThread.IsBackground = true;
                         receivePetitionThread.Start();
 
-                        currentComputer.N_connections++;
+                        Computer.N_connections++;
 
-                        DBConnection.UpdateComputerInfo(currentComputer);
+                        DBConnection.UpdateComputerInfo(Computer);
 
                         LogUtils.AppendLogOk(LogUtils.ServerConnectionLog, $"Cliente con IP {clientAddress.Address.ToString()} agregado con éxito.");
                     }
@@ -117,7 +114,7 @@ namespace Cross_Game.Connection
             {
                 listenSocket?.Close();
             }
-            LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"El servidor ya no acepta más clientes ({currentComputer.N_connections}/{currentComputer.Max_connections})");
+            LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"El servidor ya no acepta más clientes ({Computer.N_connections}/{Computer.Max_connections})");
         }
 
         protected override void Init()
@@ -166,9 +163,9 @@ namespace Cross_Game.Connection
                 }
             }
 
-            currentComputer.N_connections = 0;
-            currentComputer.Status = 0;
-            DBConnection.UpdateComputerInfo(currentComputer);
+            Computer.N_connections = 0;
+            Computer.Status = 0;
+            DBConnection.UpdateComputerInfo(Computer);
 
             LogUtils.AppendLogFooter(LogUtils.ServerConnectionLog);
         }
@@ -188,21 +185,21 @@ namespace Cross_Game.Connection
             DisconnectClient(clientSockets[IP]);
             clientSockets.Remove(IP);
 
-            currentComputer.N_connections--;
+            Computer.N_connections--;
 
-            if (currentComputer.N_connections == 0)
+            if (Computer.N_connections == 0)
             {
                 LogUtils.AppendLogText(LogUtils.ServerConnectionLog, "Se han desconectado todos los clientes, reiniciando el servidor...");
                 Stop();
-                Start(currentComputer);
+                Start(Computer);
             }
-            else if (currentComputer.N_connections == currentComputer.Max_connections - 1)
+            else if (Computer.N_connections == Computer.Max_connections - 1)
             {
                 LogUtils.AppendLogText(LogUtils.ServerConnectionLog, "El servidor vuelve a tener un espacio libre, volviendo a pedir clientes...");
-                Start(currentComputer);
+                Start(Computer);
             }
             else
-                DBConnection.UpdateComputerInfo(currentComputer);
+                DBConnection.UpdateComputerInfo(Computer);
         }
 
         public void SendData(byte[] data)

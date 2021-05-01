@@ -1,5 +1,4 @@
 ﻿using Cross_Game.DataManipulation;
-using NAudio.Wave;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -76,10 +75,10 @@ namespace Cross_Game.Connection
     abstract class RTDProtocol
     {
         public bool IsConnected { get; protected set; }
-
         public const int MaxPacketSize = 65507;
+
         protected const int CacheImages = 32;
-        protected IPEndPoint serverEP;
+        protected ComputerData Computer;
         protected Audio audio;
 
         protected RTDProtocol()
@@ -152,6 +151,7 @@ namespace Cross_Game.Connection
 
         protected abstract void ReceivePetition(Socket s, byte[] buffer);
         protected abstract void Init();
+        public abstract void Start(ComputerData computerData);
         public abstract void Stop();
     }
 }
