@@ -39,6 +39,8 @@ namespace Cross_Game.Windows
 
             WaitSlider.SetActions(() =>
             {
+                CurrentUser.SyncLocalMachine();
+
                 server = new RTDPServer(3030, 3031);
                 server.Start(CurrentUser.localMachine);
             }, () => server.Stop());
@@ -78,7 +80,7 @@ namespace Cross_Game.Windows
             switch (name)
             {
                 case "Ordenadores": break;
-                case "Amigos": new WaitingWindow().Show(); break;
+                case "Amigos": SyncData(); break;
                 case "Transmisión":
                     var display = new UserDisplay();
                     display.StartTransmission(3030, 3031, "127.0.0.1");
