@@ -9,7 +9,7 @@
         ResizeMode="NoResize"
         Name="EditComputer"
         WindowStartupLocation="CenterScreen"
-        Title="EditComputerParams" Height="182" Width="350"
+        Title="EditComputerParams" Height="242" Width="350"
         SourceInitialized="Window_SourceInitialized"
         Closing="EditComputer_Closing">
     <Window.Resources>
@@ -43,66 +43,80 @@
                 <RowDefinition/>
                 <RowDefinition/>
                 <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
             </Grid.RowDefinitions>
             
             <TextBlock Text="Nombre:" 
                        Grid.Row="0" 
-                       Grid.Column="0" 
+                       Grid.ColumnSpan="2" 
                        Style="{StaticResource FlatTextStyle}"/>
             
             <TextBox Name="ComputerName" 
                      Grid.Row="1" 
-                     Grid.Column="0" 
+                       Grid.ColumnSpan="2" 
                      Margin="3" 
                      FontSize="13"/>
             
+            
+            
             <TextBlock Text="Puerto TCP:" 
-                       Grid.Row="0" 
-                       Grid.Column="1" 
-                       Style="{StaticResource FlatTextStyle}"/>
-            <controllers:NumericUpDown x:Name="TCP" 
-                                       Grid.Row="1" 
-                                       Grid.Column="1"
-                                       Margin="3" 
-                                       Maximum="65554" 
-                                       Minimum="1"/>
-            
-            
-
-            <TextBlock Text="Conexiones máximas:"
                        Grid.Row="2" 
                        Grid.Column="0" 
                        Style="{StaticResource FlatTextStyle}"/>
-            
-            <controllers:NumericUpDown x:Name="MaxConections" 
+            <controllers:NumericUpDown x:Name="TCP" 
                                        Grid.Row="3" 
-                                       Grid.Column="0" 
+                                       Grid.Column="0"
                                        Margin="3" 
-                                       Maximum="99" 
+                                       Maximum="65554" 
                                        Minimum="1"/>
             
             <TextBlock Text="Puerto UDP:" 
                        Grid.Row="2" 
                        Grid.Column="1" 
                        Style="{StaticResource FlatTextStyle}"/>
-            
+
             <controllers:NumericUpDown x:Name="UDP" 
                                        Grid.Row="3" 
                                        Grid.Column="1" 
                                        Margin="3" 
                                        Maximum="65554" 
-                                       Minimum="1"/>  
+                                       Minimum="1"/>
 
+
+
+            <TextBlock Text="Conexiones máximas:"
+                       Grid.Row="4" 
+                       Grid.Column="0" 
+                       Style="{StaticResource FlatTextStyle}"/>
+
+            <controllers:NumericUpDown x:Name="MaxConections" 
+                                       Grid.Row="5" 
+                                       Grid.Column="0" 
+                                       Margin="3" 
+                                       Maximum="99" 
+                                       Minimum="1"/>
             
+            <TextBlock Text="FPS:"
+                       Grid.Row="4" 
+                       Grid.Column="1" 
+                       Style="{StaticResource FlatTextStyle}"/>
 
-            <Button Grid.Row="4" 
+            <controllers:NumericUpDown x:Name="FPS" 
+                                       Grid.Row="5" 
+                                       Grid.Column="1" 
+                                       Margin="3" 
+                                       Maximum="60" 
+                                       Minimum="15"/>
+
+            <Button Grid.Row="6" 
                     Grid.Column="0" 
                     Style="{StaticResource FlatButtonStyle}" 
                     Click="SaveButton_Click">
                 <TextBlock Text="Guardar cambios"/>
             </Button>
             
-            <Button Grid.Row="4" 
+            <Button Grid.Row="6" 
                     Grid.Column="1" 
                     Style="{StaticResource FlatButtonStyle}" 
                     Click="CloseButton_Click">

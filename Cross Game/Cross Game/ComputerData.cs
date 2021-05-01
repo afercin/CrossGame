@@ -12,6 +12,7 @@ namespace Cross_Game
         private string localIP;
         private string publicIP;
         private string name;
+        private int fps;
         private int tcp;
         private int udp;
         private int status;
@@ -28,7 +29,6 @@ namespace Cross_Game
         public int N_connections { get => n_connections; set => n_connections = value; }
         public int Max_connections { get => max_connections; set => max_connections = value; }
         public string Name { get => name; set => name = value; }
-
-
+        public int FPS { get => fps; set => fps = value; }
     }
 }

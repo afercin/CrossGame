@@ -9,7 +9,7 @@ namespace Cross_Game.Windows
     /// </summary>
     public partial class EditComputerParams : Window
     {
-        private Computer current;
+        private ComputerData current;
         public EditComputerParams()
         {
             InitializeComponent();
@@ -25,24 +25,26 @@ namespace Cross_Game.Windows
         {
             if (Edited())
             {
-                current.ComputerName.Text = ComputerName.Text;
-                current.pc.Tcp = TCP.Value;
-                current.pc.Udp = UDP.Value;
-                current.pc.Max_connections = MaxConections.Value;
+                current.Name = ComputerName.Text;
+                current.Tcp = TCP.Value;
+                current.Udp = UDP.Value;
+                current.Max_connections = MaxConections.Value;
+                current.FPS = FPS.Value;
                 DBConnection.UpdateComputerInfo(current);
                 DialogResult = true;
             }
             Close();
         }
 
-        public bool? Show(Computer computer)
+        public bool? Show(ComputerData computer)
         {
             current = computer;
-            ComputerName.Text = computer.ComputerName.Text.Split(new string[] { " (" }, StringSplitOptions.None)[0];
-            TCP.Value = computer.pc.Tcp;
-            UDP.Value = computer.pc.Udp;
-            MaxConections.Value = computer.pc.Max_connections;
-            if (computer.pc.N_connections > 0)
+            ComputerName.Text = computer.Name;
+            TCP.Value = computer.Tcp;
+            UDP.Value = computer.Udp;
+            MaxConections.Value = computer.Max_connections;
+            FPS.Value = computer.FPS;
+            if (computer.N_connections > 0)
             {
                 TCP.IsEnabled = false;
                 UDP.IsEnabled = false;
@@ -58,10 +60,9 @@ namespace Cross_Game.Windows
 
         private bool Edited()
         {
-            return ComputerName.Text != current.ComputerName.Text.Split(new string[] { " (" }, StringSplitOptions.None)[0] ||
-                   TCP.Value != current.pc.Tcp ||
-                   UDP.Value != current.pc.Udp ||
-                   MaxConections.Value != current.pc.Max_connections;
+            return ComputerName.Text != current.Name ||
+                   TCP.Value != current.Tcp || UDP.Value != current.Udp ||
+                   MaxConections.Value != current.Max_connections || FPS.Value != current.FPS;
         }
     }
 }

@@ -58,6 +58,7 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="30"/>
                 </Grid.RowDefinitions>
+
                 <Border Padding="5" Name="MyComputers">
                     <StackPanel Name="ComputerPanel"
                                 Width="auto"

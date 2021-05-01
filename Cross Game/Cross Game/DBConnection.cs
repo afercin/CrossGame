@@ -130,45 +130,46 @@ namespace Cross_Game
 
         internal static void SyncLocalMachinerData(UserData currentUser)
         {
-            currentUser.localMachine.Tcp = 3030;
-            currentUser.localMachine.Udp = 3031;
-            currentUser.localMachine.Name = Environment.MachineName;
-            currentUser.localMachine.Max_connections = 1;
-            currentUser.localMachine.N_connections = 0;
+            bool newComputer = true;
+            ComputerData currentMachine = currentUser.localMachine;
+            currentMachine.Tcp = 3030;
+            currentMachine.Udp = 3031;
+            currentMachine.Name = Environment.MachineName;
+            currentMachine.Max_connections = 1;
+            currentMachine.N_connections = 0;
             if (OpenConnection())
             {
                 MySqlDataReader dataReader = Query(
-                    "SELECT TCP, UDP, name, n_connections, max_connections " +
-                    "FROM computers " +
-                    "WHERE MAC = '" + currentUser.localMachine.MAC + "'"
+                    $"SELECT TCP, UDP, name, n_connections, max_connections, FPS " +
+                    $"FROM computers " +
+                    $"WHERE MAC = '{currentMachine.MAC}' " +
+                    $"AND owner = '{currentUser.ID}'"
                     );
                 if (dataReader.HasRows)
                 {
                     dataReader.Read();
-                    currentUser.localMachine.Tcp = (int)dataReader["TCP"];
-                    currentUser.localMachine.Udp = (int)dataReader["UDP"];
-                    currentUser.localMachine.Name = (string)dataReader["name"];
-                    currentUser.localMachine.N_connections = (int)dataReader["n_connections"];
-                    currentUser.localMachine.Max_connections = (int)dataReader["max_connections"];
+                    currentMachine.Tcp = (int)dataReader["TCP"];
+                    currentMachine.Udp = (int)dataReader["UDP"];
+                    currentMachine.Name = (string)dataReader["name"];
+                    currentMachine.N_connections = (int)dataReader["n_connections"];
+                    currentMachine.Max_connections = (int)dataReader["max_connections"];
+                    currentMachine.FPS = (int)dataReader["fps"];
 
                     dataReader.Close();
-
-                    NonQuery("UPDATE computers " +
-                            $"SET LocalIP = '{currentUser.localMachine.LocalIP}', PublicIP = '{currentUser.localMachine.PublicIP}', status = {currentUser.localMachine.Status} " +
-                            $"WHERE MAC = '{currentUser.localMachine.MAC}'");
+                    newComputer = false;
                 }
-                else
+                
+                if (newComputer)
                 {
-                    dataReader.Close();
-
+                    
                     NonQuery("INSERT INTO computers VALUES " +
-                            $"('{currentUser.localMachine.MAC}', '{currentUser.localMachine.LocalIP}', '{currentUser.localMachine.PublicIP}', {currentUser.localMachine.Tcp}, {currentUser.localMachine.Udp}, " +
-                            $"'{currentUser.localMachine.Name}', {currentUser.localMachine.N_connections}, {currentUser.localMachine.Max_connections}, {currentUser.localMachine.Status}, {currentUser.ID})");
+                            $"('{currentMachine.MAC}', '{currentMachine.LocalIP}', '{currentMachine.PublicIP}', {currentMachine.Tcp}, {currentMachine.Udp}, '{currentMachine.Name}', " +
+                            $"{currentMachine.N_connections}, {currentMachine.Max_connections}, {currentMachine.Status}, {currentUser.ID}, {currentMachine.FPS})");
                 }
-                NonQuery($"UPDATE computers " +
-                            $"SET LocalIP = '{currentUser.localMachine.LocalIP}', PublicIP = '{currentUser.localMachine.PublicIP}', status = {currentUser.localMachine.Status} " +
-                            $"WHERE MAC = '{currentUser.localMachine.MAC}'");
                 CloseConnection();
+
+                if (!newComputer)
+                    UpdateComputerInfo(currentMachine);
             }
         }
 
@@ -178,7 +179,7 @@ namespace Cross_Game
             if (OpenConnection())
             {
                 MySqlDataReader dataReader = Query(
-                    "SELECT LocalIP, PublicIP, TCP, UDP, name, n_connections, max_connections, status " +
+                    "SELECT LocalIP, PublicIP, TCP, UDP, name, n_connections, max_connections, status, FPS " +
                     "FROM computers " +
                     "WHERE MAC = '" + pc.MAC + "'"
                     );
@@ -193,6 +194,7 @@ namespace Cross_Game
                     pc.N_connections = (int)dataReader["n_connections"];
                     pc.Max_connections = (int)dataReader["max_connections"];
                     pc.Status = (int)dataReader["status"];
+                    pc.FPS = (int)dataReader["FPS"];
                 }
 
                 dataReader.Close();
@@ -200,13 +202,14 @@ namespace Cross_Game
             }
         }
 
-        public static void UpdateComputerInfo(Computer computer)
+        public static void UpdateComputerInfo(ComputerData computer)
         {
             if (OpenConnection())
             {
-                NonQuery("UPDATE computers " +
-                        $"SET TCP = {computer.pc.Tcp}, UDP = {computer.pc.Udp}, name = '{computer.ComputerName.Text}', max_connections = '{computer.pc.Max_connections}' " +
-                        $"WHERE MAC = '{computer.pc.MAC}'");
+                NonQuery("UPDATE computers SET " +
+                        $"LocalIP = '{computer.LocalIP}', PublicIP = '{computer.PublicIP}', TCP = {computer.Tcp}, UDP = {computer.Udp}, name = '{computer.Name}', " +
+                        $"max_connections = {computer.Max_connections}, n_connections = {computer.N_connections}, FPS = {computer.FPS}, status = {computer.Status} " +
+                        $"WHERE MAC = '{computer.MAC}'");
                 CloseConnection();
             }
         }

@@ -23,6 +23,8 @@ namespace Cross_Game.Windows
 
         public Login()
         {
+            LogUtils.CleanLogs();
+
             InitializeComponent();
             emailWatermark = true;
             passwordWatermark = true;
@@ -39,7 +41,7 @@ namespace Cross_Game.Windows
                     md5_pass = br.ReadString();
                 }
 
-                LogUtils.AppendLogText(LogUtils.LoginLog, "Se ha detectado el fichero de autologin, comprobando las credenciales al usuario...");
+                LogUtils.AppendLogOk(LogUtils.LoginLog, "Se ha detectado el fichero de autologin, comprobando las credenciales al usuario...");
 
                 Email.Text = email;
                 Password.Password = "";
@@ -156,7 +158,7 @@ namespace Cross_Game.Windows
                 }
                 else
                 {
-                    LogUtils.AppendLogText(LogUtils.LoginLog, "Las credenciales introducidas son correctas.");
+                    LogUtils.AppendLogOk(LogUtils.LoginLog, "Las credenciales introducidas son correctas.");
                     if (RememberMe.IsChecked == true)
                     {
                         LogUtils.AppendLogText(LogUtils.LoginLog, "Remember me estaba marcado por lo que se procede guardar las credenciales en el fichero de autologin.");

@@ -32,6 +32,7 @@ CREATE TABLE computers(
 	max_connections INT(2) NOT NULL,
 	status INT(1) NOT NULL, -- 0 => Disconected, 1 => Connected.
 	owner int(9) NOT NULL,
+	FPS INT(3) NOT NULL DEFAULT 30,
 	CONSTRAINT FK_C_Users FOREIGN KEY(owner) REFERENCES users(user_id) ON DELETE CASCADE
 );
 

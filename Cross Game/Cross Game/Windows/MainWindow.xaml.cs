@@ -2,6 +2,7 @@
 using Cross_Game.Controllers;
 using Cross_Game.DataManipulation;
 using System;
+using System.Collections.Generic;
 using System.Timers;
 using System.Windows;
 using System.Windows.Input;
@@ -15,19 +16,18 @@ namespace Cross_Game.Windows
     {
         public UserData CurrentUser { get; set; }
 
+        private List<Computer> computerList;
         private OptionButton currentOption;
         private RTDPServer server;
-        //private Timer updateInfo;
 
         public MainWindow()
         {
-            Screen.CaptureScreen();
             InitializeComponent();
+
+            computerList = new List<Computer>();
+
             currentOption = Ordenadores;
             Ordenadores.Active = true;
-            //updateInfo = new Timer();
-            //updateInfo.Elapsed += (s, e) => { };
-            //updateInfo.Start();
         }
 
         private void Window_SourceInitialized(object sender, EventArgs e)
@@ -40,9 +40,7 @@ namespace Cross_Game.Windows
             WaitSlider.SetActions(() =>
             {
                 server = new RTDPServer(3030, 3031);
-                server.MaxConnections = 2;
-                server.TimeRate = 1000 / 45;
-                server.Start();
+                server.Start(CurrentUser.localMachine);
             }, () => server.Stop());
 
             foreach (string mac in DBConnection.GetMyComputers(CurrentUser))
@@ -52,6 +50,7 @@ namespace Cross_Game.Windows
                     {
                         var computer = new Computer(mac);
                         computer.ComputerClicked += Computer_Clicked;
+                        computerList.Add(computer);
 
                         ComputerPanel.Children.Add(computer);
                     }
@@ -98,6 +97,15 @@ namespace Cross_Game.Windows
             }
         }
 
+        private void SyncData()
+        {
+            foreach (Computer c in computerList)
+            {
+                c.UpdateStatus();
+                CurrentUser.SyncLocalMachine();
+            }
+            CurrentUser.SyncLocalMachine();
+        }
         private void Computer_Clicked(object sender, EventArgs e)
         {
             ComputerData pc = (sender as ComputerData);

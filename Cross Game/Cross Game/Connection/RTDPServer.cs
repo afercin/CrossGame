@@ -11,16 +11,14 @@ namespace Cross_Game.Connection
 {
     class RTDPServer : RTDProtocol
     {
-        public int TimeRate { get; set; }
-        public int MaxConnections { get; set; }
-
-        public int NClients { get => clientSockets.Count; }
         private Dictionary<string, Sockets> clientSockets;
         private readonly int udpPort;
+        private ComputerData currentComputer;
         private Thread listenThread;
         private Thread CaptureScreen;
         private Thread CheckCursorShape;
         private Socket listenSocket;
+        private int frameRate;
 
 
         public RTDPServer(int tcpPort, int udpPort) : base()
@@ -29,10 +27,16 @@ namespace Cross_Game.Connection
             this.udpPort = udpPort;
         }
 
-        public override void Start()
+        public void Start(ComputerData computerData)
         {
-            if (!IsConnected || NClients == 0)
+            if (!IsConnected)
                 clientSockets = new Dictionary<string, Sockets>();
+
+            currentComputer = computerData;
+            frameRate = 1000 / currentComputer.FPS;
+
+            currentComputer.Status = 1;
+            DBConnection.UpdateComputerInfo(currentComputer);
 
             listenThread = new Thread(ConnectionThread);
             listenThread.IsBackground = true;
@@ -50,10 +54,10 @@ namespace Cross_Game.Connection
 
             listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             listenSocket.Bind(serverEP);
-            listenSocket.Listen(MaxConnections - NClients);
+            listenSocket.Listen(currentComputer.Max_connections - currentComputer.N_connections);
             try
             {
-                while (NClients < MaxConnections) // diseñar alguna forma de recibir clientes permanentemente
+                while (currentComputer.N_connections < currentComputer.Max_connections) // diseñar alguna forma de recibir clientes permanentemente
                 {
                     tcpClientSocket = listenSocket.Accept();
                     clientAddress = tcpClientSocket.RemoteEndPoint as IPEndPoint;
@@ -66,11 +70,11 @@ namespace Cross_Game.Connection
                     UserData checkUser = DBConnection.CheckLogin("afercin@gmail.com", "patata123");
                     if (checkUser != null && checkUser.ID != 0)
                     {
-                        LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"Cliente {clientAddress.Address.ToString()} aceptado, procediendo a establecer canal de comunicación.");
+                        LogUtils.AppendLogOk(LogUtils.ServerConnectionLog, $"Cliente {clientAddress.Address.ToString()} aceptado, procediendo a establecer canal de comunicación.");
 
                         SendBuffer(tcpClientSocket, new byte[] { Convert.ToByte(Petition.ConnectionAccepted) });
 
-                        if (NClients == 0)
+                        if (currentComputer.N_connections == 0)
                             Init();
 
                         SendWaveFormat(tcpClientSocket, new byte[] { 0 }); // TODO: Enviar waveformat
@@ -87,7 +91,12 @@ namespace Cross_Game.Connection
                         receivePetitionThread = new Thread(() => ReceivePetition(tcpClientSocket));
                         receivePetitionThread.IsBackground = true;
                         receivePetitionThread.Start();
-                        LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"Cliente con IP {clientAddress.Address.ToString()} agregado con éxito.");
+
+                        currentComputer.N_connections++;
+
+                        DBConnection.UpdateComputerInfo(currentComputer);
+
+                        LogUtils.AppendLogOk(LogUtils.ServerConnectionLog, $"Cliente con IP {clientAddress.Address.ToString()} agregado con éxito.");
                     }
                     else
                     {
@@ -100,16 +109,15 @@ namespace Cross_Game.Connection
             {
                 // Recojo la excepcion que salta al abortar el thread para que no vaya al log.
             }
-            catch (Exception e)
+            catch (SocketException)
             {
-                LogUtils.AppendLogError(LogUtils.ConnectionErrorsLog, e.Message);
-                LogUtils.AppendLogError(LogUtils.ConnectionErrorsLog, e.StackTrace);
+                LogUtils.AppendLogWarn(LogUtils.ServerConnectionLog, "El servidor fué cerrado mientras esperaba clientes.");
             }
             finally
             {
                 listenSocket?.Close();
             }
-            LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"El servidor ya no acepta más clientes ({NClients}/{MaxConnections})");
+            LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"El servidor ya no acepta más clientes ({currentComputer.N_connections}/{currentComputer.Max_connections})");
         }
 
         protected override void Init()
@@ -147,37 +155,47 @@ namespace Cross_Game.Connection
 
             foreach (Sockets sockets in collection)
             {
-                //if (IsConnected)
-                //    SendBuffer(sockets.tcpSocket, new byte[] { Convert.ToByte(Petition.EndConnetion) });
                 LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"Desconectando al cliente {(sockets.tcpSocket.RemoteEndPoint as IPEndPoint).Address.ToString()}...");
-                lock (sockets.udpSocket)
-                {
-                    sockets.tcpSocket.Close();
-                    sockets.udpSocket.Close();
-                }
-
+                DisconnectClient(sockets);
             }
+
+            currentComputer.N_connections = 0;
+            currentComputer.Status = 0;
+            DBConnection.UpdateComputerInfo(currentComputer);
+
             LogUtils.AppendLogFooter(LogUtils.ServerConnectionLog);
+        }
+
+        private void DisconnectClient(Sockets clientSockets)
+        {
+            lock (clientSockets.udpSocket)
+            {
+                clientSockets.tcpSocket?.Close();
+                clientSockets.udpSocket?.Close();
+            }
         }
 
         public void CloseConnection(string IP)
         {
             LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"Desconectando al cliente {IP}...");
-            clientSockets[IP].tcpSocket?.Close();
-            clientSockets[IP].udpSocket?.Close();
+            DisconnectClient(clientSockets[IP]);
             clientSockets.Remove(IP);
 
-            if (NClients == 0)
+            currentComputer.N_connections--;
+
+            if (currentComputer.N_connections == 0)
             {
                 LogUtils.AppendLogText(LogUtils.ServerConnectionLog, "Se han desconectado todos los clientes, reiniciando el servidor...");
                 Stop();
-                Start();
+                Start(currentComputer);
             }
-            else if (NClients == MaxConnections - 1)
+            else if (currentComputer.N_connections == currentComputer.Max_connections - 1)
             {
-                LogUtils.AppendLogText(LogUtils.ServerConnectionLog, "Se han desconectado un cliente, volviendo a pedir clientes...");
-                Start();
+                LogUtils.AppendLogText(LogUtils.ServerConnectionLog, "El servidor vuelve a tener un espacio libre, volviendo a pedir clientes...");
+                Start(currentComputer);
             }
+            else
+                DBConnection.UpdateComputerInfo(currentComputer);
         }
 
         public void SendData(byte[] data)
@@ -189,7 +207,7 @@ namespace Cross_Game.Connection
             }
             catch (InvalidOperationException)
             {
-
+                LogUtils.AppendLogError(LogUtils.ServerConnectionLog, $"La desconexión de un cliente ha provocado que se pierda un paquede ({data[0]}).");
             }
         }
 
@@ -248,7 +266,7 @@ namespace Cross_Game.Connection
                     }
                 });
 
-                Thread.Sleep(TimeRate);
+                Thread.Sleep(frameRate);
             }
         }
 
@@ -272,7 +290,7 @@ namespace Cross_Game.Connection
                         currentCursor = pci.hCursor;
                     }
 
-                    Thread.Sleep(TimeRate);
+                    Thread.Sleep(frameRate);
                 }
             }
             catch (ObjectDisposedException)
@@ -281,28 +299,11 @@ namespace Cross_Game.Connection
             }
         }
 
-        protected override void ReceivePetition(byte[] buffer)
+        protected override void ReceivePetition(Socket s, byte[] buffer)
         {
             Petition petition = (Petition)buffer[0];
             switch (petition)
             {
-                //case Petition.EndConnetion:
-                //    if (connection is RTDPClient)
-                //        connection.Close();
-                //    else
-                //    {
-                //        RTDPServer server = connection as RTDPServer;
-                //        server.Close(((IPEndPoint)(sender as Socket).RemoteEndPoint).Address.ToString());
-                //        if (server.NClients == 0)
-                //        {
-                //            audio.CapturedAudio -= Audio_CapturedAudio;
-                //            audio.Dispose();
-                //            audio = null;
-                //        }
-                //    }
-                //    break;
-                case Petition.IncreaseTimeRate: TimeRate += buffer[1]; break;
-                case Petition.DecreaseTimeRate: TimeRate -= buffer[1]; break;
                 case Petition.MouseMove:
                     float xPos = BitConverter.ToSingle(buffer, 1);
                     float yPos = BitConverter.ToSingle(buffer, 5);
@@ -330,6 +331,8 @@ namespace Cross_Game.Connection
 
         private class Sockets
         {
+            public bool root;
+            public bool privileges;
             public Socket tcpSocket;
             public Socket udpSocket;
         }

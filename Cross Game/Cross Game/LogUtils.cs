@@ -11,18 +11,11 @@ namespace Cross_Game
         public static readonly string LoginLog = Path.Combine(LogsFolder, "Login.log");
         public static readonly string ClientConnectionLog = Path.Combine(LogsFolder, "ClientConnection.log");
         public static readonly string ServerConnectionLog = Path.Combine(LogsFolder, "ServerConnection.log");
-        public static readonly string ConnectionErrorsLog = Path.Combine(LogsFolder, "ConnectionErrors.log");
         public static readonly string DatabaseErrorsLog = Path.Combine(LogsFolder, "DatabaseErrors.log");
 
 
         public static void AppendLogHeader(string logPath)
         {
-            if (!Directory.Exists(CrossGameFolder))
-                Directory.CreateDirectory(CrossGameFolder);
-
-            if (!Directory.Exists(LogsFolder))
-                Directory.CreateDirectory(LogsFolder);
-
             AppendText(logPath, @"                     _________                                 ________                                            ");
             AppendText(logPath, @"                     \_   ___ \_______  ____   ____  ______   /  _____/_____    _____   ____                       ");
             AppendText(logPath, @"                     /    \  \/\_  __ \/  _ \ /  _ \/  ___/  /   \  ___\__  \  /     \_/ __ \                      ");
@@ -41,6 +34,8 @@ namespace Cross_Game
         public static void AppendLogText(string logPath, string text) => AppendText(logPath, GetCurrentDate() + "[INFO] " + text);
 
         public static void AppendLogWarn(string logPath, string text) => AppendText(logPath, GetCurrentDate() + "[WARN] " + text);
+
+        public static void AppendLogOk(string logPath, string text) => AppendText(logPath, GetCurrentDate() + "[OK] " + text);
 
         public static void AppendLogError(string logPath, string text) => AppendText(logPath, GetCurrentDate() + "[ERROR] " + text);
 
@@ -63,6 +58,26 @@ namespace Cross_Game
         {
             DateTime time = DateTime.Now;
             return "[" + time.ToShortDateString() + " " + time.ToLongTimeString() + "] ";
+        }
+
+        public static void CleanLogs()
+        {
+            if (!Directory.Exists(CrossGameFolder))
+                Directory.CreateDirectory(CrossGameFolder);
+
+            try
+            {
+                if ((DateTime.Now - File.GetCreationTime(LoginLog)).TotalDays >= 1 || true)
+                {
+                    Directory.Delete(LogsFolder, true);
+                    Thread.Sleep(50);
+                }
+            }
+            catch { }
+            finally
+            {
+                Directory.CreateDirectory(LogsFolder);
+            }
         }
 
     }

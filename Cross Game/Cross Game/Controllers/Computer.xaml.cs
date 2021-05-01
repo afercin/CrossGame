@@ -42,10 +42,8 @@ namespace Cross_Game.Controllers
                 if (pc.N_connections < pc.Max_connections)
                     ComputerClicked.Invoke(pc, new EventArgs());
             }
-            else if (new EditComputerParams().Show(this) == true)
-            {
-                DBConnection.UpdateComputerInfo(this);
-            }
+            else if (new EditComputerParams().Show(pc) == true)
+                Dispatcher.Invoke(UpdateStatus); 
             Icon.Kind = currentIcon;
             editArea = false;
         }

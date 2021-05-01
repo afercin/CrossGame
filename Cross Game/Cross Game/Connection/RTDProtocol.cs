@@ -103,6 +103,7 @@ namespace Cross_Game.Connection
 
         protected void ReceivePetition(Socket s)
         {
+            string IP = (s.RemoteEndPoint as IPEndPoint).Address.ToString();
             int errors = 0;
             try
             {
@@ -120,7 +121,6 @@ namespace Cross_Game.Connection
                             }
                             else
                             {
-                                string IP = (s.RemoteEndPoint as IPEndPoint).Address.ToString();
                                 LogUtils.AppendLogWarn(LogUtils.ServerConnectionLog, $"Parece que la aplicación del cliente {IP} ha crasheado.");
                                 (this as RTDPServer).CloseConnection(IP);
                             }
@@ -128,7 +128,7 @@ namespace Cross_Game.Connection
                     else
                     {
                         errors = 0;
-                        ReceivePetition(buffer);
+                        ReceivePetition(s, buffer);
                     }
                 }
             }
@@ -143,7 +143,6 @@ namespace Cross_Game.Connection
                     }
                     else
                     {
-                        string IP = (s.RemoteEndPoint as IPEndPoint).Address.ToString();
                         LogUtils.AppendLogWarn(LogUtils.ServerConnectionLog, $"Se ha perdido la conexión con el cliente {IP} ({e.SocketErrorCode}).");
                         (this as RTDPServer).CloseConnection(IP);
                     }
@@ -151,9 +150,8 @@ namespace Cross_Game.Connection
             }
         }
 
-        protected abstract void ReceivePetition(byte[] buffer);
+        protected abstract void ReceivePetition(Socket s, byte[] buffer);
         protected abstract void Init();
-        public abstract void Start();
         public abstract void Stop();
     }
 }

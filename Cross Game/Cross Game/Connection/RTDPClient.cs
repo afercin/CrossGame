@@ -31,7 +31,7 @@ namespace Cross_Game.Connection
             serverEP = new IPEndPoint(IPAddress.Parse(serverIP), tcpPort);
         }
 
-        public override void Start()
+        public void Start()
         {
             int err = 0;
             bool connected = false;
@@ -82,7 +82,8 @@ namespace Cross_Game.Connection
 
                 if (connected)
                 {
-                    LogUtils.AppendLogText(LogUtils.ClientConnectionLog, "Mandando credenciales al equipo servidor.");
+                    LogUtils.AppendLogOk(LogUtils.ClientConnectionLog, "Se ha conseguido establecer conexión con el servidor.");
+                    LogUtils.AppendLogText(LogUtils.ClientConnectionLog, "Mandando credenciales al equipo servidor...");
 
                     /****** Mandar credenciales y esperar confirmación *******/
 
@@ -96,7 +97,7 @@ namespace Cross_Game.Connection
                         }
                         catch (SocketException)
                         {
-                            LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "Se ha cerrado el socket antes de recibir una respuesta del servidor.");
+                            LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, "Se ha cerrado el socket antes de recibir una respuesta del servidor.");
                         }
                     });
                     connectedThread.IsBackground = true;
@@ -112,14 +113,14 @@ namespace Cross_Game.Connection
 
                     if (((Petition)buffer[0]) == Petition.ConnectionAccepted)
                     {
-                        LogUtils.AppendLogText(LogUtils.ClientConnectionLog, "Conexión establecida con éxito.");
+                        LogUtils.AppendLogOk(LogUtils.ClientConnectionLog, "Conexión establecida con éxito.");
                         Init();
-                        LogUtils.AppendLogText(LogUtils.ClientConnectionLog, "Conexión de datos establecida, fin de la configuración.");
+                        LogUtils.AppendLogOk(LogUtils.ClientConnectionLog, "Conexión de datos establecida, fin de la configuración.");
                     }
                     else
                     {
                         if (buffer[0] != 0)
-                            LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "La conexión ha sido rechazada por el servidor.");
+                            LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, "La conexión ha sido rechazada por el servidor.");
                         petitionsSocket.Close();
                     }
                 }
@@ -130,7 +131,7 @@ namespace Cross_Game.Connection
             {
                 LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, "Servidor inalcanzable.");
                 if (!ConnectionUtils.InternetConnection())
-                    LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, "El equipo no tiene acceso a internet");
+                    LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "El equipo no tiene acceso a internet");
             }
         }
 
@@ -185,7 +186,7 @@ namespace Cross_Game.Connection
             }
         }
 
-        protected override void ReceivePetition(byte[] buffer)
+        protected override void ReceivePetition(Socket s, byte[] buffer)
         {
             Petition petition = (Petition)buffer[0];
             switch (petition)
@@ -241,12 +242,12 @@ namespace Cross_Game.Connection
                             }
                             catch (KeyNotFoundException)
                             {
-                                LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"No ha llegado a tiempo el paquete que inicializaba el fotograma nº{img}");
+                                LogUtils.AppendLogError(LogUtils.ClientConnectionLog, $"No ha llegado a tiempo el paquete que inicializaba el fotograma nº{img}");
                                 skipImage = img;
                             }
                             catch (ArgumentException)
                             {
-                                LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"No ha llegado a tiempo el paquete que inicializaba el fotograma nº{img}");
+                                LogUtils.AppendLogError(LogUtils.ClientConnectionLog, $"No ha llegado a tiempo el paquete que inicializaba el fotograma nº{img}");
                                 skipImage = img;
                             }
                         }                            
