@@ -8,6 +8,7 @@ namespace Cross_Game
     {
         private static readonly string CrossGameFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Cross Game");
         private static readonly string LogsFolder = Path.Combine(CrossGameFolder, "Logs");
+        public static readonly string LoginLog = Path.Combine(LogsFolder, "Login.log");
         public static readonly string ClientConnectionLog = Path.Combine(LogsFolder, "ClientConnection.log");
         public static readonly string ServerConnectionLog = Path.Combine(LogsFolder, "ServerConnection.log");
         public static readonly string ConnectionErrorsLog = Path.Combine(LogsFolder, "ConnectionErrors.log");

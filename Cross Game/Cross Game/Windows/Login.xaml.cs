@@ -9,7 +9,7 @@ using System.Windows.Media;
 namespace Cross_Game.Windows
 {
     /// <summary>
-    /// Lógica de interacción para LoginRegister.xaml
+    /// Ventana encargada de solicitar y verificar las credenciales del cliente.
     /// </summary>
     public partial class Login : Window
     {
@@ -28,6 +28,8 @@ namespace Cross_Game.Windows
             passwordWatermark = true;
             Error.Visibility = Visibility.Hidden;
 
+            LogUtils.AppendLogHeader(LogUtils.LoginLog);
+            
             try
             {
                 string email, md5_pass;
@@ -36,13 +38,16 @@ namespace Cross_Game.Windows
                     email = br.ReadString();
                     md5_pass = br.ReadString();
                 }
+
+                LogUtils.AppendLogText(LogUtils.LoginLog, "Se ha detectado el fichero de autologin, comprobando las credenciales al usuario...");
+
                 Email.Text = email;
                 Password.Password = "";
                 CheckLogin(email, md5_pass, true);
             }
             catch (IOException)
             {
-                Console.WriteLine("No existe el fichero de autologin, se le solicitarán las credenciales al usuario");
+                LogUtils.AppendLogWarn(LogUtils.LoginLog, "No existe el fichero de autologin, se le solicitarán las credenciales al usuario.");
             }
 
         }
@@ -126,27 +131,36 @@ namespace Cross_Game.Windows
                 CheckText.Foreground = White;
             }
         }
-
+        /// <summary>
+        /// Comprueba las credenciales de un cliente a partir de su email y contraseña, se puede especificar si la contraseña ya está cifrada (autologin).
+        /// </summary>
         private void CheckLogin(string email, string password, bool md5 = false)
         {
             if (email != watermakEmail && password != watermakPassword)
             {
+                LogUtils.AppendLogText(LogUtils.LoginLog, "Comprobando las credenciales introducidas...");
+
                 UserData currentUser = DBConnection.CheckLogin(email, password, md5);
 
                 if (currentUser == null)
                 {
+                    LogUtils.AppendLogError(LogUtils.LoginLog, "Se ha producido un error al conectar con la base de datos.");
                     Error.Text = "Error de conexión.";
                     Error.Visibility = Visibility.Visible;
                 }
                 else if (currentUser.ID == 0)
                 {
+                    LogUtils.AppendLogWarn(LogUtils.LoginLog, "Las credenciales introducidas no concuerdan con las de ningún usuario.");
                     Error.Text = "Email o contraseña incorrectos.";
                     Error.Visibility = Visibility.Visible;
                 }
                 else
                 {
+                    LogUtils.AppendLogText(LogUtils.LoginLog, "Las credenciales introducidas son correctas.");
                     if (RememberMe.IsChecked == true)
                     {
+                        LogUtils.AppendLogText(LogUtils.LoginLog, "Remember me estaba marcado por lo que se procede guardar las credenciales en el fichero de autologin.");
+
                         if (!Directory.Exists(Path.GetDirectoryName(AutoLoginPath)))
                             Directory.CreateDirectory(Path.GetDirectoryName(AutoLoginPath));
                         using (BinaryWriter bw = new BinaryWriter(File.Open(AutoLoginPath, FileMode.Create)))
@@ -156,16 +170,23 @@ namespace Cross_Game.Windows
                         }
                     }
 
+                    LogUtils.AppendLogText(LogUtils.LoginLog, "Iniciando instancia de la ventana principal...");
+
                     currentUser.SyncLocalMachine();
                     var mainWindow = new MainWindow
                     {
                         CurrentUser = currentUser
                     };
                     mainWindow.Show();
+
+                    LogUtils.AppendLogText(LogUtils.LoginLog, "Cerrando ventana para logearse.");
+
                     Close();
                 }
             }
                 
         }
+
+        private void Window_Closed(object sender, EventArgs e) => LogUtils.AppendLogFooter(LogUtils.LoginLog);
     }
 }

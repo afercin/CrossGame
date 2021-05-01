@@ -11,7 +11,8 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
         MouseDown="Login_OnMouseDown"
-        Title="Cross Game - Login" Height="450" Width="380">
+        Title="Cross Game - Login" Height="450" Width="380"
+        Closed="Window_Closed">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
