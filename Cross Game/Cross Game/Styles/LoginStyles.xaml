@@ -14,18 +14,31 @@
         </Style.Triggers>
     </Style>
 
-    <Style x:Key="CheckTextStyle" TargetType="TextBlock">
+    <Style x:Key="CheckStyle" TargetType="CheckBox">
         <Setter Property="FontSize" Value="14"/>
         <Setter Property="Margin" Value="0 -2 0 0"/>
-        <Setter Property="Foreground" Value="White"/>
-        <Setter Property="Opacity" Value="0.5"/>
+        <Setter Property="Foreground" Value="#AFAFAF"/>
+        <Setter Property="Opacity" Value="0.7"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Cursor" Value="Hand"/>
-                <Setter Property="TextDecorations" Value="Underline"/>
-                <Setter Property="Opacity" Value="0.6"/>
+                <Setter Property="Opacity" Value="0.8"/>
+            </Trigger>
+            <Trigger Property="IsChecked" Value="True">
+                <Setter Property="Foreground" Value="#FFF"/>
             </Trigger>
         </Style.Triggers>
+        <Style.Resources>
+            <Style TargetType="TextBlock">
+                <Setter Property="Opacity" Value="0.8"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding ElementName=RememberMe, Path=IsMouseOver}" Value="True">
+                        <Setter Property="TextDecorations" Value="Underline"/>
+                        <Setter Property="Opacity" Value="1.0"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Style.Resources>
     </Style>
     
     <Style x:Key="ErrorTextStyle" TargetType="TextBlock">

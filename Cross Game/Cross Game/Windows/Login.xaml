@@ -77,12 +77,12 @@
                         Background="{Binding ElementName=Password, Path=Foreground}"/>
 
                 <CheckBox Name="RememberMe" 
-                          Margin="64 15 60 0">
+                          Margin="64 15 60 0"
+                          Style="{StaticResource CheckStyle}">
                     <TextBlock Name="CheckText"
                                Text="Recordar credenciales"
                                GotFocus="Field_GotFocus"
-                               LostFocus="Field_LostFocus"
-                               Style="{StaticResource CheckTextStyle}"/>
+                               LostFocus="Field_LostFocus"/>
                 </CheckBox>
 
                 <StackPanel Margin="60 5">
