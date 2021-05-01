@@ -137,12 +137,11 @@
       <DependentUpon>CustomMessageBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="DataManipulation\Audio.cs" />
-    <Compile Include="Connection\DXKeyboardSimulator.cs" />    
+    <Compile Include="Connection\DXKeyboardSimulator.cs" />
     <Compile Include="Connection\MouseSimulator.cs" />
-	<Compile Include="DataManipulation\SavingWaveProvider.cs" />
+    <Compile Include="DataManipulation\SavingWaveProvider.cs" />
     <Compile Include="DataManipulation\Screen.cs" />
     <Compile Include="DBConnection.cs" />
-    <Compile Include="CrossGameExceptions.cs" />
     <Compile Include="Windows\EditComputerParams.xaml.cs">
       <DependentUpon>EditComputerParams.xaml</DependentUpon>
     </Compile>
@@ -150,9 +149,6 @@
       <DependentUpon>Login.xaml</DependentUpon>
     </Compile>
     <Compile Include="LogUtils.cs" />
-    <Compile Include="prueba.xaml.cs">
-      <DependentUpon>prueba.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Windows\UserDisplay.xaml.cs">
       <DependentUpon>UserDisplay.xaml</DependentUpon>
     </Compile>
@@ -200,10 +196,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Windows\Login.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="prueba.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

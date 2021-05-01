@@ -1,5 +1,5 @@
-﻿using System.IO;
-using System.IO.Compression;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -23,7 +23,7 @@ namespace Cross_Game
         public static string GetPublicIPAddress()
         {
             if (!InternetConnection())
-                throw new InternetConnectionException("You has not internet connection");
+                throw new Exception("You has not internet connection");
             string address;
             WebRequest request = WebRequest.Create("http://checkip.dyndns.org/");
             using (WebResponse response = request.GetResponse())
@@ -41,7 +41,7 @@ namespace Cross_Game
         private static string GetLocalIPAddress()
         {
             if (!InternetConnection())
-                throw new InternetConnectionException("You has not internet connection");
+                throw new Exception("You has not internet connection");
             return ((IPEndPoint)new UdpClient("8.8.8.8", 1).Client.LocalEndPoint).Address.ToString();
         }
 
