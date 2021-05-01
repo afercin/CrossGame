@@ -155,8 +155,15 @@ namespace Cross_Game.Connection
 
             foreach (Sockets sockets in collection)
             {
-                LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"Desconectando al cliente {(sockets.tcpSocket.RemoteEndPoint as IPEndPoint).Address.ToString()}...");
-                DisconnectClient(sockets);
+                try
+                {
+                    LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"Desconectando al cliente {(sockets.tcpSocket.RemoteEndPoint as IPEndPoint).Address.ToString()}...");
+                    DisconnectClient(sockets);
+                }
+                catch
+                {
+
+                }
             }
 
             currentComputer.N_connections = 0;
