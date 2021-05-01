@@ -6,36 +6,36 @@ namespace Cross_Game.DataManipulation
     [Flags]
     enum InputType
     {
-        Mouse = 0,
+        Mouse    = 0,
         Keyboard = 1,
         Hardware = 2
     }
     [Flags]
     enum KeyEventF
     {
-        KeyDown = 0x0000,
+        KeyDown     = 0x0000,
         ExtendedKey = 0x0001,
-        KeyUp = 0x0002,
-        Unicode = 0x0004,
-        Scancode = 0x0008,
+        KeyUp       = 0x0002,
+        Unicode     = 0x0004,
+        Scancode    = 0x0008,
     }
     [Flags]
     enum MouseEventFlags
     {
-        LeftDown = 0x00000002,
-        LeftUp = 0x00000004,
-        MiddleDown = 0x00000020,
-        MiddleUp = 0x00000040,
-        Move = 0x00000001,
-        Absolute = 0x00008000,
-        RightDown = 0x00000008,
-        RightUp = 0x00000010,
-        Wheel = 0x00000800
+        Move             = 0x00000001,
+        MouseLButtonDown = 0x00000002,
+        MouseLButtonUp   = 0x00000004,
+        MouseRButtonDown = 0x00000008,
+        MouseRButtonUp   = 0x00000010,
+        MouseMButtonDown = 0x00000020,
+        MouseMButtonUp   = 0x00000040,
+        Wheel            = 0x00000800,
+        Absolute         = 0x00008000
     }
     [Flags]
     enum MonitorOptions
     {
-        MONITOR_DEFAULTTONULL = 0x00000000,
+        MONITOR_DEFAULTTONULL    = 0x00000000,
         MONITOR_DEFAULTTOPRIMARY = 0x00000001,
         MONITOR_DEFAULTTONEAREST = 0x00000002
     }
