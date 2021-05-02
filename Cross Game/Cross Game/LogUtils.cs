@@ -12,6 +12,7 @@ namespace Cross_Game
         public static readonly string ClientConnectionLog = Path.Combine(LogsFolder, "ClientConnection.log");
         public static readonly string ServerConnectionLog = Path.Combine(LogsFolder, "ServerConnection.log");
         public static readonly string DatabaseErrorsLog = Path.Combine(LogsFolder, "DatabaseErrors.log");
+        public static readonly string ConnectionErrorsLog = Path.Combine(LogsFolder, "ConnectionErrors.log");
 
 
         public static void AppendLogHeader(string logPath)

@@ -38,10 +38,19 @@ namespace Cross_Game.Windows
 
             WaitSlider.SetActions(() =>
             {
-                CurrentUser.SyncLocalMachine();
+                try
+                {
+                    CurrentUser.SyncLocalMachine();
 
-                server = new RTDPServer();
-                server.Start(CurrentUser.localMachine);
+                    server = new RTDPServer();
+                    server.Start(CurrentUser);
+                }
+                catch (InternetConnectionException ex)
+                {
+                    LogUtils.AppendLogHeader(LogUtils.ConnectionErrorsLog);
+                    LogUtils.AppendLogError(LogUtils.ConnectionErrorsLog, ex.Message);
+                    LogUtils.AppendLogFooter(LogUtils.ConnectionErrorsLog);
+                }
             }, () =>
             {
                 server.Stop();
@@ -104,13 +113,20 @@ namespace Cross_Game.Windows
 
         private void SyncData()
         {
-            foreach (Computer c in computerList)
+            try
             {
-                c.UpdateStatus();
                 CurrentUser.SyncLocalMachine();
+                foreach (Computer c in computerList)
+                    c.UpdateStatus();
             }
-            CurrentUser.SyncLocalMachine();
+            catch (InternetConnectionException e)
+            {
+                LogUtils.AppendLogHeader(LogUtils.ConnectionErrorsLog);
+                LogUtils.AppendLogError(LogUtils.ConnectionErrorsLog, e.Message);
+                LogUtils.AppendLogFooter(LogUtils.ConnectionErrorsLog);
+            }
         }
+
         private void Computer_Clicked(object sender, EventArgs e)
         {
             ComputerData pc = (sender as ComputerData);
