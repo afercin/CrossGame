@@ -148,7 +148,7 @@ namespace Cross_Game.Connection
             }
 
             dataSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            dataSocket.Bind(new IPEndPoint(IPAddress.Parse(serverIP), Computer.Udp));
+            dataSocket.Bind(new IPEndPoint(IPAddress.Any, Computer.Udp));
 
             receivePetitionThread = new Thread(() => ReceivePetition(petitionsSocket));
             receivePetitionThread.IsBackground = true;
