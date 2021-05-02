@@ -18,7 +18,7 @@ namespace Cross_Game.Controllers
 
         private readonly Brush red = new SolidColorBrush(Color.FromRgb(240, 30, 30));
         private readonly Brush blue = new SolidColorBrush(Color.FromRgb(50, 157, 201));
-        private readonly Brush yellow = new SolidColorBrush(Color.FromRgb(240, 30, 30));
+        private readonly Brush yellow = new SolidColorBrush(Color.FromRgb(190, 170, 40));
         private readonly Brush gray = new SolidColorBrush(Color.FromRgb(224, 224, 224));
 
         public readonly ComputerData pc;
@@ -56,29 +56,30 @@ namespace Cross_Game.Controllers
             if (pc.Status != -1)
             {
                 Connections.Text = pc.Status == 1 ? $"{pc.N_connections}/{pc.Max_connections}" : "";
-                if (pc.N_connections == 0)
+                switch (pc.Status)
                 {
-                    switch (pc.Status)
-                    {
-                        case 0:
-                            ComputerBorder.BorderBrush = gray;
-                            Icon.Kind = PackIconMaterialKind.MonitorOff;
-                            break;
-                        case 1:
+                    case 0:
+                        ComputerBorder.BorderBrush = gray;
+                        Icon.Kind = PackIconMaterialKind.MonitorOff;
+                        break;
+                    case 1:
+
+                        if (pc.N_connections == 0)
+                        {
                             ComputerBorder.BorderBrush = blue;
                             Icon.Kind = PackIconMaterialKind.MonitorClean;
-                            break;
-                    }
-                }
-                else if (pc.N_connections == -1 || pc.N_connections == pc.Max_connections)
-                {
-                    Icon.Kind = PackIconMaterialKind.MonitorDashboard;
-                    ComputerBorder.BorderBrush = red;
-                }
-                else
-                {
-                    Icon.Kind = PackIconMaterialKind.MonitorEye;
-                    ComputerBorder.BorderBrush = yellow;
+                        }
+                        else if (pc.N_connections == pc.Max_connections)
+                        {
+                            Icon.Kind = PackIconMaterialKind.MonitorDashboard;
+                            ComputerBorder.BorderBrush = red;
+                        }
+                        else
+                        {
+                            Icon.Kind = PackIconMaterialKind.MonitorEye;
+                            ComputerBorder.BorderBrush = yellow;
+                        }
+                        break;
                 }
 
                 currentIcon = Icon.Kind;

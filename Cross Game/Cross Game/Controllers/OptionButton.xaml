@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:iconpacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d" 
              MouseLeftButtonDown="Option_MouseLeftButtonDown"
              MouseLeftButtonUp="Option_MouseLeftButtonUp"
@@ -11,25 +12,33 @@
              Name="Option"
              Height="55" d:DesignWidth="180">
     <Grid>
-        <StackPanel Orientation="Horizontal">
-            <Border Name="OverEffect"
-                    Width="8"
-                    Background="#3095bf"
-                    Opacity="0"/>
-            <Grid Margin="3 0 0 0">
-                <Canvas Name="BackColor"
-                        Background="#292728"
-                        Opacity="0"/>
-                <TextBlock Text="{Binding Name, ElementName=Option}" 
-                           Foreground="#E0E0E0" 
-                           TextAlignment="Left" 
-                           FontWeight="SemiBold"
-                           VerticalAlignment="Center"
-                           FontSize="16" 
-                           Width="150" 
-                           Margin="16,0,0,0"/>
-            </Grid>
-
+        <Border Name="BackColor"
+                CornerRadius="10"
+                Opacity="0">
+            <Border.Background>
+                <LinearGradientBrush>
+                    <GradientStop Color="#3095bf" Offset="0.0" />
+                    <GradientStop Color="#111" Offset="0.6"/>
+                </LinearGradientBrush>
+            </Border.Background>
+        </Border>
+        <StackPanel Orientation="Horizontal"
+                    Margin="16 0 0 0">
+            <iconpacks:PackIconMaterial Name="Icon"
+                                        Kind="{Binding IconType, ElementName=Option}" 
+                                        Width="30"
+                                        Height="auto"
+                                        VerticalAlignment="Center" 
+                                        HorizontalAlignment="Left" 
+                                        Foreground="#CFFF"/>
+            <TextBlock Text="{Binding Name, ElementName=Option}" 
+                       Foreground="#CFFF" 
+                       TextAlignment="Left" 
+                       FontWeight="SemiBold"
+                       VerticalAlignment="Center"
+                       FontSize="16" 
+                       Margin="20,0,0,0"/>
+            
         </StackPanel>
     </Grid>
 </UserControl>    

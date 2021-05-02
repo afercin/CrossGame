@@ -49,12 +49,13 @@
             
             <TextBlock Text="Nombre:" 
                        Grid.Row="0" 
+                       Margin="3" 
                        Grid.ColumnSpan="2" 
                        Style="{StaticResource FlatTextStyle}"/>
             
             <TextBox Name="ComputerName" 
                      Grid.Row="1" 
-                       Grid.ColumnSpan="2" 
+                     Grid.ColumnSpan="2" 
                      Margin="3" 
                      FontSize="13"/>
             
@@ -62,6 +63,7 @@
             
             <TextBlock Text="Puerto TCP:" 
                        Grid.Row="2" 
+                       Margin="3" 
                        Grid.Column="0" 
                        Style="{StaticResource FlatTextStyle}"/>
             <controllers:NumericUpDown x:Name="TCP" 
@@ -73,6 +75,7 @@
             
             <TextBlock Text="Puerto UDP:" 
                        Grid.Row="2" 
+                       Margin="3" 
                        Grid.Column="1" 
                        Style="{StaticResource FlatTextStyle}"/>
 
@@ -87,6 +90,7 @@
 
             <TextBlock Text="Conexiones máximas:"
                        Grid.Row="4" 
+                       Margin="3" 
                        Grid.Column="0" 
                        Style="{StaticResource FlatTextStyle}"/>
 
@@ -99,6 +103,7 @@
             
             <TextBlock Text="FPS:"
                        Grid.Row="4" 
+                       Margin="3" 
                        Grid.Column="1" 
                        Style="{StaticResource FlatTextStyle}"/>
 
@@ -111,6 +116,7 @@
 
             <Button Grid.Row="6" 
                     Grid.Column="0" 
+                    Margin="3" 
                     Style="{StaticResource FlatButtonStyle}" 
                     Click="SaveButton_Click">
                 <TextBlock Text="Guardar cambios"/>
@@ -118,6 +124,7 @@
             
             <Button Grid.Row="6" 
                     Grid.Column="1" 
+                    Margin="3" 
                     Style="{StaticResource FlatButtonStyle}" 
                     Click="CloseButton_Click">
                 <TextBlock Text="Cancelar"/>

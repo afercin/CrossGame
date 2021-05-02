@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MahApps.Metro.IconPacks;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,15 +23,22 @@ namespace Cross_Game.Controllers
     {
         public bool Active
         {
-            get => (bool)GetValue(ValuePropertyChanged);
+            get => (bool)GetValue(ActivePropertyChanged);
             set
             {
-                SetValue(ValuePropertyChanged, value);
-                OverEffect.Opacity = value ? 1.0 : 0.0;
+                SetValue(ActivePropertyChanged, value);
+                BackColor.Opacity = Active ? 0.75 : 0.0;
             }
         }
 
-        public static readonly DependencyProperty ValuePropertyChanged = DependencyProperty.Register("Active", typeof(bool), typeof(OptionButton), new PropertyMetadata(false));
+        public PackIconMaterialKind IconType
+        {
+            get => (PackIconMaterialKind)GetValue(IconTypePropertyChanged);
+            set => SetValue(IconTypePropertyChanged, value);
+        }
+
+        public static readonly DependencyProperty ActivePropertyChanged = DependencyProperty.Register("Active", typeof(bool), typeof(OptionButton), new PropertyMetadata(false));
+        public static readonly DependencyProperty IconTypePropertyChanged = DependencyProperty.Register("IconType", typeof(PackIconMaterialKind), typeof(OptionButton), new PropertyMetadata(PackIconMaterialKind.Cog));
 
         public OptionButton()
         {
@@ -40,15 +48,12 @@ namespace Cross_Game.Controllers
         private void Option_MouseEnter(object sender, MouseEventArgs e)
         {
             if (!Active)
-                OverEffect.Opacity = 0.5;
-            BackColor.Opacity = 0.5;
+                BackColor.Opacity = 0.5;
         }
 
         private void Option_MouseLeave(object sender, MouseEventArgs e)
         {
-            if (!Active)
-                OverEffect.Opacity = 0.0;
-            BackColor.Opacity = 0.0;
+            BackColor.Opacity = Active ? 0.75 : 0.0;
         }
 
         private void Option_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

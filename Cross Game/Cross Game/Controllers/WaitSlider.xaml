@@ -39,7 +39,7 @@
         <Border x:Name="BackgroundBorder"
                 HorizontalAlignment="Left"
                 Background="#333"
-                BorderBrush="#404040"
+                BorderBrush="#4f4b4d"
                 BorderThickness="1"
                 CornerRadius="10"
                 Width="50"

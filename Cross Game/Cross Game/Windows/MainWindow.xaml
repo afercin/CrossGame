@@ -15,8 +15,8 @@
         ResizeMode="CanResizeWithGrip"
         WindowStartupLocation="CenterScreen"        
         Title="MainWindow"
-        MinWidth="833" MinHeight="450"
-        Width="833" Height="450" 
+        MinWidth="857" MinHeight="450"
+        Width="857" Height="450" 
         Name="mainWindow"
         SourceInitialized="Window_SourceInitialized"
         Closed="MainWindow_Closed">
@@ -24,14 +24,15 @@
         <ResourceDictionary Source="/Styles/Styles.xaml"/>
     </Window.Resources>
     <Border Background="#111"
-            CornerRadius="4">
+            BorderThickness="1"
+            BorderBrush="#0d2834">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="180"/>
+                <ColumnDefinition Width="200"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="32"/>
+                <RowDefinition Height="30"/>
                 <RowDefinition/>
                 <RowDefinition Height="30"/>
             </Grid.RowDefinitions>
@@ -42,19 +43,36 @@
                                       MaximizeButton="True"
                                       MinimizeButton="True"
                                       MenuButtonClick="WindowHeader_MenuButtonClick"/>
-
             <StackPanel Grid.Row="1"
                         Grid.Column="0"
-                        Margin="6,0,0,0">
-                <controllers:OptionButton x:Name="Ordenadores" MouseLeftButtonDown="OptionButton_MouseLeftButtonDown"/>
-                <controllers:OptionButton x:Name="Amigos" MouseLeftButtonDown="OptionButton_MouseLeftButtonDown"/>
-                <controllers:OptionButton x:Name="Transmisión" MouseLeftButtonDown="OptionButton_MouseLeftButtonDown"/>
-            </StackPanel>
+                        Margin="5 0 0 0">
+                <controllers:OptionButton x:Name="Ordenadores" 
+                                          Margin="5 1"
+                                          IconType="MonitorScreenshot"
+                                          MouseLeftButtonDown="OptionButton_MouseLeftButtonDown" />
+                <controllers:OptionButton x:Name="Amigos"
+                                          Margin="5 1"
+                                          IconType="AccountGroup"
+                                          MouseLeftButtonDown="OptionButton_MouseLeftButtonDown"/>
+                <controllers:OptionButton x:Name="Transmisión" 
+                                          Margin="5 1"
+                                          MouseLeftButtonDown="OptionButton_MouseLeftButtonDown"/>
 
-            <Grid Grid.Row="1" 
-                  Grid.Column="1" 
-                  Background="#292728"
-                  Margin="0 0 3 3">
+            </StackPanel>
+            
+            <Image Source="/Images/CrossGame.png"
+                   Grid.Row="1"
+                   Width="140"
+                   Opacity="0.95"
+                   Margin="0 0 0 20"
+                   VerticalAlignment="Bottom" />
+
+            <Border Grid.Row="1" 
+                    Grid.Column="1" 
+                    Background="#292728"
+                    Margin="0 0 3 3"
+                    BorderThickness="1"
+                    BorderBrush="#464244">
                 <ScrollViewer Name="MyComputers"
                               Padding="5" 
                               HorizontalScrollBarVisibility="Disabled"
@@ -73,7 +91,7 @@
             <Button Name="Cancel" Grid.Row="1" Margin="3" Style="{StaticResource FlatButtonStyle}" Width="130" HorizontalAlignment="Right" Click="Cancel_Click">
                 <TextBlock Text="Cancelar"/>
             </Button-->
-            </Grid>
+            </Border>
             <StackPanel Grid.Row="2"
                         Orientation="Horizontal"
                         VerticalAlignment="Center"
@@ -91,8 +109,11 @@
                 <TextBlock Text="1234" Name="UserNumber" Foreground="#E0E0E0"/>
 
             </StackPanel>
+            
             <Grid Grid.Row="2"
                   Grid.Column="1"
+                  Margin="0 0 0 0"
+                  Width="auto"
                   HorizontalAlignment="Left">
                 <StackPanel Orientation="Horizontal" >
                     <TextBlock Text="Modo servidor:"
@@ -101,6 +122,12 @@
                                Style="{StaticResource FlatTextStyle}"/>
                     <controllers:WaitSlider x:Name="WaitSlider"/>
                 </StackPanel>
+                
+                <iconpacks:PackIconMaterial Name="ConnectionStatus"
+                                            Kind="wifi" 
+                                            VerticalAlignment="Center" 
+                                            HorizontalAlignment="Right" 
+                                            Foreground="Green"/>
             </Grid>
 
         </Grid>
