@@ -6,8 +6,13 @@ namespace Cross_Game.Connection
 {
     public class DXKeyboardSimulator
     {
-        private static bool[] pressed = new bool[0xFF];
-        public static void SendKey(int key, Petition petition)
+        private bool[] pressed;
+
+        public DXKeyboardSimulator()
+        {
+            pressed = new bool[0xFF];
+        }
+        public void SendKey(int key, Petition petition)
         {
             try
             {
@@ -42,14 +47,14 @@ namespace Cross_Game.Connection
             }
         }
 
-        public static void ReleaseAllKeys()
+        public void ReleaseAllKeys()
         {
             foreach(int key in Enum.GetValues(typeof(DirectXKeyStrokes)))
                 if (pressed[key])
                     SendKey(key, Petition.KeyboardKeyUp);
         }
 
-        public enum DirectXKeyStrokes
+        private enum DirectXKeyStrokes
         {
             DIK_UNKNOW = 0x00,
 

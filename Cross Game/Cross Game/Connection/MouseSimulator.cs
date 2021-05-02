@@ -5,11 +5,16 @@ namespace Cross_Game.Connection
 {
     class MouseSimulator
     {
-        private static bool[] pressed = new bool[3];
+        private bool[] pressed;
 
-        public static void Move(int x, int y) => Win32API.SetCursorPos(x, y);
+        public MouseSimulator()
+        {
+            pressed = new bool[3];
+        }
 
-        public static void Button(Petition petition)
+        public void Move(int x, int y) => Win32API.SetCursorPos(x, y);
+
+        public void Button(Petition petition)
         {
             switch (petition)
             {
@@ -23,9 +28,9 @@ namespace Cross_Game.Connection
             MouseEvent((MouseEventFlags)Enum.Parse(typeof(MouseEventFlags), petition.ToString()));
         }
 
-        public static void Wheel(int delta) => MouseEvent(MouseEventFlags.Wheel, delta);
+        public void Wheel(int delta) => MouseEvent(MouseEventFlags.Wheel, delta);
 
-        public static void MouseEvent(MouseEventFlags value, int delta = 0)
+        private void MouseEvent(MouseEventFlags value, int delta = 0)
         {
             if (!Win32API.GetCursorPos(out POINT currentMousePosition))
                 currentMousePosition = new POINT { x = 0, y = 0 };
@@ -37,7 +42,7 @@ namespace Cross_Game.Connection
                                  0);
         }
 
-        public static void ReleaseAllClicks()
+        public void ReleaseAllClicks()
         {
             if (pressed[0])
                 MouseEvent(MouseEventFlags.MouseLButtonUp);

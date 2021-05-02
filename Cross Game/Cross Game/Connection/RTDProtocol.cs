@@ -102,7 +102,7 @@ namespace Cross_Game.Connection
 
         protected void ReceivePetition(Socket s)
         {
-            string IP = (s.RemoteEndPoint as IPEndPoint).Address.ToString();
+            IPAddress IP = (s.RemoteEndPoint as IPEndPoint).Address;
             int errors = 0;
             try
             {

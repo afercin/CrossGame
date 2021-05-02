@@ -11,7 +11,7 @@ namespace Cross_Game.Connection
 {
     class RTDPServer : RTDProtocol
     {
-        private Dictionary<string, Sockets> clientSockets;
+        private Dictionary<IPAddress, Client> clientSockets;
         private Thread listenThread;
         private Thread CaptureScreen;
         private Thread CheckCursorShape;
@@ -26,7 +26,7 @@ namespace Cross_Game.Connection
         public override void Start(ComputerData computerData)
         {
             if (!IsConnected)
-                clientSockets = new Dictionary<string, Sockets>();
+                clientSockets = new Dictionary<IPAddress, Client>();
 
             Computer = computerData;
             frameRate = 1000 / Computer.FPS;
@@ -79,11 +79,24 @@ namespace Cross_Game.Connection
                         udpClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                         udpClientSocket.Connect(new IPEndPoint(clientAddress.Address, Computer.Udp));
 
-                        clientSockets[clientAddress.Address.ToString()] = new Sockets()
+                        Client client = new Client()
                         {
                             tcpSocket = tcpClientSocket,
-                            udpSocket = udpClientSocket
+                            udpSocket = udpClientSocket,
                         };
+
+                        if (true)
+                        {
+                            client.mouse = new MouseSimulator();
+                            client.keyboard = new DXKeyboardSimulator();
+                        }
+                        else
+                        {
+                            client.mouse = null;
+                            client.keyboard = null;
+                        }
+
+                        clientSockets[clientAddress.Address] = client;
 
                         receivePetitionThread = new Thread(() => ReceivePetition(tcpClientSocket));
                         receivePetitionThread.IsBackground = true;
@@ -138,7 +151,7 @@ namespace Cross_Game.Connection
         public override void Stop()
         {
             LogUtils.AppendLogText(LogUtils.ServerConnectionLog, "Desconectando servidor...");
-            Sockets[] collection = new Sockets[clientSockets.Count];
+            Client[] collection = new Client[clientSockets.Count];
             clientSockets.Values.CopyTo(collection, 0);
 
             listenSocket?.Close();
@@ -150,7 +163,7 @@ namespace Cross_Game.Connection
             CaptureScreen?.Abort();
             CheckCursorShape?.Abort();
 
-            foreach (Sockets sockets in collection)
+            foreach (Client sockets in collection)
             {
                 try
                 {
@@ -163,9 +176,6 @@ namespace Cross_Game.Connection
                 }
             }
 
-            DXKeyboardSimulator.ReleaseAllKeys();
-            MouseSimulator.ReleaseAllClicks();
-
             Computer.N_connections = 0;
             Computer.Status = 0;
             DBConnection.UpdateComputerInfo(Computer);
@@ -173,16 +183,18 @@ namespace Cross_Game.Connection
             LogUtils.AppendLogFooter(LogUtils.ServerConnectionLog);
         }
 
-        private void DisconnectClient(Sockets clientSockets)
+        private void DisconnectClient(Client clientSockets)
         {
             lock (clientSockets.udpSocket)
             {
                 clientSockets.tcpSocket?.Close();
                 clientSockets.udpSocket?.Close();
+                clientSockets.mouse?.ReleaseAllClicks();
+                clientSockets.keyboard?.ReleaseAllKeys();
             }
         }
 
-        public void CloseConnection(string IP)
+        public void CloseConnection(IPAddress IP)
         {
             LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"Desconectando al cliente {IP}...");
             DisconnectClient(clientSockets[IP]);
@@ -209,7 +221,7 @@ namespace Cross_Game.Connection
         {
             try
             {
-                foreach (Sockets sockets in clientSockets.Values)
+                foreach (Client sockets in clientSockets.Values)
                     SendBuffer(sockets.udpSocket, data);
             }
             catch (InvalidOperationException)
@@ -308,13 +320,14 @@ namespace Cross_Game.Connection
 
         protected override void ReceivePetition(Socket s, byte[] buffer)
         {
+            IPAddress IP = (s.RemoteEndPoint as IPEndPoint).Address;
             Petition petition = (Petition)buffer[0];
             switch (petition)
             {
                 case Petition.MouseMove:
                     float xPos = BitConverter.ToSingle(buffer, 1);
                     float yPos = BitConverter.ToSingle(buffer, 5);
-                    MouseSimulator.Move(Convert.ToInt32(Screen.Display.Width * xPos / 100), Convert.ToInt32(Screen.Display.Height * yPos / 100));
+                    clientSockets[IP].mouse?.Move(Convert.ToInt32(Screen.Display.Width * xPos / 100), Convert.ToInt32(Screen.Display.Height * yPos / 100));
                     break;
                 case Petition.MouseLButtonDown:
                 case Petition.MouseRButtonDown:
@@ -322,24 +335,24 @@ namespace Cross_Game.Connection
                 case Petition.MouseLButtonUp:
                 case Petition.MouseRButtonUp:
                 case Petition.MouseMButtonUp:
-                    MouseSimulator.Button(petition);
+                    clientSockets[IP].mouse?.Button(petition);
                     break;
                 case Petition.MouseWheel:
-                    MouseSimulator.Wheel(BitConverter.ToInt32(buffer, 1));
+                    clientSockets[IP].mouse?.Wheel(BitConverter.ToInt32(buffer, 1));
                     break;
                 case Petition.KeyboardKeyDown:
                 case Petition.KeyboardKeyUp:
-                    DXKeyboardSimulator.SendKey(buffer[1], petition);
+                    clientSockets[IP].keyboard?.SendKey(buffer[1], petition);
                     break;
                 default:
                     throw new Exception();
             }
         }
 
-        private class Sockets
+        private class Client
         {
-            public bool root;
-            public bool privileges;
+            public MouseSimulator mouse;
+            public DXKeyboardSimulator keyboard;
             public Socket tcpSocket;
             public Socket udpSocket;
         }
