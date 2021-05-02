@@ -7,7 +7,7 @@ CREATE TABLE users(
 	name VARCHAR(30) NOT NULL,
 	number INT(4) NOT NULL,
 	email VARCHAR(50) NOT NULL UNIQUE,
-	password CHAR(32) NOT NULL,
+	password CHAR(64) NOT NULL,
 	status INT(1) NOT NULL, -- 0 => Disconnected, 1 => Connected, 2 => Playing, 3 => Bussy, 4 => Invisible.
 	CONSTRAINT UC_Name_Number UNIQUE(name, number)
 );
