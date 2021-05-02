@@ -67,7 +67,7 @@ namespace Cross_Game
 
             try
             {
-                if ((DateTime.Now - File.GetCreationTime(LoginLog)).TotalDays >= 1 || true)
+                if ((DateTime.Now - File.GetCreationTime(LoginLog)).TotalDays >= 1)
                 {
                     Directory.Delete(LogsFolder, true);
                     Thread.Sleep(50);
