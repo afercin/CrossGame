@@ -106,6 +106,77 @@ namespace Cross_Game
             return sb.ToString();
         }
 
+        public static int GetUserPriority(UserData currentUser, string clientMAC)
+        {
+            int priority = 0;
+            if (OpenConnection())
+            {
+                int clientUserID = 0;
+                MySqlDataReader dataReader = Query(
+                    $"SELECT owner " +
+                    $"FROM computers " +
+                    $"WHERE MAC = '{clientMAC}'"
+                    );
+                if (dataReader.HasRows)
+                {
+                    dataReader.Read();
+                    clientUserID = (int)dataReader["owner"];
+                }
+
+                dataReader.Close();
+
+                if (clientUserID != 0)
+                {
+                    if (currentUser.ID == clientUserID)
+                        priority = 2;
+                    else
+                    {
+                        dataReader = Query(
+                            $"SELECT * " +
+                            $"FROM users_computers " +
+                            $"WHERE computer_id = '{currentUser.localMachine.MAC}'"
+                            );
+
+                        if (dataReader.HasRows)
+                        {
+                            while (dataReader.Read() && priority == 0)
+                            {
+                                if (clientUserID == (int)dataReader["user_id"])
+                                    priority = 1;
+                            }
+                        }
+
+                        dataReader.Close();
+                    }
+                }
+
+                CloseConnection();
+            }
+            return priority;
+        }
+
+        public static bool IsCorrectComputerIP(string clientMAC, string clientIP)
+        {
+            bool isCorrect = false;
+            if (OpenConnection())
+            {
+                MySqlDataReader dataReader = Query(
+                    $"SELECT LocalIP, PublicIP " +
+                    $"FROM computers " +
+                    $"WHERE MAC = '{clientMAC}'"
+                    );
+                if (dataReader.HasRows)
+                {
+                    dataReader.Read();
+                    isCorrect = clientIP == (string)dataReader["LocalIP"] || clientIP == (string)dataReader["PublicIP"];
+                }
+
+                dataReader.Close();
+                CloseConnection();
+            }
+            return isCorrect;
+        }
+
         public static List<string> GetMyComputers(UserData currentUser)
         {
             List<string> myComputers = new List<string>();

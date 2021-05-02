@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,18 +18,20 @@ namespace Cross_Game.Connection
         private Thread CheckCursorShape;
         private Socket listenSocket;
         private int frameRate;
+        private UserData user;
 
 
         public RTDPServer() : base()
         {
         }
 
-        public override void Start(ComputerData computerData)
+        public void Start(UserData currentUser)
         {
             if (!IsConnected)
                 clientSockets = new Dictionary<IPAddress, Client>();
 
-            Computer = computerData;
+            user = currentUser;
+            Computer = currentUser.localMachine;
             frameRate = 1000 / Computer.FPS;
 
             Computer.Status = 1;
@@ -46,6 +49,9 @@ namespace Cross_Game.Connection
             Socket udpClientSocket;
             IPEndPoint clientAddress;
             Thread receivePetitionThread;
+            string clientMAC;
+            int userPriority = 0;
+
             LogUtils.AppendLogHeader(LogUtils.ServerConnectionLog);
             LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"Comenzando a recibir clientes por el puerto {Computer.Tcp}");
 
@@ -62,10 +68,12 @@ namespace Cross_Game.Connection
                     /***** Esperar y comprobar credenciales del usuario *****/
 
                     ReceiveBuffer(tcpClientSocket, out byte[] buffer, out int bufferSize);
+                    clientMAC = Encoding.ASCII.GetString(buffer, 0, bufferSize);
+                    if (DBConnection.IsCorrectComputerIP(clientMAC, clientAddress.ToString()))
+                        userPriority = DBConnection.GetUserPriority(user, clientMAC);
 
                     /*********************************************************/
-                    UserData checkUser = DBConnection.CheckLogin("afercin@gmail.com", "patata123");
-                    if (checkUser != null && checkUser.ID != 0)
+                    if (userPriority > 0)
                     {
                         LogUtils.AppendLogOk(LogUtils.ServerConnectionLog, $"Cliente {clientAddress.Address.ToString()} aceptado, procediendo a establecer canal de comunicación.");
 
@@ -81,20 +89,12 @@ namespace Cross_Game.Connection
 
                         Client client = new Client()
                         {
+                            mouse = userPriority == 2 ? new MouseSimulator() : null,
+                            keyboard = new DXKeyboardSimulator(),
                             tcpSocket = tcpClientSocket,
-                            udpSocket = udpClientSocket,
+                            udpSocket = udpClientSocket
                         };
 
-                        if (true)
-                        {
-                            client.mouse = new MouseSimulator();
-                            client.keyboard = new DXKeyboardSimulator();
-                        }
-                        else
-                        {
-                            client.mouse = null;
-                            client.keyboard = null;
-                        }
 
                         clientSockets[clientAddress.Address] = client;
 
@@ -110,7 +110,7 @@ namespace Cross_Game.Connection
                     }
                     else
                     {
-                        LogUtils.AppendLogWarn(LogUtils.ServerConnectionLog, $"No se acepta la conexión desde {clientAddress.Address.ToString()}, datos de inicio de sesión incorrectos.");
+                        LogUtils.AppendLogWarn(LogUtils.ServerConnectionLog, $"No se acepta la conexión desde {clientAddress.Address.ToString()}, no es un usuario autorizado.");
                         SendBuffer(tcpClientSocket, new byte[] { Convert.ToByte(Petition.ConnectionRefused) });
                     }
                 }
@@ -206,12 +206,12 @@ namespace Cross_Game.Connection
             {
                 LogUtils.AppendLogText(LogUtils.ServerConnectionLog, "Se han desconectado todos los clientes, reiniciando el servidor...");
                 Stop();
-                Start(Computer);
+                Start(user);
             }
             else if (Computer.N_connections == Computer.Max_connections - 1)
             {
                 LogUtils.AppendLogText(LogUtils.ServerConnectionLog, "El servidor vuelve a tener un espacio libre, volviendo a pedir clientes...");
-                Start(Computer);
+                Start(user);
             }
             else
                 DBConnection.UpdateComputerInfo(Computer);

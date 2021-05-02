@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
@@ -28,111 +29,125 @@ namespace Cross_Game.Connection
         {
         }
 
-        public override void Start(ComputerData computerData)
+        public void Start(ComputerData computerData)
         {
             int err = 0;
             bool connected = false;
 
-            Computer = computerData;
-            serverIP = Computer.PublicIP == ConnectionUtils.GetPublicIPAddress() ? Computer.LocalIP : Computer.PublicIP;
-
-            LogUtils.AppendLogHeader(LogUtils.ClientConnectionLog);
-            LogUtils.AppendLogText(LogUtils.ClientConnectionLog, $"Intentando conectar con {serverIP}:{Computer.Tcp}");
-
-            if (ConnectionUtils.Ping(serverIP))
+            try
             {
-                Thread connectedThread = new Thread(() =>
+                ConnectionUtils.GetComputerNetworkInfo(out string localIP, out string publicIP, out string mac); Computer = computerData;
+
+                serverIP = Computer.PublicIP == publicIP ? Computer.LocalIP : Computer.PublicIP;
+
+                LogUtils.AppendLogHeader(LogUtils.ClientConnectionLog);
+                LogUtils.AppendLogText(LogUtils.ClientConnectionLog, $"Intentando conectar con {serverIP}:{Computer.Tcp}");
+
+                if (ConnectionUtils.Ping(serverIP))
                 {
-
-                    petitionsSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-                    while (!connected && err < 5)
+                    Thread connectedThread = new Thread(() =>
                     {
-                        LogUtils.AppendLogText(LogUtils.ClientConnectionLog, $"Intento de conexión {err + 1} de 5...");
-                        try
+
+                        petitionsSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+                        while (!connected && err < 5)
                         {
-                            petitionsSocket.Connect(new IPEndPoint(IPAddress.Parse(serverIP), Computer.Tcp));
-                            connected = true;
-                        }
-                        catch (SocketException e)
-                        {
-                            LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"No se ha logrado establecer la conexión ({e.SocketErrorCode}).");
-                            if (e.SocketErrorCode == SocketError.TimedOut)
+                            LogUtils.AppendLogText(LogUtils.ClientConnectionLog, $"Intento de conexión {err + 1} de 5...");
+                            try
+                            {
+                                petitionsSocket.Connect(new IPEndPoint(IPAddress.Parse(serverIP), Computer.Tcp));
+                                connected = true;
+                            }
+                            catch (SocketException e)
+                            {
+                                LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"No se ha logrado establecer la conexión ({e.SocketErrorCode}).");
+                                if (e.SocketErrorCode == SocketError.TimedOut)
+                                    err = 5;
+                                err++;
+                            }
+                            catch (ObjectDisposedException)
+                            {
+                                LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"Se ha cerrado la conexión mientras se intentaba conectar al servidor.");
                                 err = 5;
-                            err++;
-                        }
-                        catch (ObjectDisposedException)
-                        {
-                            LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, $"Se ha cerrado la conexión mientras se intentaba conectar al servidor.");
-                            err = 5;
-                        }
-                    }
-                });
-                connectedThread.IsBackground = true;
-                connectedThread.Start();
-
-                if (!connectedThread.Join(10000))
-                    if (err == 0)
-                    {
-                        LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "No se ha logrado establecer conexión (TimedOut).");
-                        connectedThread.Abort();
-                    }
-                    else
-                        connectedThread.Join();
-
-                if (connected)
-                {
-                    LogUtils.AppendLogOk(LogUtils.ClientConnectionLog, "Se ha conseguido establecer conexión con el servidor.");
-                    LogUtils.AppendLogText(LogUtils.ClientConnectionLog, "Mandando credenciales al equipo servidor...");
-
-                    /****** Mandar credenciales y esperar confirmación *******/
-
-                    byte[] credentials = new byte[] { 0 }, buffer = new byte[] { 0 };
-                    SendBuffer(petitionsSocket, credentials);
-                    connectedThread = new Thread(() =>
-                    {
-                        try
-                        {
-                            ReceiveBuffer(petitionsSocket, out buffer, out int bufferSize);
-                        }
-                        catch (SocketException)
-                        {
-                            LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, "Se ha cerrado el socket antes de recibir una respuesta del servidor.");
+                            }
                         }
                     });
                     connectedThread.IsBackground = true;
-
                     connectedThread.Start();
-                    if (!connectedThread.Join(5000))
-                    {
-                        LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "No se ha obtenido la respuesta del servidor (TimedOut).");
-                        connectedThread.Abort();
-                    }
 
-                    /*********************************************************/
+                    if (!connectedThread.Join(10000))
+                        if (err == 0)
+                        {
+                            LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "No se ha logrado establecer conexión (TimedOut).");
+                            connectedThread.Abort();
+                        }
+                        else
+                            connectedThread.Join();
 
-                    if (((Petition)buffer[0]) == Petition.ConnectionAccepted)
+                    if (connected)
                     {
-                        LogUtils.AppendLogOk(LogUtils.ClientConnectionLog, "Conexión establecida con éxito.");
-                        Init();
-                        LogUtils.AppendLogOk(LogUtils.ClientConnectionLog, "Conexión de datos establecida, fin de la configuración.");
+                        LogUtils.AppendLogOk(LogUtils.ClientConnectionLog, "Se ha conseguido establecer conexión con el servidor.");
+                        LogUtils.AppendLogText(LogUtils.ClientConnectionLog, "Mandando credenciales al equipo servidor...");
+
+                        /****** Mandar credenciales y esperar confirmación *******/
+
+                        byte[] buffer = new byte[] { 0 };
+                        SendBuffer(petitionsSocket, Encoding.ASCII.GetBytes(mac));
+                        connectedThread = new Thread(() =>
+                        {
+                            try
+                            {
+                                ReceiveBuffer(petitionsSocket, out buffer, out int bufferSize);
+                            }
+                            catch (SocketException)
+                            {
+                                LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, "Se ha cerrado el socket antes de recibir una respuesta del servidor.");
+                            }
+                        });
+                        connectedThread.IsBackground = true;
+
+                        connectedThread.Start();
+                        if (!connectedThread.Join(10000))
+                        {
+                            LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "No se ha obtenido la respuesta del servidor (TimedOut).");
+                            connectedThread.Abort();
+                        }
+
+                        /*********************************************************/
+
+                        if (((Petition)buffer[0]) == Petition.ConnectionAccepted)
+                        {
+                            LogUtils.AppendLogOk(LogUtils.ClientConnectionLog, "Conexión establecida con éxito.");
+                            Init();
+                            LogUtils.AppendLogOk(LogUtils.ClientConnectionLog, "Conexión de datos establecida, fin de la configuración.");
+                        }
+                        else
+                        {
+                            if (buffer[0] != 0)
+                                LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, "La conexión ha sido rechazada por el servidor.");
+                            Stop();
+                        }
                     }
-                    else
+                    else if (err == 5)
                     {
-                        if (buffer[0] != 0)
-                            LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, "La conexión ha sido rechazada por el servidor.");
-                        petitionsSocket.Close();
+                        LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "El servidor no responde.");
+                        Stop();
                     }
                 }
-                else if (err == 5)
-                    LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "El servidor no responde.");
+                else
+                {
+                    if (ConnectionUtils.HasInternetConnection())
+                        LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "EL servidor no es alcanzable desde el cliente.");
+                    else
+                        LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "El cliente ha perdido la conexión a internet.");
+                    Stop();
+                }
             }
-            else
+            catch (InternetConnectionException)
             {
-                LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, "Servidor inalcanzable.");
-                if (!ConnectionUtils.InternetConnection())
-                    LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "El equipo no tiene acceso a internet");
-            }
+                LogUtils.AppendLogError(LogUtils.ClientConnectionLog, "No se tiene acceso a internet, el proceso no puede continuar.");
+                Stop();
+            }            
         }
 
         protected override void Init()

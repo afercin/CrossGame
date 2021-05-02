@@ -151,7 +151,6 @@ namespace Cross_Game.Connection
 
         protected abstract void ReceivePetition(Socket s, byte[] buffer);
         protected abstract void Init();
-        public abstract void Start(ComputerData computerData);
         public abstract void Stop();
     }
 }
