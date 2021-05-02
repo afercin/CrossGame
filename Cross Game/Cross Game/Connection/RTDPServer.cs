@@ -69,7 +69,7 @@ namespace Cross_Game.Connection
 
                     ReceiveBuffer(tcpClientSocket, out byte[] buffer, out int bufferSize);
                     clientMAC = Encoding.ASCII.GetString(buffer, 0, bufferSize);
-                    if (DBConnection.IsCorrectComputerIP(clientMAC, clientAddress.ToString()))
+                    if (DBConnection.IsCorrectComputerIP(clientMAC, clientAddress.Address.ToString()))
                         userPriority = DBConnection.GetUserPriority(user, clientMAC);
 
                     /*********************************************************/

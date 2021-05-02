@@ -204,7 +204,7 @@ namespace Cross_Game
             currentMachine.Name = Environment.MachineName;
             currentMachine.Max_connections = 1;
             currentMachine.N_connections = 0;
-            currentMachine.Status = 1;
+            currentMachine.Status = 0;
             currentMachine.FPS = 30;
             if (OpenConnection())
             {
