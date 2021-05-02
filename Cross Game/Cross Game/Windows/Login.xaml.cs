@@ -26,7 +26,7 @@ namespace Cross_Game.Windows
         private bool passwordWatermark;
 
         public Login()
-        {            
+        {
             LogUtils.CleanLogs();
 
             InitializeComponent();
@@ -205,7 +205,7 @@ namespace Cross_Game.Windows
 
                                 try
                                 {
-                                    using (FileStream fileStream = new FileStream(AutoLoginPath, FileMode.OpenOrCreate))
+                                    using (FileStream fileStream = new FileStream(AutoLoginPath, FileMode.Create))
                                     {
                                         using (Aes aes = Aes.Create())
                                         {
@@ -253,14 +253,31 @@ namespace Cross_Game.Windows
 
         private byte[] GetVolumeInfo()
         {
-            ManagementObjectSearcher moSearcher = new ManagementObjectSearcher("SELECT VolumeSerialNumber, SystemName FROM Win32_LogicalDisk WHERE DeviceID = 'C:'");
-            byte[] info = null;
-            foreach (ManagementObject wmi_HD in moSearcher.Get())
+            byte[] SN = Encoding.ASCII.GetBytes(GetWindowDiskSN() + Environment.MachineName);
+            Array.Resize(ref SN, 16);
+            return SN;
+        }
+
+        public static string GetWindowDiskSN()
+        {
+            try
             {
-                info = Encoding.ASCII.GetBytes(wmi_HD["VolumeSerialNumber"] + "" + wmi_HD["SystemName"]);
+                string windowsDriveLetter = Path.GetPathRoot(Environment.GetFolderPath(Environment.SpecialFolder.System)).Split('\\')[0];
+                using (var partitions = new ManagementObjectSearcher("ASSOCIATORS OF {Win32_LogicalDisk.DeviceID='" + windowsDriveLetter + "'} WHERE ResultClass=Win32_DiskPartition"))
+                    foreach (var partition in partitions.Get())
+                        using (var drives = new ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskPartition.DeviceID='" + partition["DeviceID"] + "'} WHERE ResultClass=Win32_DiskDrive"))
+                            foreach (var drive in drives.Get())
+                                return (string)drive["SerialNumber"];
             }
-            Array.Resize(ref info, 16);
-            return info;
+            catch
+            {
+                LogUtils.AppendLogError(LogUtils.LoginLog, "404");
+                using (var disks = new ManagementObjectSearcher("SELECT SerialNumber FROM Win32_DiskDrive"))
+                    foreach (var disk in disks.Get())
+                        return disk["SerialNumber"].ToString();
+            }
+            
+            return "<unknown>";
         }
 
         private void Window_Closed(object sender, EventArgs e) => LogUtils.AppendLogFooter(LogUtils.LoginLog);
