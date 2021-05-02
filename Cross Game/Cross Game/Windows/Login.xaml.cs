@@ -234,12 +234,19 @@ namespace Cross_Game.Windows
 
                             LogUtils.AppendLogText(LogUtils.LoginLog, "Iniciando instancia de la ventana principal...");
 
-                            currentUser.SyncLocalMachine();
-                            var mainWindow = new MainWindow
+                            try
                             {
-                                CurrentUser = currentUser
-                            };
-                            mainWindow.Show();
+                                currentUser.SyncLocalMachine();
+                                var mainWindow = new MainWindow
+                                {
+                                    CurrentUser = currentUser
+                                };
+                                mainWindow.Show();
+                            }
+                            catch (InternetConnectionException)
+                            {
+                                LogUtils.AppendLogError(LogUtils.LoginLog, "No se tiene acceso a internet.");
+                            }
 
                             LogUtils.AppendLogText(LogUtils.LoginLog, "Cerrando ventana para logearse.");
 
