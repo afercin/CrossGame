@@ -66,7 +66,7 @@ namespace Cross_Game
 
         private static bool NonQuery(string sqlQuery) => new MySqlCommand(sqlQuery, connection).ExecuteNonQuery() > 0;
 
-        public static UserData CheckLogin(string email, string password, bool md5 = false)
+        public static UserData CheckLogin(string email, string password)
         {
             UserData currentUser = null;
 
@@ -74,17 +74,17 @@ namespace Cross_Game
             {
                 
                 MySqlDataReader dataReader = Query(
-                    "SELECT user_id, name, number " +
-                    "FROM users " +
-                    "WHERE email = '" + email + "' " +
-                    "AND password = '" + (md5 ? password : CreateMD5(password)) + "'"
+                    $"SELECT user_id, name, number " +
+                    $"FROM users " +
+                    $"WHERE email = '{email}' " +
+                    $"AND password = '{CreateMD5(password)}'"
                     );
                 if (dataReader.HasRows)
                 {
                     dataReader.Read();
                     currentUser = new UserData((int)dataReader["user_id"],
-                                           (string)dataReader["name"],
-                                           (int)dataReader["number"]);
+                                               (string)dataReader["name"],
+                                               (int)dataReader["number"]);
                     dataReader.Close();
                 }
                 else
@@ -96,13 +96,12 @@ namespace Cross_Game
             return currentUser;
         }
 
-        public static string CreateMD5(string input)
+        private static string CreateMD5(string password)
         {
             StringBuilder sb = new StringBuilder();
             using (MD5 md5 = MD5.Create())
             {
-                byte[] inputBytes = Encoding.ASCII.GetBytes(input);
-                byte[] hashBytes = md5.ComputeHash(inputBytes);
+                byte[] hashBytes = md5.ComputeHash(Encoding.ASCII.GetBytes(password));
                 
                 for (int i = 0; i < hashBytes.Length; i++)
                     sb.Append(hashBytes[i].ToString("X2"));

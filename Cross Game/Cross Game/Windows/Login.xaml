@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"        
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
         mc:Ignorable="d"
         AllowsTransparency="True" 
         Background="Transparent"
@@ -87,10 +88,26 @@
                 </CheckBox>
 
                 <StackPanel Margin="60 5">
-                    <TextBlock Name="Error"
-                               Text="Email o contraseña incorrectos" 
-                               IsVisibleChanged="Error_IsVisibleChanged"
-                               Style="{StaticResource ErrorTextStyle}"/>
+                    <Grid>
+                        <TextBlock Name="Error"
+                                   Visibility="Hidden"
+                                   Text="Email o contraseña incorrectos" 
+                                   IsVisibleChanged="Error_IsVisibleChanged"
+                                   Style="{StaticResource ErrorTextStyle}"/>
+                        <StackPanel Name="Checking"
+                                    Orientation="Horizontal"
+                                    Visibility="Hidden">
+                            <mah:ProgressRing Foreground="#AFFF"
+                                              Width="20" 
+                                              Height="auto"
+                                              Margin="0 -2 2 0"/>
+                            <TextBlock Text="Comprobando credenciales..." 
+                                       Foreground="#CFFF"
+                                       FontWeight="DemiBold"
+                                       IsVisibleChanged="Error_IsVisibleChanged"
+                                       Style="{StaticResource ErrorTextStyle}"/>
+                        </StackPanel>
+                    </Grid>
                     <Border Style="{StaticResource RoundButtonStyle}" 
                             Margin="0 0 0 5"
                             Height="36">

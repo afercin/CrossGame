@@ -4,6 +4,7 @@ using System.IO;
 using System.Management;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -29,19 +30,20 @@ namespace Cross_Game.Windows
             LogUtils.CleanLogs();
 
             InitializeComponent();
+
             emailWatermark = true;
             passwordWatermark = true;
-            Error.Visibility = Visibility.Hidden;
 
             LogUtils.AppendLogHeader(LogUtils.LoginLog);
             try
             {
                 LogUtils.AppendLogOk(LogUtils.LoginLog, "Se ha detectado el fichero de autologin, comprobando las credenciales al usuario...");
 
-                string email, md5_pass;
+                string email, password;
 
                 using (FileStream fileStream = new FileStream(AutoLoginPath, FileMode.Open))
                 {
+                    RememberMe.IsChecked = true;
                     using (Aes aes = Aes.Create())
                     {
                         byte[] iv = new byte[aes.IV.Length];
@@ -62,16 +64,16 @@ namespace Cross_Game.Windows
                             using (StreamReader decryptReader = new StreamReader(cryptoStream))
                             {
                                 email = decryptReader.ReadLine();
-                                md5_pass = decryptReader.ReadLine();
+                                password = decryptReader.ReadLine();
                             }
                         }
                     }
                 }
 
                 Email.Text = email;
-                Password.Password = "";
+                Password.Password = password;
 
-                CheckLogin(email, md5_pass, true);
+                CheckLogin(email, password);
             }
             catch (IOException)
             {
@@ -127,11 +129,7 @@ namespace Cross_Game.Windows
             if (Email.Text == string.Empty && !emailWatermark)
                 emailWatermark = true;
             if (Error != null && Error.Visibility == Visibility.Visible && !emailWatermark)
-            {
                 Error.Visibility = Visibility.Hidden;
-                Email.Foreground = White;
-                Email.Foreground = White;
-            }
         }
 
         private void Password_PasswordChanged(object sender, RoutedEventArgs e)
@@ -141,16 +139,12 @@ namespace Cross_Game.Windows
             if (Password.Password == string.Empty && !passwordWatermark)
                 passwordWatermark = true;
             if (Error != null && Error.Visibility == Visibility.Visible && !passwordWatermark)
-            {
                 Error.Visibility = Visibility.Hidden;
-                Email.Foreground = White;
-                Email.Foreground = White;
-            }
         }
 
         private void Error_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if ((sender as TextBlock).Visibility == Visibility.Visible)
+            if (Error.Visibility == Visibility.Visible)
             {
                 Email.Foreground = Error.Foreground;
                 Password.Foreground = Error.Foreground;
@@ -166,78 +160,94 @@ namespace Cross_Game.Windows
         /// <summary>
         /// Comprueba las credenciales de un cliente a partir de su email y contraseña, se puede especificar si la contraseña ya está cifrada (autologin).
         /// </summary>
-        private void CheckLogin(string email, string password, bool md5 = false)
+        private void CheckLogin(string email, string password)
         {
-            if (email != watermakEmail && password != watermakPassword)
+            if (email != watermakEmail && password != watermakPassword && Checking.Visibility != Visibility.Visible)
             {
-                LogUtils.AppendLogText(LogUtils.LoginLog, "Comprobando las credenciales introducidas...");
+                Error.Visibility = Visibility.Hidden;
+                Checking.Visibility = Visibility.Visible;
 
-                UserData currentUser = DBConnection.CheckLogin(email, password, md5);
+                Task.Run(()=>
+                {
+                    LogUtils.AppendLogText(LogUtils.LoginLog, "Comprobando las credenciales introducidas...");
+                    
+                    UserData currentUser = DBConnection.CheckLogin(email, password);
 
-                if (currentUser == null)
-                {
-                    LogUtils.AppendLogError(LogUtils.LoginLog, "Se ha producido un error al conectar con la base de datos.");
-                    Error.Text = "Error de conexión.";
-                    Error.Visibility = Visibility.Visible;
-                }
-                else if (currentUser.ID == 0)
-                {
-                    LogUtils.AppendLogWarn(LogUtils.LoginLog, "Las credenciales introducidas no concuerdan con las de ningún usuario.");
-                    Error.Text = "Email o contraseña incorrectos.";
-                    Error.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    LogUtils.AppendLogOk(LogUtils.LoginLog, "Las credenciales introducidas son correctas.");
-                    if (RememberMe.IsChecked == true)
+                    if (currentUser == null)
                     {
-                        LogUtils.AppendLogText(LogUtils.LoginLog, "\"Remember me\" estaba marcado por lo que se procede guardar las credenciales en el fichero de autologin.");
-
-                        if (!Directory.Exists(Path.GetDirectoryName(AutoLoginPath)))
-                            Directory.CreateDirectory(Path.GetDirectoryName(AutoLoginPath));
-                        
-                        try
+                        LogUtils.AppendLogError(LogUtils.LoginLog, "Se ha producido un error al conectar con la base de datos.");
+                        Dispatcher.Invoke(() =>
                         {
-                            using (FileStream fileStream = new FileStream(AutoLoginPath, FileMode.OpenOrCreate))
+                            Error.Text = "Error de conexión.";
+                            Error.Visibility = Visibility.Visible;
+                        });
+                    }
+                    else if (currentUser.ID == 0)
+                    {
+                        LogUtils.AppendLogWarn(LogUtils.LoginLog, "Las credenciales introducidas no concuerdan con las de ningún usuario.");
+                        Dispatcher.Invoke(() =>
+                        {
+                            Error.Text = "Email o contraseña incorrectos.";
+                            Error.Visibility = Visibility.Visible;
+                        });
+                    }
+                    else
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            LogUtils.AppendLogOk(LogUtils.LoginLog, "Las credenciales introducidas son correctas.");
+                            if (RememberMe.IsChecked == true)
                             {
-                                using (Aes aes = Aes.Create())
+                                LogUtils.AppendLogText(LogUtils.LoginLog, "\"Remember me\" estaba marcado por lo que se procede guardar las credenciales en el fichero de autologin.");
+
+                                if (!Directory.Exists(Path.GetDirectoryName(AutoLoginPath)))
+                                    Directory.CreateDirectory(Path.GetDirectoryName(AutoLoginPath));
+
+                                try
                                 {
-                                    aes.Key = GetVolumeInfo();
-
-                                    byte[] iv = aes.IV;
-                                    fileStream.Write(iv, 0, iv.Length);
-
-                                    using (CryptoStream cryptoStream = new CryptoStream(fileStream, aes.CreateEncryptor(), CryptoStreamMode.Write))
+                                    using (FileStream fileStream = new FileStream(AutoLoginPath, FileMode.OpenOrCreate))
                                     {
-                                        using (StreamWriter encryptWriter = new StreamWriter(cryptoStream))
+                                        using (Aes aes = Aes.Create())
                                         {
-                                            encryptWriter.WriteLine(email);
-                                            encryptWriter.WriteLine(md5 ? password : DBConnection.CreateMD5(password));
+                                            aes.Key = GetVolumeInfo();
+
+                                            byte[] iv = aes.IV;
+                                            fileStream.Write(iv, 0, iv.Length);
+
+                                            using (CryptoStream cryptoStream = new CryptoStream(fileStream, aes.CreateEncryptor(), CryptoStreamMode.Write))
+                                            {
+                                                using (StreamWriter encryptWriter = new StreamWriter(cryptoStream))
+                                                {
+                                                    encryptWriter.WriteLine(email);
+                                                    encryptWriter.WriteLine(password);
+                                                }
+                                            }
                                         }
                                     }
+                                    LogUtils.AppendLogOk(LogUtils.LoginLog, "Fichero autologin creado con éxito.");
+                                }
+                                catch (Exception ex)
+                                {
+                                    LogUtils.AppendLogError(LogUtils.LoginLog, "Ha ocurrido un error al generar el fichero: " + ex);
                                 }
                             }
-                            LogUtils.AppendLogOk(LogUtils.LoginLog, "Fichero autologin creado con éxito.");
-                        }
-                        catch (Exception ex)
-                        {
-                            LogUtils.AppendLogError(LogUtils.LoginLog, "Ha ocurrido un error al generar el fichero: " + ex);
-                        }
+
+                            LogUtils.AppendLogText(LogUtils.LoginLog, "Iniciando instancia de la ventana principal...");
+
+                            currentUser.SyncLocalMachine();
+                            var mainWindow = new MainWindow
+                            {
+                                CurrentUser = currentUser
+                            };
+                            mainWindow.Show();
+
+                            LogUtils.AppendLogText(LogUtils.LoginLog, "Cerrando ventana para logearse.");
+
+                            Close();
+                        });                        
                     }
-
-                    LogUtils.AppendLogText(LogUtils.LoginLog, "Iniciando instancia de la ventana principal...");
-
-                    currentUser.SyncLocalMachine();
-                    var mainWindow = new MainWindow
-                    {
-                        CurrentUser = currentUser
-                    };
-                    mainWindow.Show();
-
-                    LogUtils.AppendLogText(LogUtils.LoginLog, "Cerrando ventana para logearse.");
-
-                    Close();
-                }
+                    Dispatcher.Invoke(() => Checking.Visibility = Visibility.Hidden);
+                });                
             }
         }
 
