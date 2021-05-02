@@ -205,6 +205,7 @@ namespace Cross_Game
             currentMachine.Max_connections = 1;
             currentMachine.N_connections = 0;
             currentMachine.Status = 1;
+            currentMachine.FPS = 30;
             if (OpenConnection())
             {
                 MySqlDataReader dataReader = Query(
