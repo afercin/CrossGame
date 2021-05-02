@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Management;
+using System.Security.Cryptography;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -22,7 +25,7 @@ namespace Cross_Game.Windows
         private bool passwordWatermark;
 
         public Login()
-        {
+        {            
             LogUtils.CleanLogs();
 
             InitializeComponent();
@@ -31,25 +34,52 @@ namespace Cross_Game.Windows
             Error.Visibility = Visibility.Hidden;
 
             LogUtils.AppendLogHeader(LogUtils.LoginLog);
-            
             try
             {
-                string email, md5_pass;
-                using (BinaryReader br = new BinaryReader(File.Open(AutoLoginPath, FileMode.Open)))
-                {
-                    email = br.ReadString();
-                    md5_pass = br.ReadString();
-                }
-
                 LogUtils.AppendLogOk(LogUtils.LoginLog, "Se ha detectado el fichero de autologin, comprobando las credenciales al usuario...");
+
+                string email, md5_pass;
+
+                using (FileStream fileStream = new FileStream(AutoLoginPath, FileMode.Open))
+                {
+                    using (Aes aes = Aes.Create())
+                    {
+                        byte[] iv = new byte[aes.IV.Length];
+                        int numBytesToRead = aes.IV.Length;
+                        int numBytesRead = 0;
+
+                        while (numBytesToRead > 0)
+                        {
+                            int n = fileStream.Read(iv, numBytesRead, numBytesToRead);
+                            if (n == 0) break;
+
+                            numBytesRead += n;
+                            numBytesToRead -= n;
+                        }
+
+                        using (CryptoStream cryptoStream = new CryptoStream(fileStream, aes.CreateDecryptor(GetVolumeInfo(), iv), CryptoStreamMode.Read))
+                        {
+                            using (StreamReader decryptReader = new StreamReader(cryptoStream))
+                            {
+                                email = decryptReader.ReadLine();
+                                md5_pass = decryptReader.ReadLine();
+                            }
+                        }
+                    }
+                }
 
                 Email.Text = email;
                 Password.Password = "";
+
                 CheckLogin(email, md5_pass, true);
             }
             catch (IOException)
             {
                 LogUtils.AppendLogWarn(LogUtils.LoginLog, "No existe el fichero de autologin, se le solicitarán las credenciales al usuario.");
+            }
+            catch (Exception)
+            {
+                LogUtils.AppendLogWarn(LogUtils.LoginLog, "Error al leer el fichero de autologin, se le solicitarán las credenciales al usuario.");
             }
 
         }
@@ -161,14 +191,37 @@ namespace Cross_Game.Windows
                     LogUtils.AppendLogOk(LogUtils.LoginLog, "Las credenciales introducidas son correctas.");
                     if (RememberMe.IsChecked == true)
                     {
-                        LogUtils.AppendLogText(LogUtils.LoginLog, "Remember me estaba marcado por lo que se procede guardar las credenciales en el fichero de autologin.");
+                        LogUtils.AppendLogText(LogUtils.LoginLog, "\"Remember me\" estaba marcado por lo que se procede guardar las credenciales en el fichero de autologin.");
 
                         if (!Directory.Exists(Path.GetDirectoryName(AutoLoginPath)))
                             Directory.CreateDirectory(Path.GetDirectoryName(AutoLoginPath));
-                        using (BinaryWriter bw = new BinaryWriter(File.Open(AutoLoginPath, FileMode.Create)))
+                        
+                        try
                         {
-                            bw.Write(email);
-                            bw.Write(md5 ? password : DBConnection.CreateMD5(password));
+                            using (FileStream fileStream = new FileStream(AutoLoginPath, FileMode.OpenOrCreate))
+                            {
+                                using (Aes aes = Aes.Create())
+                                {
+                                    aes.Key = GetVolumeInfo();
+
+                                    byte[] iv = aes.IV;
+                                    fileStream.Write(iv, 0, iv.Length);
+
+                                    using (CryptoStream cryptoStream = new CryptoStream(fileStream, aes.CreateEncryptor(), CryptoStreamMode.Write))
+                                    {
+                                        using (StreamWriter encryptWriter = new StreamWriter(cryptoStream))
+                                        {
+                                            encryptWriter.WriteLine(email);
+                                            encryptWriter.WriteLine(md5 ? password : DBConnection.CreateMD5(password));
+                                        }
+                                    }
+                                }
+                            }
+                            LogUtils.AppendLogOk(LogUtils.LoginLog, "Fichero autologin creado con éxito.");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogUtils.AppendLogError(LogUtils.LoginLog, "Ha ocurrido un error al generar el fichero: " + ex);
                         }
                     }
 
@@ -186,7 +239,18 @@ namespace Cross_Game.Windows
                     Close();
                 }
             }
-                
+        }
+
+        private byte[] GetVolumeInfo()
+        {
+            ManagementObjectSearcher moSearcher = new ManagementObjectSearcher("SELECT VolumeSerialNumber, SystemName FROM Win32_LogicalDisk WHERE DeviceID = 'C:'");
+            byte[] info = null;
+            foreach (ManagementObject wmi_HD in moSearcher.Get())
+            {
+                info = Encoding.ASCII.GetBytes(wmi_HD["VolumeSerialNumber"] + "" + wmi_HD["SystemName"]);
+            }
+            Array.Resize(ref info, 16);
+            return info;
         }
 
         private void Window_Closed(object sender, EventArgs e) => LogUtils.AppendLogFooter(LogUtils.LoginLog);
