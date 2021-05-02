@@ -7,23 +7,30 @@ using System.Net.Sockets;
 
 namespace Cross_Game
 {   
+    public class InternetConnectionException : Exception
+    {
+        public new string Message { get; set; }
+        public InternetConnectionException(string msg) : base() => Message = msg;
+    }
+
     class ConnectionUtils
     {
         public static bool Ping(string IP) => new Ping().Send(IP).Status == IPStatus.Success;
 
-        public static bool InternetConnection() => Ping("8.8.8.8");
+        public static bool HasInternetConnection() => Ping("8.8.8.8");
         
         public static void GetComputerNetworkInfo(out string localIP, out string publicIP, out string mac)
         {
-            localIP = GetLocalIPAddress();
+            if (!HasInternetConnection())
+                throw new InternetConnectionException("No se tiene acceso a internet");
+
+            localIP = ((IPEndPoint)new UdpClient("8.8.8.8", 1).Client.LocalEndPoint).Address.ToString();
             publicIP = GetPublicIPAddress();
             mac = GetMacByIP(localIP);
         }
 
         public static string GetPublicIPAddress()
         {
-            if (!InternetConnection())
-                throw new Exception("You has not internet connection");
             string address;
             WebRequest request = WebRequest.Create("http://checkip.dyndns.org/");
             using (WebResponse response = request.GetResponse())
@@ -36,13 +43,6 @@ namespace Cross_Game
             int last = address.LastIndexOf("</body>");
 
             return address.Substring(first, last - first);
-        }
-
-        private static string GetLocalIPAddress()
-        {
-            if (!InternetConnection())
-                throw new Exception("You has not internet connection");
-            return ((IPEndPoint)new UdpClient("8.8.8.8", 1).Client.LocalEndPoint).Address.ToString();
         }
 
         private static string GetMacByIP(string ipAddress)
