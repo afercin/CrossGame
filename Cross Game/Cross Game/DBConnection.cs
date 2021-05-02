@@ -1,5 +1,4 @@
-﻿using Cross_Game.Controllers;
-using MySql.Data.MySqlClient;
+﻿using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -71,13 +70,12 @@ namespace Cross_Game
             UserData currentUser = null;
 
             if (OpenConnection())
-            {
-                
+            {                
                 MySqlDataReader dataReader = Query(
                     $"SELECT user_id, name, number " +
                     $"FROM users " +
                     $"WHERE email = '{email}' " +
-                    $"AND password = '{CreateMD5(password)}'"
+                    $"AND password = '{CreateSHA256(password)}'"
                     );
                 if (dataReader.HasRows)
                 {
@@ -85,24 +83,23 @@ namespace Cross_Game
                     currentUser = new UserData((int)dataReader["user_id"],
                                                (string)dataReader["name"],
                                                (int)dataReader["number"]);
-                    dataReader.Close();
                 }
                 else
                     currentUser = new UserData(0, "0", 0);
 
-                dataReader?.Close();
+                dataReader.Close();
                 CloseConnection();
             }
             return currentUser;
         }
 
-        private static string CreateMD5(string password)
+        public static string CreateSHA256(string password)
         {
             StringBuilder sb = new StringBuilder();
             using (MD5 md5 = MD5.Create())
             {
-                byte[] hashBytes = md5.ComputeHash(Encoding.ASCII.GetBytes(password));
-                
+                byte[] hashBytes = new SHA256Managed().ComputeHash(Encoding.ASCII.GetBytes(password));
+
                 for (int i = 0; i < hashBytes.Length; i++)
                     sb.Append(hashBytes[i].ToString("X2"));
             }
@@ -147,20 +144,20 @@ namespace Cross_Game
                     );
                 if (dataReader.HasRows)
                 {
+                    newComputer = false;
+
                     dataReader.Read();
                     currentMachine.Tcp = (int)dataReader["TCP"];
                     currentMachine.Udp = (int)dataReader["UDP"];
                     currentMachine.Name = (string)dataReader["name"];
                     currentMachine.Max_connections = (int)dataReader["max_connections"];
                     currentMachine.FPS = (int)dataReader["fps"];
-
-                    dataReader.Close();
-                    newComputer = false;
                 }
-                
+
+                dataReader.Close();
+
                 if (newComputer)
-                {
-                    
+                {                    
                     NonQuery("INSERT INTO computers VALUES " +
                             $"('{currentMachine.MAC}', '{currentMachine.LocalIP}', '{currentMachine.PublicIP}', {currentMachine.Tcp}, {currentMachine.Udp}, '{currentMachine.Name}', " +
                             $"{currentMachine.N_connections}, {currentMachine.Max_connections}, {currentMachine.Status}, {currentUser.ID}, {currentMachine.FPS})");
