@@ -21,14 +21,12 @@ namespace Cross_Game.DataManipulation
             int read = sourceWaveProvider.Read(buffer, offset, count);
             if (count > 0 && writer != null)
                 writer.Write(buffer, offset, read);
-            if (count == 0)
-                Dispose();
             return read;
         }
 
         public void Dispose()
         {
-            writer?.Dispose();
+            writer.Dispose();
             writer = null;
         }
     }

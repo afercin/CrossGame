@@ -70,31 +70,31 @@ namespace Cross_Game.DataManipulation
         /// </summary>
         private static Bitmap CaptureDesktop()
         {
-            IntPtr currentView = Win32API.GetDesktopWindow();
+            IntPtr currentView = NativeMethods.GetDesktopWindow();
 
             if (Display.Handle != currentView)
             {
                 Display.Handle = currentView;
                 RECT windowRect = new RECT();
 
-                Win32API.GetWindowRect(Display.Handle, ref windowRect);
+                NativeMethods.GetWindowRect(Display.Handle, ref windowRect);
                 Display.Width = windowRect.right - windowRect.left;
                 Display.Height = windowRect.bottom - windowRect.top;
             }
 
-            IntPtr hdcSrc = Win32API.GetWindowDC(Display.Handle),
-                   hdcDest = Win32API.CreateCompatibleDC(hdcSrc),
-                   hBitmap = Win32API.CreateCompatibleBitmap(hdcSrc, Display.Width, Display.Height),
-                   hOld = Win32API.SelectObject(hdcDest, hBitmap);
+            IntPtr hdcSrc = NativeMethods.GetWindowDC(Display.Handle),
+                   hdcDest = NativeMethods.CreateCompatibleDC(hdcSrc),
+                   hBitmap = NativeMethods.CreateCompatibleBitmap(hdcSrc, Display.Width, Display.Height),
+                   hOld = NativeMethods.SelectObject(hdcDest, hBitmap);
 
-            Win32API.BitBlt(hdcDest, 0, 0, Display.Width, Display.Height, hdcSrc, 0, 0, Win32API.SRCCOPY);
-            Win32API.SelectObject(hdcDest, hOld);
+            NativeMethods.BitBlt(hdcDest, 0, 0, Display.Width, Display.Height, hdcSrc, 0, 0, NativeMethods.SRCCOPY);
+            NativeMethods.SelectObject(hdcDest, hOld);
 
-            Win32API.DeleteDC(hdcDest);
-            Win32API.ReleaseDC(Display.Handle, hdcSrc);
+            NativeMethods.DeleteDC(hdcDest);
+            NativeMethods.ReleaseDC(Display.Handle, hdcSrc);
 
             Bitmap img = Image.FromHbitmap(hBitmap);
-            Win32API.DeleteObject(hBitmap);
+            NativeMethods.DeleteObject(hBitmap);
 
             return img;
         }
@@ -106,11 +106,11 @@ namespace Cross_Game.DataManipulation
             RECT a = new RECT(),
                  b = new RECT();
 
-            IntPtr foreground = Win32API.GetForegroundWindow(),
-                   desktop = Win32API.GetDesktopWindow();
+            IntPtr foreground = NativeMethods.GetForegroundWindow(),
+                   desktop = NativeMethods.GetDesktopWindow();
 
-            Win32API.GetWindowRect(foreground, ref b);
-            Win32API.GetWindowRect(desktop, ref a);
+            NativeMethods.GetWindowRect(foreground, ref b);
+            NativeMethods.GetWindowRect(desktop, ref a);
 
             return a.left == b.left && a.right == b.right &&
                    a.top == b.top && a.bottom == b.bottom ? foreground : desktop;

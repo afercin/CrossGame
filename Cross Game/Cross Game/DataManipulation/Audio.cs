@@ -83,13 +83,17 @@ namespace Cross_Game.DataManipulation
         public void Dispose()
         {
             if (recorder != null)
+            {
                 recorder.StopRecording();
+                recorder.Dispose();
+            }
 
             if (player != null)
             {
                 player.Stop();
                 savingWaveProvider.Dispose();
                 File.Delete(tempFile);
+                player.Dispose();
             }
         }
 

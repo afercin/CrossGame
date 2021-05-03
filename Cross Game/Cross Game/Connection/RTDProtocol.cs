@@ -72,7 +72,7 @@ namespace Cross_Game.Connection
         Hand = 0x1F
     }
 
-    abstract class RTDProtocol
+    abstract class RTDProtocol : IDisposable
     {
         public bool IsConnected { get; protected set; }
         public const int MaxPacketSize = 65507;
@@ -147,6 +147,11 @@ namespace Cross_Game.Connection
                     }
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            Stop();
         }
 
         protected abstract void ReceivePetition(Socket s, byte[] buffer);

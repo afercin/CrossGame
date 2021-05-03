@@ -10,7 +10,7 @@ namespace Cross_Game.Windows
     /// <summary>
     /// Lógica de interacción para MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, IDisposable
     {
         public UserData CurrentUser { get; set; }
 
@@ -155,7 +155,9 @@ namespace Cross_Game.Windows
             }
         }
 
-        private void MainWindow_Closed(object sender, EventArgs e)
+        private void MainWindow_Closed(object sender, EventArgs e) => Dispose();
+
+        public void Dispose()
         {
             server?.Stop();
             DBConnection.LogOut(CurrentUser);

@@ -87,7 +87,7 @@ namespace Cross_Game.Controllers
 
                 parentWindow.WindowState = WindowState.Normal;
 
-                Win32API.GetCursorPos(out POINT lMousePosition);
+                NativeMethods.GetCursorPos(out POINT lMousePosition);
 
                 parentWindow.Left = lMousePosition.x - targetHorizontal;
                 parentWindow.Top = lMousePosition.y - targetVertical;
@@ -108,16 +108,16 @@ namespace Cross_Game.Controllers
 
         public static void WmGetMinMaxInfo(IntPtr hwnd, IntPtr lParam)
         {
-            Win32API.GetCursorPos(out POINT lMousePosition);
+            NativeMethods.GetCursorPos(out POINT lMousePosition);
 
-            IntPtr lPrimaryScreen = Win32API.MonitorFromPoint(new POINT { x = 0, y = 0 }, MonitorOptions.MONITOR_DEFAULTTOPRIMARY);
+            IntPtr lPrimaryScreen = NativeMethods.MonitorFromPoint(new POINT { x = 0, y = 0 }, MonitorOptions.MONITOR_DEFAULTTOPRIMARY);
             MONITORINFO lPrimaryScreenInfo = new MONITORINFO();
-            if (Win32API.GetMonitorInfo(lPrimaryScreen, lPrimaryScreenInfo) == false)
+            if (NativeMethods.GetMonitorInfo(lPrimaryScreen, lPrimaryScreenInfo) == false)
             {
                 return;
             }
 
-            IntPtr lCurrentScreen = Win32API.MonitorFromPoint(lMousePosition, MonitorOptions.MONITOR_DEFAULTTONEAREST);
+            IntPtr lCurrentScreen = NativeMethods.MonitorFromPoint(lMousePosition, MonitorOptions.MONITOR_DEFAULTTONEAREST);
 
             MINMAXINFO lMmi = (MINMAXINFO)Marshal.PtrToStructure(lParam, typeof(MINMAXINFO));
 

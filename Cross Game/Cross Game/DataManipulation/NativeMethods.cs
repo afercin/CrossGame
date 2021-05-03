@@ -144,7 +144,7 @@ namespace Cross_Game.DataManipulation
         public int dwFlags = 0;
     }
     /// <summary> Clase de apoyo para utiliar funciones nativas de c++. </summary>
-    class Win32API
+    class NativeMethods
     {
         [DllImport("user32.dll")]
         public static extern void mouse_event(int dwFlags, int dx, int dy, int dwData, int dwExtraInfo);

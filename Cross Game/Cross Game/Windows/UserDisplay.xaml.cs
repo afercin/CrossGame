@@ -13,7 +13,7 @@ namespace Cross_Game.Windows
     /// <summary>
     /// Lógica de interacción para PruebaSockets.xaml
     /// </summary>
-    public partial class UserDisplay : Window
+    public partial class UserDisplay : Window, IDisposable
     {
         private readonly Dictionary<CursorShape, Cursor> cursors = new Dictionary<CursorShape, Cursor>
         {
@@ -182,7 +182,9 @@ namespace Cross_Game.Windows
                 MessageBox.Show("¿Desea realmente cerrar la Transmisión?", "Cerrar la transmisión", MessageBoxButton.YesNo, MessageBoxImage.Exclamation) != MessageBoxResult.Yes;
         }
 
-        private void Window_Closed(object sender, EventArgs e)
+        private void Window_Closed(object sender, EventArgs e) => Dispose();
+
+        public void Dispose()
         {
             framerate.Dispose();
             paint.Abort();

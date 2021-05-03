@@ -292,7 +292,7 @@ namespace Cross_Game.Connection
         private void CheckCursorShapeThread()
         {
             IntPtr currentCursor;
-            Win32API.GetCursorInfo(out CURSORINFO pci);
+            NativeMethods.GetCursorInfo(out CURSORINFO pci);
 
             currentCursor = pci.hCursor;
 
@@ -301,7 +301,7 @@ namespace Cross_Game.Connection
                 while (IsConnected)
                 {
                     pci.cbSize = Marshal.SizeOf(typeof(CURSORINFO));
-                    Win32API.GetCursorInfo(out pci);
+                    NativeMethods.GetCursorInfo(out pci);
 
                     if (currentCursor != pci.hCursor && (int)pci.hCursor <= 0x1001F)
                     {

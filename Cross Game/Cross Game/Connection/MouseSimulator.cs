@@ -12,7 +12,7 @@ namespace Cross_Game.Connection
             pressed = new bool[3];
         }
 
-        public void Move(int x, int y) => Win32API.SetCursorPos(x, y);
+        public void Move(int x, int y) => NativeMethods.SetCursorPos(x, y);
 
         public void Button(Petition petition)
         {
@@ -32,10 +32,10 @@ namespace Cross_Game.Connection
 
         private void MouseEvent(MouseEventFlags value, int delta = 0)
         {
-            if (!Win32API.GetCursorPos(out POINT currentMousePosition))
+            if (!NativeMethods.GetCursorPos(out POINT currentMousePosition))
                 currentMousePosition = new POINT { x = 0, y = 0 };
 
-            Win32API.mouse_event((int)value,
+            NativeMethods.mouse_event((int)value,
                                  currentMousePosition.x,
                                  currentMousePosition.y,
                                  delta,

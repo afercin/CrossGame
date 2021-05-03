@@ -23,7 +23,7 @@ namespace Cross_Game.Connection
 
                 pressed[(int)keycode] = petition == Petition.KeyboardKeyDown;
 
-                Win32API.SendInput(new Input[]
+                NativeMethods.SendInput(new Input[]
                 {
                 new Input
                 {
@@ -35,7 +35,7 @@ namespace Cross_Game.Connection
                             wVk = 0,
                             wScan = (ushort) keycode,
                             dwFlags = (uint) ((petition == Petition.KeyboardKeyUp ? KeyEventF.KeyUp : KeyEventF.KeyDown) | KeyEventF.Scancode),
-                            dwExtraInfo = Win32API.GetMessageExtraInfo()
+                            dwExtraInfo = NativeMethods.GetMessageExtraInfo()
                         }
                     }
                 }

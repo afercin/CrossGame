@@ -7,10 +7,13 @@ using System.Net.Sockets;
 
 namespace Cross_Game
 {   
+    [Serializable]
     public class InternetConnectionException : Exception
     {
-        public new string Message { get; set; }
-        public InternetConnectionException(string msg) : base() => Message = msg;
+        public InternetConnectionException(string msg) : base(msg)
+        {
+
+        }
     }
 
     class ConnectionUtils

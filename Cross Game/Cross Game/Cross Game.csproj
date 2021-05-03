@@ -112,7 +112,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="DataManipulation\Win32API.cs" />
+    <Compile Include="DataManipulation\NativeMethods.cs" />
     <Compile Include="ComputerData.cs" />
     <Compile Include="Connection\RTDPClient.cs" />
     <Compile Include="Connection\RTDPEvents.cs" />
