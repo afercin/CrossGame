@@ -37,12 +37,12 @@ namespace Cross_Game.Windows
             LogUtils.AppendLogHeader(LogUtils.LoginLog);
             try
             {
-                LogUtils.AppendLogOk(LogUtils.LoginLog, "Se ha detectado el fichero de autologin, comprobando las credenciales al usuario...");
-
                 string email, password;
 
                 using (FileStream fileStream = new FileStream(AutoLoginPath, FileMode.Open))
                 {
+                    LogUtils.AppendLogOk(LogUtils.LoginLog, "Se ha detectado el fichero de autologin, comprobando las credenciales al usuario...");
+
                     RememberMe.IsChecked = true;
                     using (Aes aes = Aes.Create())
                     {
