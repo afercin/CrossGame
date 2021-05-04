@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Cross_Game.DataManipulation;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Management;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -37,43 +36,19 @@ namespace Cross_Game.Windows
             LogUtils.AppendLogHeader(LogUtils.LoginLog);
             try
             {
-                string email, password;
+                string[] credentials;
+                byte[] decryptPassword = Crypto.GetBytes(Crypto.CreateSHA256(GetWindowDiskSN()));
+                Array.Resize(ref decryptPassword, 32);
 
-                using (FileStream fileStream = new FileStream(AutoLoginPath, FileMode.Open))
-                {
-                    LogUtils.AppendLogOk(LogUtils.LoginLog, "Se ha detectado el fichero de autologin, comprobando las credenciales al usuario...");
+                credentials = Crypto.ReadData(AutoLoginPath, decryptPassword);
 
-                    RememberMe.IsChecked = true;
-                    using (Aes aes = Aes.Create())
-                    {
-                        byte[] iv = new byte[aes.IV.Length];
-                        int numBytesToRead = aes.IV.Length;
-                        int numBytesRead = 0;
+                RememberMe.IsChecked = true;
+                LogUtils.AppendLogOk(LogUtils.LoginLog, "Se ha detectado el fichero de autologin, comprobando las credenciales al usuario...");
 
-                        while (numBytesToRead > 0)
-                        {
-                            int n = fileStream.Read(iv, numBytesRead, numBytesToRead);
-                            if (n == 0) break;
+                Email.Text = credentials[0];
+                Password.Password = credentials[1];
 
-                            numBytesRead += n;
-                            numBytesToRead -= n;
-                        }
-
-                        using (CryptoStream cryptoStream = new CryptoStream(fileStream, aes.CreateDecryptor(GetVolumeInfo(), iv), CryptoStreamMode.Read))
-                        {
-                            using (StreamReader decryptReader = new StreamReader(cryptoStream))
-                            {
-                                email = decryptReader.ReadLine();
-                                password = decryptReader.ReadLine();
-                            }
-                        }
-                    }
-                }
-
-                Email.Text = email;
-                Password.Password = password;
-
-                CheckLogin(email, password);
+                CheckLogin(credentials[0], credentials[1]);
             }
             catch (IOException)
             {
@@ -205,25 +180,11 @@ namespace Cross_Game.Windows
 
                                 try
                                 {
-                                    using (FileStream fileStream = new FileStream(AutoLoginPath, FileMode.Create))
-                                    {
-                                        using (Aes aes = Aes.Create())
-                                        {
-                                            aes.Key = GetVolumeInfo();
+                                    byte[] encryptPassword = Crypto.GetBytes(Crypto.CreateSHA256(GetWindowDiskSN()));
+                                    Array.Resize(ref encryptPassword, 32);
 
-                                            byte[] iv = aes.IV;
-                                            fileStream.Write(iv, 0, iv.Length);
+                                    Crypto.WriteData(AutoLoginPath, encryptPassword, new string[] { email, password });
 
-                                            using (CryptoStream cryptoStream = new CryptoStream(fileStream, aes.CreateEncryptor(), CryptoStreamMode.Write))
-                                            {
-                                                using (StreamWriter encryptWriter = new StreamWriter(cryptoStream))
-                                                {
-                                                    encryptWriter.WriteLine(email);
-                                                    encryptWriter.WriteLine(password);
-                                                }
-                                            }
-                                        }
-                                    }
                                     LogUtils.AppendLogOk(LogUtils.LoginLog, "Fichero autologin creado con éxito.");
                                 }
                                 catch (Exception ex)
@@ -256,13 +217,6 @@ namespace Cross_Game.Windows
                     Dispatcher.Invoke(() => Checking.Visibility = Visibility.Hidden);
                 });                
             }
-        }
-
-        private byte[] GetVolumeInfo()
-        {
-            byte[] SN = Encoding.ASCII.GetBytes(GetWindowDiskSN() + Environment.MachineName);
-            Array.Resize(ref SN, 16);
-            return SN;
         }
 
         public static string GetWindowDiskSN()

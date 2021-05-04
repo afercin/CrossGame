@@ -1,8 +1,7 @@
-﻿using MySql.Data.MySqlClient;
+﻿using Cross_Game.DataManipulation;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Cross_Game
 {
@@ -75,7 +74,7 @@ namespace Cross_Game
                     $"SELECT user_id, name, number " +
                     $"FROM users " +
                     $"WHERE email = '{email}' " +
-                    $"AND password = '{CreateSHA256(password)}'"
+                    $"AND password = '{Crypto.CreateSHA256(password)}'"
                     );
                 if (dataReader.HasRows)
                 {
@@ -91,19 +90,6 @@ namespace Cross_Game
                 CloseConnection();
             }
             return currentUser;
-        }
-
-        public static string CreateSHA256(string password)
-        {
-            StringBuilder sb = new StringBuilder();
-            using (MD5 md5 = MD5.Create())
-            {
-                byte[] hashBytes = new SHA256Managed().ComputeHash(Encoding.ASCII.GetBytes(password));
-
-                for (int i = 0; i < hashBytes.Length; i++)
-                    sb.Append(hashBytes[i].ToString("X2"));
-            }
-            return sb.ToString();
         }
 
         public static int GetUserPriority(UserData currentUser, string clientMAC)

@@ -112,6 +112,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="DataManipulation\Crypto.cs" />
     <Compile Include="DataManipulation\NativeMethods.cs" />
     <Compile Include="ComputerData.cs" />
     <Compile Include="Connection\RTDPClient.cs" />
@@ -252,6 +253,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

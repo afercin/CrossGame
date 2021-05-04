@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -68,7 +67,8 @@ namespace Cross_Game.Connection
                     /***** Esperar y comprobar credenciales del usuario *****/
 
                     ReceiveBuffer(tcpClientSocket, out byte[] buffer, out int bufferSize);
-                    clientMAC = Encoding.ASCII.GetString(buffer, 0, bufferSize);
+                    clientMAC = Crypto.GetString(buffer, 0, bufferSize);
+
                     if (DBConnection.IsCorrectComputerIP(clientMAC, clientAddress.Address.ToString()))
                         userPriority = DBConnection.GetUserPriority(user, clientMAC);
 

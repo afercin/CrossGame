@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
@@ -92,7 +91,7 @@ namespace Cross_Game.Connection
                         /****** Mandar credenciales y esperar confirmación *******/
 
                         byte[] buffer = new byte[] { 0 };
-                        SendBuffer(petitionsSocket, Encoding.ASCII.GetBytes(mac));
+                        SendBuffer(petitionsSocket, Crypto.GetBytes(mac));
                         connectedThread = new Thread(() =>
                         {
                             try
