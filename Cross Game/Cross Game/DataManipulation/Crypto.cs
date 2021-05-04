@@ -8,20 +8,29 @@ namespace Cross_Game.DataManipulation
     class Crypto
     {
         private static readonly string separator = "\r\n";
-
+        /// <summary>
+        /// Genera el hash de la cadena introducida con el algoritmo sha256.
+        /// </summary>
+        /// <param name="s">Cadena a la que se le generará el hash</param>
+        /// <returns>Devuelve la cadena hash representada en caracteres hexadecimales.</returns>
         public static string CreateSHA256(string s)
         {
             StringBuilder sb = new StringBuilder();
-            using (MD5 md5 = MD5.Create())
+            using (SHA256Managed sha256 = new SHA256Managed())
             {
-                byte[] hashBytes = new SHA256Managed().ComputeHash(GetBytes(s));
+                byte[] hashBytes = sha256.ComputeHash(GetBytes(s));
 
                 for (int i = 0; i < hashBytes.Length; i++)
                     sb.Append(hashBytes[i].ToString("X2"));
             }
             return sb.ToString();
         }
-
+        /// <summary>
+        /// Escribe la información introducida en un fichero y la encripta con la clave proporcionada.
+        /// </summary>
+        /// <param name="filePath">Ruta al fichero donde se guardará la información.</param>
+        /// <param name="key">Clave para encriptar</param>
+        /// <param name="data">Información a encriptar en el fichero.</param>
         public static void WriteData(string filePath, byte[] key, string[] data)
         {
             using (FileStream fileStream = new FileStream(filePath, FileMode.Create))
@@ -38,7 +47,12 @@ namespace Cross_Game.DataManipulation
                                 encryptWriter.WriteLine(s);
                 }
         }
-
+        /// <summary>
+        /// Desencripta el fichero introducido con la clave proporcionada y devuelve su información.
+        /// </summary>
+        /// <param name="filePath">Ruta al fichero donde está la información</param>
+        /// <param name="key">Clave que se usará para la desencriptación.</param>
+        /// <returns>Devuelve un array de string con toda la información desencriptada.</returns>
         public static string[] ReadData(string filePath, byte[] key)
         {
             string data;
@@ -66,9 +80,17 @@ namespace Cross_Game.DataManipulation
 
             return data.Split(new string[] { separator }, StringSplitOptions.None);
         }
-
+        /// <summary>
+        /// Codifica una cadena a binario.
+        /// </summary>
+        /// <param name="s">Cadena a obtener los bytes.</param>
+        /// <returns>Devuelve un array de bytes que representa cara carácter de la cadena como un carácter ASCII.</returns>
         public static byte[] GetBytes(string s) => Encoding.ASCII.GetBytes(s);
-
-        public static string GetString(byte[] bytes, int index, int count) => Encoding.ASCII.GetString(bytes, index, count);
+        /// <summary>
+        /// Decodifica un array de bytes.
+        /// </summary>
+        /// <param name="bytes">Array de bytes.</param>
+        /// <returns>Devuelve la cadena correspondiente a la concatenación de cada carácter ASCII que representa cada byte.</returns>
+        public static string GetString(byte[] bytes) => Encoding.ASCII.GetString(bytes, 0, bytes.Length);
     }
 }
