@@ -12,6 +12,15 @@
              Name="Option"
              Height="55" d:DesignWidth="180">
     <Grid>
+        <Grid.Style>
+            <Style TargetType="Grid">
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Cursor" Value="Hand"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Style>
         <Border Name="BackColor"
                 CornerRadius="10"
                 Opacity="0">
