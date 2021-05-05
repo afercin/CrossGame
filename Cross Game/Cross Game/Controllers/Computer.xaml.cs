@@ -19,7 +19,7 @@ namespace Cross_Game.Controllers
         private readonly Brush red = new SolidColorBrush(Color.FromRgb(240, 30, 30));
         private readonly Brush blue = new SolidColorBrush(Color.FromRgb(50, 157, 201));
         private readonly Brush yellow = new SolidColorBrush(Color.FromRgb(190, 170, 40));
-        private readonly Brush gray = new SolidColorBrush(Color.FromRgb(224, 224, 224));
+        private readonly Brush gray = new SolidColorBrush(Color.FromRgb(140, 140, 140));
 
         public readonly ComputerData pc;
         private bool editArea;

@@ -31,7 +31,7 @@
                            MouseLeave="ComputerName_MouseLeave"/>
                 <Grid Margin="0 10 0 0">
                     <iconPacks:PackIconMaterial Name="Icon" 
-                                                Kind="MonitorEye"
+                                                Kind="Monitor"
                                                 Height="70" 
                                                 Width="auto"
                                                 HorizontalAlignment="Center"
