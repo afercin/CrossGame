@@ -23,9 +23,11 @@ namespace Cross_Game.Connection
         private Dictionary<int, ScreenImage> images;
         private byte skipImage;
         private string serverIP;
+        //private GPUAceleration ga;
 
         public RTDPClient() : base()
         {
+        //    ga = new GPUAceleration();
         }
 
         public void Start(ComputerData computerData)
@@ -246,7 +248,10 @@ namespace Cross_Game.Connection
                         {
                             try
                             {
-                                if (img != skipImage && images[img].AppendBuffer(data, 1, dataSize - 1, data[0] & 0x0F))
+                                //ga.GPUCopy(data, 1, images[img].ImageBytes, images[img].currentSize, dataSize - 1);
+                                //images[img].currentSize += dataSize - 1;
+                                images[img].AppendBuffer(data, 1, dataSize);
+                                if (images[img].currentSize >= images[img].imageSize)
                                 {
                                     byte[] i = images[img].ImageBytes;
                                     Array.Resize(ref i, images[img].imageSize);
@@ -254,7 +259,7 @@ namespace Cross_Game.Connection
                                     if (img == (skipImage + 5) % 254)
                                         skipImage = 255;
                                 }
-                            }
+                            }                                
                             catch (KeyNotFoundException)
                             {
                                 LogUtils.AppendLogError(LogUtils.ClientConnectionLog, $"No ha llegado a tiempo el paquete que inicializaba el fotograma nº{img}");
@@ -338,9 +343,9 @@ namespace Cross_Game.Connection
                 currentSize = 0;
             }
 
-            public bool AppendBuffer(byte[] buffer, int offset, int bufferSize, int bufferIndex)
+            public bool AppendBuffer(byte[] buffer, int offset, int bufferSize)
             {
-                Array.Copy(buffer, offset, ImageBytes,/**/ currentSize /**bufferIndex * (MaxPacketSize - 1) /**/, bufferSize);
+                Array.Copy(buffer, offset, ImageBytes, currentSize, bufferSize);
                 currentSize += bufferSize;
                 return currentSize == imageSize;
             }

@@ -165,6 +165,9 @@ namespace Cross_Game
 
         public static List<string> GetMyComputers(UserData currentUser)
         {
+            if (!ConnectionUtils.HasInternetConnection())
+                return null;
+
             List<string> myComputers = new List<string>();
 
             if (OpenConnection())

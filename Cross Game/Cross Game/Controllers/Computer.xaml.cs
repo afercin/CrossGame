@@ -52,40 +52,34 @@ namespace Cross_Game.Controllers
         {
             DBConnection.GetComputerData(pc);
             ComputerName.Text = pc.Name;
-
-            if (pc.Status != -1)
+            Connections.Text = pc.Status == 1 ? $"{pc.N_connections}/{pc.Max_connections}" : "";
+            switch (pc.Status)
             {
-                Connections.Text = pc.Status == 1 ? $"{pc.N_connections}/{pc.Max_connections}" : "";
-                switch (pc.Status)
-                {
-                    case 0:
-                        ComputerBorder.BorderBrush = gray;
-                        Icon.Kind = PackIconMaterialKind.MonitorOff;
-                        break;
-                    case 1:
+                case 0:
+                    ComputerBorder.BorderBrush = gray;
+                    Icon.Kind = PackIconMaterialKind.MonitorOff;
+                    break;
+                case 1:
 
-                        if (pc.N_connections == 0)
-                        {
-                            ComputerBorder.BorderBrush = blue;
-                            Icon.Kind = PackIconMaterialKind.MonitorClean;
-                        }
-                        else if (pc.N_connections == pc.Max_connections)
-                        {
-                            Icon.Kind = PackIconMaterialKind.MonitorDashboard;
-                            ComputerBorder.BorderBrush = red;
-                        }
-                        else
-                        {
-                            Icon.Kind = PackIconMaterialKind.MonitorEye;
-                            ComputerBorder.BorderBrush = yellow;
-                        }
-                        break;
-                }
-
-                currentIcon = Icon.Kind;
+                    if (pc.N_connections == 0)
+                    {
+                        ComputerBorder.BorderBrush = blue;
+                        Icon.Kind = PackIconMaterialKind.MonitorClean;
+                    }
+                    else if (pc.N_connections == pc.Max_connections)
+                    {
+                        Icon.Kind = PackIconMaterialKind.MonitorDashboard;
+                        ComputerBorder.BorderBrush = red;
+                    }
+                    else
+                    {
+                        Icon.Kind = PackIconMaterialKind.MonitorEye;
+                        ComputerBorder.BorderBrush = yellow;
+                    }
+                    break;
             }
-            else
-                throw new Exception("Invalid computer status.");
+
+            currentIcon = Icon.Kind;
         }
 
         private void ComputerName_MouseEnter(object sender, MouseEventArgs e)

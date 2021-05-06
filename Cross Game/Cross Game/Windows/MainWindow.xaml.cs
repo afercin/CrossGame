@@ -2,8 +2,11 @@
 using Cross_Game.Controllers;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Cross_Game.Windows
 {
@@ -17,10 +20,15 @@ namespace Cross_Game.Windows
         private List<Computer> computerList;
         private OptionButton currentOption;
         private RTDPServer server;
+        private Timer connectivity;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            connectivity = new Timer(600000); // 10 * 60 * 1000
+            connectivity.Elapsed += (s, e) => CheckConnection();
+            connectivity.Start();
 
             computerList = new List<Computer>();
             server = null;
@@ -57,22 +65,7 @@ namespace Cross_Game.Windows
                 server = null;
             });
 
-            foreach (string mac in DBConnection.GetMyComputers(CurrentUser))
-                if (mac != CurrentUser.localMachine.MAC)
-                {
-                    try
-                    {
-                        var computer = new Computer(mac);
-                        computer.ComputerClicked += Computer_Clicked;
-                        computerList.Add(computer);
-
-                        ComputerPanel.Children.Add(computer);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message);
-                    }
-                }
+            CheckConnection();
         }
 
         private void OptionButton_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -92,7 +85,7 @@ namespace Cross_Game.Windows
             switch (name)
             {
                 case "Ordenadores": break;
-                case "Amigos": SyncData(); break;
+                case "Amigos": CheckConnection(); break;
                 case "Transmisión":
                     var display = new UserDisplay();
                     display.StartTransmission(CurrentUser.localMachine);
@@ -111,20 +104,55 @@ namespace Cross_Game.Windows
             }
         }
 
-        private void SyncData()
+        private void CheckConnection()
         {
-            try
+            Task.Run(()=>
             {
-                CurrentUser.SyncLocalMachine();
-                foreach (Computer c in computerList)
-                    c.UpdateStatus();
-            }
-            catch (InternetConnectionException e)
-            {
-                LogUtils.AppendLogHeader(LogUtils.ConnectionErrorsLog);
-                LogUtils.AppendLogError(LogUtils.ConnectionErrorsLog, e.Message);
-                LogUtils.AppendLogFooter(LogUtils.ConnectionErrorsLog);
-            }
+                List<string> MACs = DBConnection.GetMyComputers(CurrentUser);
+                if (MACs != null)
+                    Dispatcher.Invoke(() =>
+                    {
+                        CurrentUser.SyncLocalMachine();
+
+                        LocalIP.Text = CurrentUser.localMachine.LocalIP;
+                        PublicIP.Text = CurrentUser.localMachine.PublicIP;
+
+                        if (ConnectionUtils.LastPingResult.RoundtripTime < 200)
+                        {
+                            ConnectionStatus.Kind = MahApps.Metro.IconPacks.PackIconMaterialKind.Wifi;
+                            ConnectionStatus.Foreground = new SolidColorBrush(Colors.LimeGreen);
+                        }
+                        else
+                        {
+                            ConnectionStatus.Kind = MahApps.Metro.IconPacks.PackIconMaterialKind.WifiAlert;
+                            ConnectionStatus.Foreground = new SolidColorBrush(Colors.Yellow);
+                        }
+
+                        Ping.Text = ConnectionUtils.LastPingResult.RoundtripTime + "ms";
+
+                        foreach (string mac in MACs)
+                            if (mac != CurrentUser.localMachine.MAC)
+                            {
+                                var computer = computerList.Find(c => c.pc.MAC == mac);
+                                if (computer != null)
+                                    computer.UpdateStatus();
+                                else
+                                {
+                                    computer = new Computer(mac);
+                                    computer.ComputerClicked += Computer_Clicked;
+                                    computerList.Add(computer);
+
+                                    ComputerPanel.Children.Add(computer);
+                                }
+                            }
+                    });
+                else
+                {
+                    ConnectionStatus.Kind = MahApps.Metro.IconPacks.PackIconMaterialKind.WifiOff;
+                    ConnectionStatus.Foreground = new SolidColorBrush(Colors.Red);
+                    Ping.Text = "-";
+                }
+            });
         }
 
         private void Computer_Clicked(object sender, EventArgs e)
@@ -159,6 +187,8 @@ namespace Cross_Game.Windows
 
         public void Dispose()
         {
+            connectivity.Stop();
+            connectivity.Dispose();
             server?.Stop();
             DBConnection.LogOut(CurrentUser);
         }

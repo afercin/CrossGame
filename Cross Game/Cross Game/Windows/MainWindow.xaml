@@ -4,8 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:controllers="clr-namespace:Cross_Game.Controllers"
-        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-        xmlns:toggleswitch="clr-namespace:ToggleSwitch;assembly=ToggleSwitch"
         xmlns:iconpacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         mc:Ignorable="d"
         UseLayoutRounding="True"
@@ -111,10 +109,14 @@
             </StackPanel>
             
             <Grid Grid.Row="2"
-                  Grid.Column="1"
-                  Margin="0 0 0 0"
-                  Width="auto"
-                  HorizontalAlignment="Left">
+                  Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="30"/>
+                </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" >
                     <TextBlock Text="Modo servidor:"
                                Margin="0 0 5 0"
@@ -122,12 +124,34 @@
                                Style="{StaticResource FlatTextStyle}"/>
                     <controllers:WaitSlider x:Name="WaitSlider"/>
                 </StackPanel>
-                
-                <iconpacks:PackIconMaterial Name="ConnectionStatus"
-                                            Kind="wifi" 
-                                            VerticalAlignment="Center" 
-                                            HorizontalAlignment="Right" 
-                                            Foreground="Green"/>
+
+                <Border VerticalAlignment="Center" 
+                        HorizontalAlignment="Left"
+                        Margin="0 0 5 0"
+                        Background="#0FFF"
+                        Grid.Column="4">
+                    <iconpacks:PackIconMaterial Name="ConnectionStatus"
+                                                Kind="wifi" 
+                                                Height="18"
+                                                Width="auto"
+                                                Foreground="red"/>
+                    <Border.ToolTip>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="IP pública: "/>
+                                <TextBlock Name="PublicIP" Text="127.0.0.1"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="IP local: "/>
+                                <TextBlock Name="LocalIP" Text="127.0.0.1"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Ping: "/>
+                                <TextBlock Name="Ping" Text="-"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border.ToolTip>
+                </Border>
             </Grid>
 
         </Grid>

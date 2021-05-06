@@ -12,13 +12,25 @@ namespace Cross_Game
     {
         public InternetConnectionException(string msg) : base(msg)
         {
-
         }
     }
 
     class ConnectionUtils
     {
-        public static bool Ping(string IP) => new Ping().Send(IP).Status == IPStatus.Success;
+        public static PingReply LastPingResult = null;
+        public static bool Ping(string IP)
+        {
+            try
+            {
+                LastPingResult = new Ping().Send(IP);
+                return LastPingResult.Status == IPStatus.Success;
+            }
+            catch
+            {
+                LastPingResult = null;
+                return false;
+            }
+        }
 
         public static bool HasInternetConnection() => Ping("8.8.8.8");
         
