@@ -22,8 +22,6 @@ namespace Cross_Game.Controllers
         private readonly Brush gray = new SolidColorBrush(Color.FromRgb(140, 140, 140));
 
         public readonly ComputerData pc;
-        private bool editArea;
-        private PackIconMaterialKind currentIcon;
 
         public Computer(string _MAC)
         {
@@ -36,16 +34,9 @@ namespace Cross_Game.Controllers
 
         private void Computer_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (!editArea)
-            {
-                UpdateStatus();
-                if (pc.N_connections < pc.Max_connections)
-                    ComputerClicked.Invoke(pc, new EventArgs());
-            }
-            else if (new EditComputerParams().Show(pc) == true)
-                Dispatcher.Invoke(UpdateStatus); 
-            Icon.Kind = currentIcon;
-            editArea = false;
+            UpdateStatus();
+            if (pc.N_connections < pc.Max_connections && pc.Status != 0)
+                ComputerClicked.Invoke(pc, new EventArgs());
         }
 
         public void UpdateStatus()
@@ -60,11 +51,10 @@ namespace Cross_Game.Controllers
                     Icon.Kind = PackIconMaterialKind.MonitorOff;
                     break;
                 case 1:
-
                     if (pc.N_connections == 0)
                     {
-                        ComputerBorder.BorderBrush = blue;
                         Icon.Kind = PackIconMaterialKind.MonitorClean;
+                        ComputerBorder.BorderBrush = blue;
                     }
                     else if (pc.N_connections == pc.Max_connections)
                     {
@@ -78,20 +68,6 @@ namespace Cross_Game.Controllers
                     }
                     break;
             }
-
-            currentIcon = Icon.Kind;
-        }
-
-        private void ComputerName_MouseEnter(object sender, MouseEventArgs e)
-        {
-            Icon.Kind = PackIconMaterialKind.MonitorEdit;
-            editArea = true;
-        }
-
-        private void ComputerName_MouseLeave(object sender, MouseEventArgs e)
-        {
-            Icon.Kind = currentIcon;
-            editArea = false;
         }
     }
 }

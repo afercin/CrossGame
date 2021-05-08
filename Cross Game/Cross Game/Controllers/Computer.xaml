@@ -26,9 +26,7 @@
                            Text="Potato PC (local)"
                            Foreground="{Binding BorderBrush, ElementName=ComputerBorder}"
                            FontWeight="SemiBold"
-                           FontSize="13"
-                           MouseEnter="ComputerName_MouseEnter"
-                           MouseLeave="ComputerName_MouseLeave"/>
+                           FontSize="13"/>
                 <Grid Margin="0 10 0 0">
                     <iconPacks:PackIconMaterial Name="Icon" 
                                                 Kind="Monitor"

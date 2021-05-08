@@ -17,6 +17,7 @@ namespace Cross_Game.Windows
     {
         public UserData CurrentUser { get; set; }
 
+        private EditComputerParams TransmisionOptions;
         private List<Computer> computerList;
         private OptionButton currentOption;
         private RTDPServer server;
@@ -66,6 +67,8 @@ namespace Cross_Game.Windows
             });
 
             CheckConnection();
+            TransmisionOptions = new EditComputerParams(CurrentUser.localMachine);
+            Content.Children.Add(TransmisionOptions);
         }
 
         private void OptionButton_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -84,22 +87,22 @@ namespace Cross_Game.Windows
         {
             switch (name)
             {
-                case "Ordenadores": break;
+                case "Ordenadores": MyComputers.Visibility = visibility; break;
                 case "Amigos": CheckConnection(); break;
-                case "Transmisión":
-                    var display = new UserDisplay();
-                    display.StartTransmission(CurrentUser.localMachine);
-                    try
-                    {
-                        display.Visibility = Visibility.Visible;
-                        Hide();
-                        display.ShowDialog();
-                        Show();
-                    }
-                    catch
-                    {
+                case "Transmisión": TransmisionOptions.Visibility = visibility;
+                    //var display = new UserDisplay();
+                    //display.StartTransmission(CurrentUser.localMachine);
+                    //try
+                    //{
+                    //    display.Visibility = Visibility.Visible;
+                    //    Hide();
+                    //    display.ShowDialog();
+                    //    Show();
+                    //}
+                    //catch
+                    //{
 
-                    }
+                    //}
                     break;
             }
         }

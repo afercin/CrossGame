@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:controllers="clr-namespace:Cross_Game.Controllers"
         xmlns:iconpacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        xmlns:windows="clr-namespace:Cross_Game.Windows"
         mc:Ignorable="d"
         UseLayoutRounding="True"
         WindowStyle="None"
@@ -71,24 +72,19 @@
                     Margin="0 0 3 3"
                     BorderThickness="1"
                     BorderBrush="#464244">
-                <ScrollViewer Name="MyComputers"
+                <Grid Name="Content">
+                    <ScrollViewer Name="MyComputers"
                               Padding="5" 
                               HorizontalScrollBarVisibility="Disabled"
                               VerticalScrollBarVisibility="Auto">
-                    <WrapPanel  Name="ComputerPanel"
+                        <WrapPanel  Name="ComputerPanel"
                                 Width="auto"
                                 Height="auto"
                                 Orientation="Horizontal" 
                                 VerticalAlignment="Top"/>
-                </ScrollViewer>
+                    </ScrollViewer>
+                </Grid>
                 
-                <!--local:TransmissionOptions x:Name="tOptions"/>
-            <Button Name="Accept" Grid.Row="1" Margin="3 3 139 3" Style="{StaticResource FlatButtonStyle}" Width="130" HorizontalAlignment="Right" Click="Accept_Click">
-                <TextBlock Text="Aceptar"/>
-            </Button>
-            <Button Name="Cancel" Grid.Row="1" Margin="3" Style="{StaticResource FlatButtonStyle}" Width="130" HorizontalAlignment="Right" Click="Cancel_Click">
-                <TextBlock Text="Cancelar"/>
-            </Button-->
             </Border>
             <StackPanel Grid.Row="2"
                         Orientation="Horizontal"
