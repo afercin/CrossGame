@@ -124,7 +124,7 @@
         <StackPanel Orientation="Horizontal">
             <iconpacks:PackIconMaterial Style="{StaticResource AlertIconSyle}"/>
             <TextBlock Name="Alert"
-                   Text="Los cambios que se realicen se aplicarán cuando se vuelva a iniciar el servidor."
+                   Text="No se pueden realizar cambios en esta configuración en modo servidor."
                    Foreground="#E6CD2A"
                    Margin="3 8 3 3" 
                    Style="{StaticResource FlatTextStyle}"/>

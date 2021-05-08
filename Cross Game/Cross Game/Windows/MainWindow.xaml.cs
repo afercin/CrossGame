@@ -28,7 +28,7 @@ namespace Cross_Game.Windows
             InitializeComponent();
 
             connectivity = new Timer(600000); // 10 * 60 * 1000
-            connectivity.Elapsed += (s, e) => CheckConnection();
+            connectivity.Elapsed += (s, e) => SyncData();
             connectivity.Start();
 
             computerList = new List<Computer>();
@@ -53,6 +53,8 @@ namespace Cross_Game.Windows
 
                     server = new RTDPServer();
                     server.Start(CurrentUser);
+                    if (TransmisionOptions.Visibility == Visibility.Visible)
+                        Dispatcher.Invoke(() => TransmisionOptions.IsAlerted = true);
                 }
                 catch (InternetConnectionException ex)
                 {
@@ -64,9 +66,11 @@ namespace Cross_Game.Windows
             {
                 server.Stop();
                 server = null;
+                if (TransmisionOptions.Visibility == Visibility.Visible)
+                    Dispatcher.Invoke(() => TransmisionOptions.IsAlerted = false);
             });
 
-            CheckConnection();
+            SyncData();
             TransmisionOptions = new EditComputerParams(CurrentUser);
             TransmisionOptions.Visibility = Visibility.Hidden;
             Content.Children.Add(TransmisionOptions);
@@ -89,7 +93,7 @@ namespace Cross_Game.Windows
             switch (name)
             {
                 case "Ordenadores": MyComputers.Visibility = visibility; break;
-                case "Amigos": CheckConnection(); break;
+                case "Amigos": SyncData(); break;
                 case "Transmisión": TransmisionOptions.Visibility = visibility;
                     //var display = new UserDisplay();
                     //display.StartTransmission(CurrentUser.localMachine);
@@ -108,7 +112,7 @@ namespace Cross_Game.Windows
             }
         }
 
-        private void CheckConnection()
+        private void SyncData()
         {
             Task.Run(()=>
             {

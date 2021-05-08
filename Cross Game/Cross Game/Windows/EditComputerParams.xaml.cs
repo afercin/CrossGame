@@ -10,6 +10,20 @@ namespace Cross_Game.Windows
     /// </summary>
     public partial class EditComputerParams : UserControl
     {
+        private bool isAlerted;
+        public bool IsAlerted
+        {
+            set
+            {
+                isAlerted = value;
+                Alert.Visibility = value ? Visibility.Visible : Visibility.Hidden;
+                TCP.IsEnabled = !value;
+                UDP.IsEnabled = !value;
+                MaxConections.IsEnabled = !value;
+                FPS.IsEnabled = !value;
+            }
+        }
+
         private readonly UserData currentUser;
         public EditComputerParams(UserData user)
         {
@@ -46,7 +60,7 @@ namespace Cross_Game.Windows
                 UDP.Value = currentUser.localMachine.Udp;
                 MaxConections.Value = currentUser.localMachine.Max_connections;
                 FPS.Value = currentUser.localMachine.FPS;
-                Alert.Visibility = currentUser.localMachine.Status != 0 ? Visibility.Visible : Visibility.Hidden;
+                IsAlerted = currentUser.localMachine.Status != 0;
             }
         }
     }
