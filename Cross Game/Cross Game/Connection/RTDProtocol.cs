@@ -69,7 +69,10 @@ namespace Cross_Game.Connection
         SizeWE = 0x11,
         SizeNS = 0x13,
         Wait = 0x19,
-        Hand = 0x1F
+        Hand = 0x1F,
+        //InvertedArrow = 0x8B,
+        //ItalicIBean = 2D,
+        //ArrowCross = 4D
     }
 
     abstract class RTDProtocol : IDisposable
