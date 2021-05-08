@@ -67,7 +67,8 @@ namespace Cross_Game.Windows
             });
 
             CheckConnection();
-            TransmisionOptions = new EditComputerParams(CurrentUser.localMachine);
+            TransmisionOptions = new EditComputerParams(CurrentUser);
+            TransmisionOptions.Visibility = Visibility.Hidden;
             Content.Children.Add(TransmisionOptions);
         }
 
