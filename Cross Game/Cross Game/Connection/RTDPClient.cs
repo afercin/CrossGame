@@ -252,7 +252,7 @@ namespace Cross_Game.Connection
                             {
                                 //ga.GPUCopy(data, 1, images[img].ImageBytes, images[img].currentSize, dataSize - 1);
                                 //images[img].currentSize += dataSize - 1;
-                                images[img].AppendBuffer(data, 1, dataSize);
+                                images[img].AppendBuffer(data, 1, dataSize - 1);
                                 if (images[img].currentSize >= images[img].imageSize)
                                 {
                                     byte[] i = images[img].ImageBytes;
