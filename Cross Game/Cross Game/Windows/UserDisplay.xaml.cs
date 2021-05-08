@@ -20,7 +20,7 @@ namespace Cross_Game.Windows
             { CursorShape.None, Cursors.None },
             { CursorShape.Arrow, Cursors.Arrow },
             { CursorShape.IBeam, Cursors.IBeam },
-            { CursorShape.ArrowCD, Cursors.ArrowCD },
+            { CursorShape.ArrowCD, Cursors.AppStarting },
             { CursorShape.Cross, Cursors.Cross },
             { CursorShape.SizeNS, Cursors.SizeNS },
             { CursorShape.SizeWE, Cursors.SizeWE },

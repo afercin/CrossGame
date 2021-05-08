@@ -98,12 +98,13 @@ namespace Cross_Game.DataManipulation
     }
     /// <summary> Contains information about simulated mouse input. </summary>
     [StructLayout(LayoutKind.Sequential)]
-    struct MouseInput
+    public struct MouseInput
     {
-        public uint dx;
-        public uint dy;
-        public uint dwData;
+        public int dx;
+        public int dy;
+        public uint mouseData;
         public uint dwFlags;
+        public uint time;
         public IntPtr dwExtraInfo;
     }
     /// <summary> Contains information about simulated keyboard input. </summary>
