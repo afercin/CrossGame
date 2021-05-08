@@ -321,18 +321,28 @@ namespace Cross_Game.Connection
 
         public void SendKey(Key key, bool isPressed)
         {
-            byte[] petition = new byte[2];
+            if (!IsForbiddenKey(key))
+            {
+                byte[] petition = new byte[2];
 
-            petition[0] = Convert.ToByte(isPressed ? Petition.KeyboardKeyDown : Petition.KeyboardKeyUp);
-            petition[1] = (byte)key;
+                petition[0] = Convert.ToByte(isPressed ? Petition.KeyboardKeyDown : Petition.KeyboardKeyUp);
+                petition[1] = (byte)key;
 
-            SendPetition(petition);
+                SendPetition(petition);
+            }
         }
 
         public void SendOtherEvents(Petition otherEvent)
         {
             byte[] petition = new byte[] { Convert.ToByte(otherEvent) };
             SendPetition(petition);
+        }
+
+        private bool IsForbiddenKey(Key key)
+        {
+            return key != Key.VolumeMute &&
+                   key != Key.VolumeDown &&
+                   key != Key.VolumeUp;
         }
 
         private class ScreenImage

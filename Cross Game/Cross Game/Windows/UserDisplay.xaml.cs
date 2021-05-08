@@ -123,17 +123,6 @@ namespace Cross_Game.Windows
             });
         }
 
-        //private void Server_Click(object sender, RoutedEventArgs e)
-        //{
-        //    if (server == null || !server.IsConnected)
-        //        server = new RTDPController(3030, 3031, 1, 20);
-        //    else
-        //    {
-        //        server.Dispose();
-        //        server = null;
-        //    }
-        //}
-
         DateTime time = DateTime.Now;
 
         private void Client_ImageBuilt(object sender, ImageBuiltEventArgs e)
@@ -166,7 +155,7 @@ namespace Cross_Game.Windows
 
         private void ClientDisplay_KeyPress(object sender, KeyEventArgs e)
         {
-            if (client != null && client.IsConnected && e.Key != Key.DeadCharProcessed && e.Key != Key.OemFinish)
+            if (client != null && client.IsConnected)
                 client.SendKey(e.Key, e.IsDown);
         }
 

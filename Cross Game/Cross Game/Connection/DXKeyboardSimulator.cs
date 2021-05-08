@@ -17,7 +17,7 @@ namespace Cross_Game.Connection
             try
             {
                 DirectXKeyStrokes keycode = (DirectXKeyStrokes)Enum.Parse(typeof(DirectXKeyStrokes), ((Key)key).ToString());
-                Console.WriteLine(keycode.ToString());
+                Console.WriteLine((petition == Petition.KeyboardKeyDown? "Pressed: " : "Released: ") + keycode.ToString());
 
                 if (pressed[(int)DirectXKeyStrokes.LeftCtrl] && pressed[(int)DirectXKeyStrokes.RightAlt] && (Key)key == Key.System)
                     keycode = DirectXKeyStrokes.LeftCtrl;
@@ -83,7 +83,7 @@ namespace Cross_Game.Connection
             I = 0x17,
             O = 0x18,
             P = 0x19,
-            Oem1 = 0x1A, // `
+            Oem1 = 0x1A,        // `
             OemPlus = 0x1B,
             Return = 0x1C,
 
@@ -97,9 +97,9 @@ namespace Cross_Game.Connection
             J = 0x24,
             K = 0x25,
             L = 0x26,
-            Oem3 = 0x27, // ñ
-            OemQuotes = 0x28, // ´
-            Oem5 = 0x29, // º
+            Oem3 = 0x27,        // ñ
+            OemQuotes = 0x28,   // ´
+            Oem5 = 0x29,        // º
 
             LeftShift = 0x2A,
             OemQuestion = 0x2B, // ç
@@ -151,50 +151,50 @@ namespace Cross_Game.Connection
 
             Snapshot = 0x54,
 
-            OemBackslash = 0x56, // <
+            OemBackslash = 0x56,        // <
             F11 = 0x57,
             F12 = 0x58,
 
-            Clear = 0x59, // Posiblemente no sea eso pero realiza el mismo evento que NumPad5
+            Clear = 0x59,               // Posiblemente no sea eso pero realiza el mismo evento que NumPad5
 
             F13 = 0x64,
             F14 = 0x65,
             F15 = 0x66,
 
-            DIK_KANA = 0x70,
-            DIK_ABNT_C1 = 0x73, // /? on Brazilian keyboard
+            KanaMode = 0x70,
+            AbntC1 = 0x73,
             DIK_CONVERT = 0x79,
             DIK_NOCONVERT = 0x7B,
-            DIK_TAB = 0x7C,
+            OemBackTab = 0x7C,
             DIK_YEN = 0x7D,
-            DIK_ABNT_C2 = 0x7E, //  Numpad . on Brazilian keyboard
+            AbntC2 = 0x7E,
 
             /** Extended Keys **/
-            DIK_NUMPADEQUALS = 0x8D,    // = on numeric keypad (NEC PC98) //
-            DIK_PREVTRACK = 0x90,    // Previous Track (DIK_CIRCUMFLEX on Japanese keyboard) //
-            DIK_AT = 0x91,    //                     (NEC PC98) //
-            DIK_COLON = 0x92,    //                     (NEC PC98) //
-            DIK_UNDERLINE = 0x93, //                     (NEC PC98) //
-            DIK_KANJI = 0x94,   // (Japanese keyboard)            //
-            DIK_STOP = 0x95,    //                     (NEC PC98) //
-            DIK_AX = 0x96,    //                     (Japan AX) //
-            DIK_UNLABELED = 0x97,    //                        (J3100) //
-            DIK_NEXTTRACK = 0x99,    // Next Track //
-            DIK_NUMPADENTER = 0x9C,    // Enter on numeric keypad //
+            DIK_NUMPADEQUALS = 0x8D,    // = on numeric keypad (NEC PC98)
+            MediaPreviousTrack = 0x90, 
+            DIK_AT = 0x91,              // (NEC PC98)
+            DIK_COLON = 0x92,           // (NEC PC98) posiblemente OemSemicolon
+            DIK_UNDERLINE = 0x93,       // (NEC PC98)
+            KanjiMode = 0x94,           // (Japanese keyboard) 
+            DIK_STOP = 0x95,            // (NEC PC98)
+            DIK_AX = 0x96,              // (Japan AX)
+            DIK_UNLABELED = 0x97,       // (J3100)
+            MediaNextTrack = 0x99,
+            DIK_NUMPADENTER = 0x9C,     // Enter on numeric keypad
             RightCtrl = 0x9D,
-            DIK_MUTE = 0xA0,    // Mute //
-            DIK_CALCULATOR = 0xA1,    // Calculator //
-            DIK_PLAYPAUSE = 0xA2,    // Play / Pause //
-            DIK_MEDIASTOP = 0xA4,    // Media Stop //
-            DIK_VOLUMEDOWN = 0xAE,    // Volume - //
-            DIK_VOLUMEUP = 0xB0,    // Volume + //
-            DIK_WEBHOME = 0xB2,    // Web home //
-            DIK_NUMPADCOMMA = 0xB3,    // , on numeric keypad (NEC PC98) //
+            VolumeMute = 0xA0,
+            DIK_CALCULATOR = 0xA1,      // Calculator
+            MediaPlayPause = 0xA2,
+            MediaStop = 0xA4,
+            VolumeDown = 0xAE,
+            VolumeUp = 0xB0,
+            BrowserHome = 0xB2,
+            DIK_NUMPADCOMMA = 0xB3,     // , on numeric keypad (NEC PC98)
 
-            Divide = 0xB5,    // / on numeric keypad //
+            Divide = 0xB5,
             DIK_SYSRQ = 0xB7,
             RightAlt = 0xB8,
-            DIK_PAUSE = 0xC5,    // Pause //
+            Pause = 0xC5,
             Home = 0xC7,
             Up = 0xC8,
             Prior = 0xC9,
@@ -208,19 +208,19 @@ namespace Cross_Game.Connection
             LWin = 0xDB,
             RWin = 0xDC,
 
-            DIK_APPS = 0xDD,    // AppMenu key //
-            DIK_POWER = 0xDE,    // System Power //
-            DIK_SLEEP = 0xDF,    // System Sleep //
-            DIK_WAKE = 0xE3,    // System Wake //
-            DIK_WEBSEARCH = 0xE5,    // Web Search //
-            DIK_WEBFAVORITES = 0xE6,    // Web Favorites //
-            DIK_WEBREFRESH = 0xE7,    // Web Refresh //
-            DIK_WEBSTOP = 0xE8,    // Web Stop //
-            DIK_WEBFORWARD = 0xE9,    // Web Forward //
-            DIK_WEBBACK = 0xEA,    // Web Back //
-            DIK_MYCOMPUTER = 0xEB,    // My Computer //
-            DIK_MAIL = 0xEC,    // Mail //
-            DIK_MEDIASELECT = 0xED,    // Media Select 
+            Apps = 0xDD,
+            DIK_POWER = 0xDE,           // System Power
+            Sleep = 0xDF,
+            DIK_WAKE = 0xE3,            // System Wake
+            BrowserSearch = 0xE5,
+            BrowserFavorites = 0xE6,
+            BrowserRefresh = 0xE7,
+            BrowserStop = 0xE8,
+            BrowserForward = 0xE9,
+            BrowserBack = 0xEA,
+            DIK_MYCOMPUTER = 0xEB,      // My Computer
+            LaunchMail = 0xEC,
+            SelectMedia = 0xED,
 
             PageUp = Prior,
             PageDown = Next,
