@@ -10,43 +10,43 @@ namespace Cross_Game.Windows
     /// </summary>
     public partial class EditComputerParams : UserControl
     {
-        private readonly ComputerData localMachine;
-        public EditComputerParams(ComputerData computer)
+        private readonly UserData currentUser;
+        public EditComputerParams(UserData user)
         {
             InitializeComponent();
-            localMachine = computer;
+            currentUser = user;
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             if (Edited())
             {
-                localMachine.Name = ComputerName.Text;
-                localMachine.Tcp = TCP.Value;
-                localMachine.Udp = UDP.Value;
-                localMachine.Max_connections = MaxConections.Value;
-                localMachine.FPS = FPS.Value;
-                DBConnection.UpdateComputerInfo(localMachine);
+                currentUser.localMachine.Name = ComputerName.Text;
+                currentUser.localMachine.Tcp = TCP.Value;
+                currentUser.localMachine.Udp = UDP.Value;
+                currentUser.localMachine.Max_connections = MaxConections.Value;
+                currentUser.localMachine.FPS = FPS.Value;
+                DBConnection.UpdateComputerInfo(currentUser.localMachine);
             }
         }
 
         private bool Edited()
         {
-            return ComputerName.Text != localMachine.Name ||
-                   TCP.Value != localMachine.Tcp || UDP.Value != localMachine.Udp ||
-                   MaxConections.Value != localMachine.Max_connections || FPS.Value != localMachine.FPS;
+            return ComputerName.Text != currentUser.localMachine.Name ||
+                   TCP.Value != currentUser.localMachine.Tcp || UDP.Value != currentUser.localMachine.Udp ||
+                   MaxConections.Value != currentUser.localMachine.Max_connections || FPS.Value != currentUser.localMachine.FPS;
         }
 
         private void EditComputer_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (Visibility == Visibility.Visible)
             {
-                ComputerName.Text = localMachine.Name;
-                TCP.Value = localMachine.Tcp;
-                UDP.Value = localMachine.Udp;
-                MaxConections.Value = localMachine.Max_connections;
-                FPS.Value = localMachine.FPS;
-                Alert.Visibility = localMachine.Status != 0 ? Visibility.Visible : Visibility.Hidden;
+                ComputerName.Text = currentUser.localMachine.Name;
+                TCP.Value = currentUser.localMachine.Tcp;
+                UDP.Value = currentUser.localMachine.Udp;
+                MaxConections.Value = currentUser.localMachine.Max_connections;
+                FPS.Value = currentUser.localMachine.FPS;
+                Alert.Visibility = currentUser.localMachine.Status != 0 ? Visibility.Visible : Visibility.Hidden;
             }
         }
     }
