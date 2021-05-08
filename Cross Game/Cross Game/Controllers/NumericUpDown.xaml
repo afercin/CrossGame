@@ -6,7 +6,8 @@
              mc:Ignorable="d" 
              Name="UpDown"
              d:DesignHeight="28" d:DesignWidth="200"
-             LostFocus="UpDown_LostFocus">
+             LostFocus="UpDown_LostFocus"
+             IsEnabledChanged="UpDown_IsEnabledChanged">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -31,14 +32,14 @@
                     Background="#ECECEC"
                     BorderBrush="#ACACAC"
                     Click="Button_Click">
-                <Image Source="pack://application:,,,/Images/up.png"/>
+                <Image Name="Up" Source="pack://application:,,,/Images/up.png"/>
             </Button>
             <Button Name="Decrement"
                     Grid.Row="1"
                     Background="#ECECEC"
                     BorderBrush="#ACACAC"
                     Click="Button_Click">
-                <Image Source="pack://application:,,,/Images/down.png"/>
+                <Image Name="Down" Source="pack://application:,,,/Images/down.png"/>
             </Button>
         </Grid>
     </Grid>

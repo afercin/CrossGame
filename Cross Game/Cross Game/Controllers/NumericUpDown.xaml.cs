@@ -110,5 +110,10 @@ namespace Cross_Game.Controllers
                 NumericBox.CaretIndex = NumericBox.Text.Length;
             }
         }
+
+        private void UpDown_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            Up.Opacity = Down.Opacity = IsEnabled ? 1.0 : 0.5;
+        }
     }
 }
