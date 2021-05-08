@@ -324,7 +324,7 @@ namespace Cross_Game.Connection
             byte[] petition = new byte[2];
 
             petition[0] = Convert.ToByte(isPressed ? Petition.KeyboardKeyDown : Petition.KeyboardKeyUp);
-            petition[1] = Convert.ToByte(key);
+            petition[1] = (byte)key;
 
             SendPetition(petition);
         }
