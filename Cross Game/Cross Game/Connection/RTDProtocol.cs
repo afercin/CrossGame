@@ -85,7 +85,7 @@ namespace Cross_Game.Connection
             IsConnected = false;
         }
 
-        protected void SendBuffer(Socket s, ref byte[] buffer)
+        protected void SendBuffer(Socket s, byte[] buffer)
         {
             if (buffer.Length > MaxPacketSize)
                 throw new ArgumentException("El tamaño del dato introducido supera el valor de " + MaxPacketSize + " bytes.");
@@ -126,7 +126,7 @@ namespace Cross_Game.Connection
                     else
                     {
                         errors = 0;
-                        ReceivePetition(s, ref buffer);
+                        ReceivePetition(s, buffer);
                     }
                 }
             }
@@ -153,7 +153,7 @@ namespace Cross_Game.Connection
             Stop();
         }
 
-        protected abstract void ReceivePetition(Socket s, ref byte[] buffer);
+        protected abstract void ReceivePetition(Socket s, byte[] buffer);
         protected abstract void Init();
         public abstract void Stop();
     }

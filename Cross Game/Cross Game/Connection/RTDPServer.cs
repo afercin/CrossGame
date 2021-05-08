@@ -78,13 +78,13 @@ namespace Cross_Game.Connection
                         LogUtils.AppendLogOk(LogUtils.ServerConnectionLog, $"Cliente {clientAddress.Address.ToString()} aceptado, procediendo a establecer canal de comunicación.");
 
                         byte[] request = new byte[] { Convert.ToByte(Petition.ConnectionAccepted) };
-                        SendBuffer(tcpClientSocket, ref request);
+                        SendBuffer(tcpClientSocket, request);
 
                         if (user.localMachine.N_connections == 0)
                             Init();
 
                         request = new byte[] { 0 };
-                        SendWaveFormat(tcpClientSocket, ref request); // TODO: Enviar waveformat
+                        SendWaveFormat(tcpClientSocket, request); // TODO: Enviar waveformat
 
                         udpClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                         udpClientSocket.Connect(new IPEndPoint(clientAddress.Address, user.localMachine.Udp));
@@ -115,7 +115,7 @@ namespace Cross_Game.Connection
                         LogUtils.AppendLogWarn(LogUtils.ServerConnectionLog, $"No se acepta la conexión desde {clientAddress.Address.ToString()}, no es un usuario autorizado.");
 
                         byte[] request = new byte[] { Convert.ToByte(Petition.ConnectionRefused) };
-                        SendBuffer(tcpClientSocket, ref request);
+                        SendBuffer(tcpClientSocket, request);
                     }
                 }
             }
@@ -226,7 +226,7 @@ namespace Cross_Game.Connection
             try
             {
                 foreach (Client sockets in clientSockets.Values)
-                    SendBuffer(sockets.udpSocket, ref data);
+                    SendBuffer(sockets.udpSocket, data);
             }
             catch (InvalidOperationException)
             {
@@ -234,12 +234,12 @@ namespace Cross_Game.Connection
             }
         }
 
-        public void SendWaveFormat(Socket newClientSocket, ref byte[] waveFormat)
+        public void SendWaveFormat(Socket newClientSocket, byte[] waveFormat)
         {
             byte[] petition = new byte[waveFormat.Length + 1];
             petition[0] = Convert.ToByte(Petition.SetWaveFormat);
             Array.Copy(waveFormat, 0, petition, 1, waveFormat.Length);
-            SendBuffer(newClientSocket, ref petition);
+            SendBuffer(newClientSocket, petition);
         }
 
         private void Audio_CapturedAudio(object sender, Audio.AudioCapturedEventArgs e)
@@ -322,7 +322,7 @@ namespace Cross_Game.Connection
             }
         }
 
-        protected override void ReceivePetition(Socket s, ref byte[] buffer)
+        protected override void ReceivePetition(Socket s, byte[] buffer)
         {
             IPAddress IP = (s.RemoteEndPoint as IPEndPoint).Address;
             Petition petition = (Petition)buffer[0];

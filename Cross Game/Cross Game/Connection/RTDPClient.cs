@@ -94,7 +94,7 @@ namespace Cross_Game.Connection
                         /****** Mandar credenciales y esperar confirmación *******/
 
                         byte[] buffer = Crypto.GetBytes(mac);
-                        SendBuffer(petitionsSocket, ref buffer);
+                        SendBuffer(petitionsSocket, buffer);
 
                         connectedThread = new Thread(() =>
                         {
@@ -205,7 +205,7 @@ namespace Cross_Game.Connection
             }
         }
 
-        protected override void ReceivePetition(Socket s, ref byte[] buffer)
+        protected override void ReceivePetition(Socket s, byte[] buffer)
         {
             Petition petition = (Petition)buffer[0];
             switch (petition)
@@ -252,7 +252,7 @@ namespace Cross_Game.Connection
                             {
                                 //ga.GPUCopy(data, 1, images[img].ImageBytes, images[img].currentSize, dataSize - 1);
                                 //images[img].currentSize += dataSize - 1;
-                                images[img].AppendBuffer(ref data, 1, dataSize);
+                                images[img].AppendBuffer(data, 1, dataSize);
                                 if (images[img].currentSize >= images[img].imageSize)
                                 {
                                     byte[] i = images[img].ImageBytes;
@@ -286,7 +286,7 @@ namespace Cross_Game.Connection
             }
         }
 
-        private void SendPetition(ref byte[] petition) => SendBuffer(petitionsSocket, ref petition);
+        private void SendPetition(byte[] petition) => SendBuffer(petitionsSocket, petition);
 
         public void SendMousePosition(Point position, Size RenderSize)
         {
@@ -296,7 +296,7 @@ namespace Cross_Game.Connection
             BitConverter.GetBytes(Convert.ToSingle(position.X * 100.0 / RenderSize.Width)).CopyTo(petition, 1);
             BitConverter.GetBytes(Convert.ToSingle(position.Y * 100.0 / RenderSize.Height)).CopyTo(petition, 5);
 
-            SendPetition(ref petition);
+            SendPetition(petition);
         }
 
         public void SendMouseButton(MouseButton mouseButton, bool isPressed)
@@ -316,7 +316,7 @@ namespace Cross_Game.Connection
             petition[0] = Convert.ToByte(Petition.MouseWheel);
             BitConverter.GetBytes(delta).CopyTo(petition, 1);
 
-            SendPetition(ref petition);
+            SendPetition(petition);
         }
 
         public void SendKey(Key key, bool isPressed)
@@ -326,13 +326,13 @@ namespace Cross_Game.Connection
             petition[0] = Convert.ToByte(isPressed ? Petition.KeyboardKeyDown : Petition.KeyboardKeyUp);
             petition[1] = Convert.ToByte(key);
 
-            SendPetition(ref petition);
+            SendPetition(petition);
         }
 
         public void SendOtherEvents(Petition otherEvent)
         {
             byte[] petition = new byte[] { Convert.ToByte(otherEvent) };
-            SendPetition(ref petition);
+            SendPetition(petition);
         }
 
         private class ScreenImage
@@ -349,7 +349,7 @@ namespace Cross_Game.Connection
                 currentSize = 0;
             }
 
-            public bool AppendBuffer(ref byte[] buffer, int offset, int bufferSize)
+            public bool AppendBuffer(byte[] buffer, int offset, int bufferSize)
             {
                 Array.Copy(buffer, offset, ImageBytes, currentSize, bufferSize);
                 currentSize += bufferSize;
