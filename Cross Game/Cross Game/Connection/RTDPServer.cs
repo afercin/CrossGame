@@ -348,8 +348,6 @@ namespace Cross_Game.Connection
                 case Petition.KeyboardKeyUp:
                     clientSockets[IP].keyboard?.SendKey(buffer[1], petition);
                     break;
-                default:
-                    throw new Exception();
             }
         }
 
