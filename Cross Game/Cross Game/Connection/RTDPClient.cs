@@ -24,11 +24,11 @@ namespace Cross_Game.Connection
         private byte skipImage;
         private string serverIP;
         private ComputerData Computer;
-        //private GPUAceleration ga;
+        private GPUAceleration ga;
 
         public RTDPClient() : base()
         {
-        //    ga = new GPUAceleration();
+            ga = new GPUAceleration();
         }
 
         public void Start(ComputerData computerData)
@@ -250,9 +250,9 @@ namespace Cross_Game.Connection
                         {
                             try
                             {
-                                //ga.GPUCopy(data, 1, images[img].ImageBytes, images[img].currentSize, dataSize - 1);
-                                //images[img].currentSize += dataSize - 1;
-                                images[img].AppendBuffer(data, 1, dataSize - 1);
+                                ga.GPUCopy(data, 1, images[img].ImageBytes, images[img].currentSize, dataSize - 1);
+                                images[img].currentSize += dataSize - 1;
+                                //images[img].AppendBuffer(data, 1, dataSize - 1);
                                 if (images[img].currentSize >= images[img].imageSize)
                                 {
                                     byte[] i = images[img].ImageBytes;

@@ -93,22 +93,22 @@ namespace Cross_Game.Windows
             switch (name)
             {
                 case "Ordenadores": MyComputers.Visibility = visibility; break;
-                case "Amigos": SyncData(); break;
-                case "Transmisión": TransmisionOptions.Visibility = visibility;
-                    //var display = new UserDisplay();
-                    //display.StartTransmission(CurrentUser.localMachine);
-                    //try
-                    //{
-                    //    display.Visibility = Visibility.Visible;
-                    //    Hide();
-                    //    display.ShowDialog();
-                    //    Show();
-                    //}
-                    //catch
-                    //{
+                case "Amigos":
+                    var display = new UserDisplay();
+                    display.StartTransmission(CurrentUser.localMachine);
+                    try
+                    {
+                        display.Visibility = Visibility.Visible;
+                        Hide();
+                        display.ShowDialog();
+                        Show();
+                    }
+                    catch
+                    {
 
-                    //}
+                    }
                     break;
+                case "Transmisión": TransmisionOptions.Visibility = visibility;break;
             }
         }
 
