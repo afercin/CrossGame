@@ -6,7 +6,6 @@
              xmlns:iconpacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
              mc:Ignorable="d" 
              MouseLeftButtonDown="Option_MouseLeftButtonDown"
-             MouseLeftButtonUp="Option_MouseLeftButtonUp"
              MouseEnter="Option_MouseEnter"
              MouseLeave="Option_MouseLeave"
              Name="Option"
