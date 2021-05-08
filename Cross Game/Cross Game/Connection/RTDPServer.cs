@@ -30,12 +30,12 @@ namespace Cross_Game.Connection
                 clientSockets = new Dictionary<IPAddress, Client>();
 
             user = currentUser;
-            Computer = currentUser.localMachine;
-            frameRate = 1000 / Computer.FPS;
+            user.localMachine = currentUser.localMachine;
+            frameRate = 1000 / user.localMachine.FPS;
 
-            Computer.Status = 1;
-            Computer.N_connections = 0;
-            DBConnection.UpdateComputerInfo(Computer);
+            user.localMachine.Status = 1;
+            user.localMachine.N_connections = 0;
+            DBConnection.UpdateComputerInfo(user.localMachine);
 
             listenThread = new Thread(ConnectionThread);
             listenThread.IsBackground = true;
@@ -52,14 +52,14 @@ namespace Cross_Game.Connection
             int userPriority = 0;
 
             LogUtils.AppendLogHeader(LogUtils.ServerConnectionLog);
-            LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"Comenzando a recibir clientes por el puerto {Computer.Tcp}");
+            LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"Comenzando a recibir clientes por el puerto {user.localMachine.Tcp}");
 
             listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            listenSocket.Bind(new IPEndPoint(IPAddress.Any, Computer.Tcp));
-            listenSocket.Listen(Computer.Max_connections - Computer.N_connections);
+            listenSocket.Bind(new IPEndPoint(IPAddress.Any, user.localMachine.Tcp));
+            listenSocket.Listen(user.localMachine.Max_connections - user.localMachine.N_connections);
             try
             {
-                while (Computer.N_connections < Computer.Max_connections) // diseñar alguna forma de recibir clientes permanentemente
+                while (user.localMachine.N_connections < user.localMachine.Max_connections) // diseñar alguna forma de recibir clientes permanentemente
                 {
                     tcpClientSocket = listenSocket.Accept();
                     clientAddress = tcpClientSocket.RemoteEndPoint as IPEndPoint;
@@ -77,15 +77,17 @@ namespace Cross_Game.Connection
                     {
                         LogUtils.AppendLogOk(LogUtils.ServerConnectionLog, $"Cliente {clientAddress.Address.ToString()} aceptado, procediendo a establecer canal de comunicación.");
 
-                        SendBuffer(tcpClientSocket, new byte[] { Convert.ToByte(Petition.ConnectionAccepted) });
+                        byte[] request = new byte[] { Convert.ToByte(Petition.ConnectionAccepted) };
+                        SendBuffer(tcpClientSocket, ref request);
 
-                        if (Computer.N_connections == 0)
+                        if (user.localMachine.N_connections == 0)
                             Init();
 
-                        SendWaveFormat(tcpClientSocket, new byte[] { 0 }); // TODO: Enviar waveformat
+                        request = new byte[] { 0 };
+                        SendWaveFormat(tcpClientSocket, ref request); // TODO: Enviar waveformat
 
                         udpClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                        udpClientSocket.Connect(new IPEndPoint(clientAddress.Address, Computer.Udp));
+                        udpClientSocket.Connect(new IPEndPoint(clientAddress.Address, user.localMachine.Udp));
 
                         Client client = new Client()
                         {
@@ -102,16 +104,18 @@ namespace Cross_Game.Connection
                         receivePetitionThread.IsBackground = true;
                         receivePetitionThread.Start();
 
-                        Computer.N_connections++;
+                        user.localMachine.N_connections++;
 
-                        DBConnection.UpdateComputerInfo(Computer);
+                        DBConnection.UpdateComputerInfo(user.localMachine);
 
                         LogUtils.AppendLogOk(LogUtils.ServerConnectionLog, $"Cliente con IP {clientAddress.Address.ToString()} agregado con éxito.");
                     }
                     else
                     {
                         LogUtils.AppendLogWarn(LogUtils.ServerConnectionLog, $"No se acepta la conexión desde {clientAddress.Address.ToString()}, no es un usuario autorizado.");
-                        SendBuffer(tcpClientSocket, new byte[] { Convert.ToByte(Petition.ConnectionRefused) });
+
+                        byte[] request = new byte[] { Convert.ToByte(Petition.ConnectionRefused) };
+                        SendBuffer(tcpClientSocket, ref request);
                     }
                 }
             }
@@ -127,7 +131,7 @@ namespace Cross_Game.Connection
             {
                 listenSocket?.Close();
             }
-            LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"El servidor ya no acepta más clientes ({Computer.N_connections}/{Computer.Max_connections})");
+            LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"El servidor ya no acepta más clientes ({user.localMachine.N_connections}/{user.localMachine.Max_connections})");
         }
 
         protected override void Init()
@@ -176,9 +180,9 @@ namespace Cross_Game.Connection
                 }
             }
 
-            Computer.N_connections = 0;
-            Computer.Status = 0;
-            DBConnection.UpdateComputerInfo(Computer);
+            user.localMachine.N_connections = 0;
+            user.localMachine.Status = 0;
+            DBConnection.UpdateComputerInfo(user.localMachine);
 
             LogUtils.AppendLogFooter(LogUtils.ServerConnectionLog);
         }
@@ -200,21 +204,21 @@ namespace Cross_Game.Connection
             DisconnectClient(clientSockets[IP]);
             clientSockets.Remove(IP);
 
-            Computer.N_connections--;
+            user.localMachine.N_connections--;
 
-            if (Computer.N_connections == 0)
+            if (user.localMachine.N_connections == 0)
             {
                 LogUtils.AppendLogText(LogUtils.ServerConnectionLog, "Se han desconectado todos los clientes, reiniciando el servidor...");
                 Stop();
                 Start(user);
             }
-            else if (Computer.N_connections == Computer.Max_connections - 1)
+            else if (user.localMachine.N_connections == user.localMachine.Max_connections - 1)
             {
                 LogUtils.AppendLogText(LogUtils.ServerConnectionLog, "El servidor vuelve a tener un espacio libre, volviendo a pedir clientes...");
                 Start(user);
             }
             else
-                DBConnection.UpdateComputerInfo(Computer);
+                DBConnection.UpdateComputerInfo(user.localMachine);
         }
 
         public void SendData(byte[] data)
@@ -222,7 +226,7 @@ namespace Cross_Game.Connection
             try
             {
                 foreach (Client sockets in clientSockets.Values)
-                    SendBuffer(sockets.udpSocket, data);
+                    SendBuffer(sockets.udpSocket, ref data);
             }
             catch (InvalidOperationException)
             {
@@ -230,12 +234,12 @@ namespace Cross_Game.Connection
             }
         }
 
-        public void SendWaveFormat(Socket newClientSocket, byte[] waveFormat)
+        public void SendWaveFormat(Socket newClientSocket, ref byte[] waveFormat)
         {
             byte[] petition = new byte[waveFormat.Length + 1];
             petition[0] = Convert.ToByte(Petition.SetWaveFormat);
             Array.Copy(waveFormat, 0, petition, 1, waveFormat.Length);
-            SendBuffer(newClientSocket, petition);
+            SendBuffer(newClientSocket, ref petition);
         }
 
         private void Audio_CapturedAudio(object sender, Audio.AudioCapturedEventArgs e)
@@ -318,7 +322,7 @@ namespace Cross_Game.Connection
             }
         }
 
-        protected override void ReceivePetition(Socket s, byte[] buffer)
+        protected override void ReceivePetition(Socket s, ref byte[] buffer)
         {
             IPAddress IP = (s.RemoteEndPoint as IPEndPoint).Address;
             Petition petition = (Petition)buffer[0];
