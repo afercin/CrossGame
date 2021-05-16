@@ -13,7 +13,6 @@
         private int n_connections;
         private int max_connections;
 
-
         public string MAC { get => mac; set => mac = value; }
         public string LocalIP { get => localIP; set => localIP = value; }
         public string PublicIP { get => publicIP; set => publicIP = value; }
@@ -24,5 +23,7 @@
         public int Max_connections { get => max_connections; set => max_connections = value; }
         public string Name { get => name; set => name = value; }
         public int FPS { get => fps; set => fps = value; }
+        
+        public ComputerData(string MAC) => mac = MAC;
     }
 }

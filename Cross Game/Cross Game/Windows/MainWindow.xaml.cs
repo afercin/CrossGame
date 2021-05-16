@@ -116,7 +116,7 @@ namespace Cross_Game.Windows
         {
             Task.Run(()=>
             {
-                List<string> MACs = DBConnection.GetMyComputers(CurrentUser);
+                List<string> MACs = DBConnection.GetUserComputers();
                 if (MACs != null)
                     Dispatcher.Invoke(() =>
                     {
@@ -198,7 +198,7 @@ namespace Cross_Game.Windows
             connectivity.Stop();
             connectivity.Dispose();
             server?.Stop();
-            DBConnection.LogOut(CurrentUser);
+            DBConnection.LogOut(CurrentUser.localMachine);
         }
     }
 }

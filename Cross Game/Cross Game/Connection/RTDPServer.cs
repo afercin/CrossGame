@@ -26,20 +26,30 @@ namespace Cross_Game.Connection
 
         public void Start(UserData currentUser)
         {
-            if (!IsConnected)
+            try
+            {
                 clientSockets = new Dictionary<IPAddress, Client>();
 
-            user = currentUser;
-            user.localMachine = currentUser.localMachine;
-            frameRate = 1000 / user.localMachine.FPS;
+                user = currentUser;
+                user.localMachine = currentUser.localMachine;
+                frameRate = 1000 / user.localMachine.FPS;
 
-            user.localMachine.Status = 1;
-            user.localMachine.N_connections = 0;
-            DBConnection.UpdateComputerInfo(user.localMachine);
+                ConnectionUtils.GetComputerNetworkInfo(out string localIP, out string publicIP, out string mac);
+                user.localMachine.LocalIP = localIP;
+                user.localMachine.PublicIP = publicIP;
+                user.localMachine.Status = 1;
+                user.localMachine.N_connections = 0;
+                DBConnection.UpdateComputerStatus(user.localMachine);
 
-            listenThread = new Thread(ConnectionThread);
-            listenThread.IsBackground = true;
-            listenThread.Start();
+                listenThread = new Thread(ConnectionThread);
+                listenThread.IsBackground = true;
+                listenThread.Start();
+            }
+            catch (InternetConnectionException)
+            {
+                LogUtils.AppendLogError(LogUtils.ServerConnectionLog, "No se tiene acceso a internet, el proceso no puede continuar.");
+                Stop();
+            }
         }
 
         private void ConnectionThread()
@@ -48,7 +58,6 @@ namespace Cross_Game.Connection
             Socket udpClientSocket;
             IPEndPoint clientAddress;
             Thread receivePetitionThread;
-            string clientMAC;
             int userPriority = 0;
 
             LogUtils.AppendLogHeader(LogUtils.ServerConnectionLog);
@@ -66,11 +75,13 @@ namespace Cross_Game.Connection
                     LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"Intento de conexión del cliente con IP {clientAddress.Address.ToString()}");
                     /***** Esperar y comprobar credenciales del usuario *****/
 
-                    ReceiveBuffer(tcpClientSocket, out byte[] buffer, out int bufferSize);
-                    clientMAC = Crypto.GetString(buffer);
+                    //ReceiveBuffer(tcpClientSocket, out byte[] buffer, out int bufferSize);
+                    //clientMAC = Crypto.GetString(buffer);
 
-                    if (DBConnection.IsCorrectComputerIP(clientMAC, clientAddress.Address.ToString()))
-                        userPriority = DBConnection.GetUserPriority(user, clientMAC);
+                    //if (DBConnection.IsCorretIP(clientMAC, clientAddress.Address.ToString()))
+                    //    userPriority = DBConnection.GetUserPriority(user, clientMAC);
+
+                    userPriority = 2;
 
                     /*********************************************************/
                     if (userPriority > 0)
@@ -106,7 +117,7 @@ namespace Cross_Game.Connection
 
                         user.localMachine.N_connections++;
 
-                        DBConnection.UpdateComputerInfo(user.localMachine);
+                        DBConnection.UpdateComputerStatus(user.localMachine);
 
                         LogUtils.AppendLogOk(LogUtils.ServerConnectionLog, $"Cliente con IP {clientAddress.Address.ToString()} agregado con éxito.");
                     }
@@ -182,7 +193,8 @@ namespace Cross_Game.Connection
 
             user.localMachine.N_connections = 0;
             user.localMachine.Status = 0;
-            DBConnection.UpdateComputerInfo(user.localMachine);
+
+            DBConnection.UpdateComputerStatus(user.localMachine);
 
             LogUtils.AppendLogFooter(LogUtils.ServerConnectionLog);
         }
@@ -218,7 +230,7 @@ namespace Cross_Game.Connection
                 Start(user);
             }
             else
-                DBConnection.UpdateComputerInfo(user.localMachine);
+                DBConnection.UpdateComputerStatus(user.localMachine);
         }
 
         public void SendData(byte[] data)

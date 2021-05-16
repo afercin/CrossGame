@@ -1,16 +1,16 @@
-﻿namespace Cross_Game
+﻿using System;
+
+namespace Cross_Game
 {
     public class UserData
     {
-        public int ID { get; private set; }
         public string Name { get; private set; }
         public int Number { get; private set; }
 
         public ComputerData localMachine { get; set; }
 
-        public UserData(int id, string name, int number)
+        public UserData(string name, int number)
         {
-            ID = id;
             Name = name;
             Number = number;
             localMachine = null;
@@ -19,13 +19,20 @@
         public void SyncLocalMachine()
         {
             ConnectionUtils.GetComputerNetworkInfo(out string localIP, out string publicIP, out string macAddress);
-            localMachine = new ComputerData()
+            localMachine = DBConnection.GetComputerData(macAddress);
+            localMachine.LocalIP = localIP;
+            localMachine.PublicIP = publicIP;
+            if (localMachine.Status != -1)
             {
-                LocalIP = localIP,
-                PublicIP = publicIP,
-                MAC = macAddress
-            };
-            DBConnection.SyncLocalMachinerData(this);
+                localMachine.N_connections = 0;
+                localMachine.Status = 1;
+                DBConnection.UpdateComputerStatus(localMachine);
+            }
+            else
+            {
+                localMachine.Name = Environment.MachineName;
+                DBConnection.AddComputer(localMachine);
+            }
         }
     }
 }

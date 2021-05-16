@@ -7,6 +7,8 @@ namespace Cross_Game
 {
     class DBConnection
     {
+        private static string UserEmail;
+        private static string UserPassword;
         private static MySqlConnection connection = new MySqlConnection(
             "SERVER=crossgame.sytes.net;" +
             "DATABASE=CrossGame;" +
@@ -64,27 +66,28 @@ namespace Cross_Game
 
         private static bool NonQuery(string sqlQuery) => new MySqlCommand(sqlQuery, connection).ExecuteNonQuery() > 0;
 
-        public static UserData CheckLogin(string email, string password)
+        public static UserData CheckLogin(string email, string password, bool overrideCredentials = true)
         {
             UserData currentUser = null;
 
             if (OpenConnection())
-            {                
-                MySqlDataReader dataReader = Query(
-                    $"SELECT user_id, name, number " +
-                    $"FROM users " +
-                    $"WHERE email = '{email}' " +
-                    $"AND password = '{Crypto.CreateSHA256(password)}'"
-                    );
+            {
+                password = Crypto.CreateSHA256(password);
+                MySqlDataReader dataReader = Query($"CALL GetUserName('{email}', '{password}');");
+
                 if (dataReader.HasRows)
                 {
                     dataReader.Read();
-                    currentUser = new UserData((int)dataReader["user_id"],
-                                               (string)dataReader["name"],
+                    currentUser = new UserData((string)dataReader["name"],
                                                (int)dataReader["number"]);
+                    if (overrideCredentials)
+                    {
+                        UserEmail = email;
+                        UserPassword = password;
+                    }
                 }
                 else
-                    currentUser = new UserData(0, "0", 0);
+                    currentUser = new UserData(string.Empty, 0);
 
                 dataReader.Close();
                 CloseConnection();
@@ -92,70 +95,14 @@ namespace Cross_Game
             return currentUser;
         }
 
-        public static int GetUserPriority(UserData currentUser, string clientMAC)
-        {
-            int priority = 0;
-            if (OpenConnection())
-            {
-                int clientUserID = 0;
-                MySqlDataReader dataReader = Query(
-                    $"SELECT owner " +
-                    $"FROM computers " +
-                    $"WHERE MAC = '{clientMAC}'"
-                    );
-                if (dataReader.HasRows)
-                {
-                    dataReader.Read();
-                    clientUserID = (int)dataReader["owner"];
-                }
-
-                dataReader.Close();
-
-                if (clientUserID != 0)
-                {
-                    if (currentUser.ID == clientUserID)
-                        priority = 2;
-                    else
-                    {
-                        dataReader = Query(
-                            $"SELECT * " +
-                            $"FROM users_computers " +
-                            $"WHERE computer_id = '{currentUser.localMachine.MAC}'"
-                            );
-
-                        if (dataReader.HasRows)
-                        {
-                            while (dataReader.Read() && priority == 0)
-                            {
-                                if (clientUserID == (int)dataReader["user_id"])
-                                    priority = 1;
-                            }
-                        }
-
-                        dataReader.Close();
-                    }
-                }
-
-                CloseConnection();
-            }
-            return priority;
-        }
-
-        public static bool IsCorrectComputerIP(string clientMAC, string clientIP)
+        public static bool IsCorretIP(string email, string password, string remoteMachineMAC, string remoteLocalIP, string remotePublicIP)
         {
             bool isCorrect = false;
             if (OpenConnection())
             {
-                MySqlDataReader dataReader = Query(
-                    $"SELECT LocalIP, PublicIP " +
-                    $"FROM computers " +
-                    $"WHERE MAC = '{clientMAC}'"
-                    );
+                MySqlDataReader dataReader = Query($"CALL GetComputerIP('{UserEmail}', '{UserPassword}', '{remoteMachineMAC}');");
                 if (dataReader.HasRows)
-                {
-                    dataReader.Read();
-                    isCorrect = clientIP == (string)dataReader["LocalIP"] || clientIP == (string)dataReader["PublicIP"];
-                }
+                    isCorrect = (string)dataReader["LocalIP"] == remoteLocalIP && (string)dataReader["PublicIP"] == remotePublicIP;
 
                 dataReader.Close();
                 CloseConnection();
@@ -163,123 +110,123 @@ namespace Cross_Game
             return isCorrect;
         }
 
-        public static List<string> GetMyComputers(UserData currentUser)
+        public static int GetUserPriority(string email, string password, string localMachineMAC)
+        {
+            int priority = 0;
+            var list = GetUserComputers(email, password);
+
+            if (list.Contains(localMachineMAC))
+                priority = 2;
+            else
+            {
+                list = GetSharedComputers(email, password);
+                if (list.Contains(localMachineMAC))
+                    priority = 1;
+            }
+            return priority;
+        }
+
+        public static List<string> GetUserComputers(string email = null, string password = null) => GetComputers("GetUserComputers", email, password);
+
+        public static List<string> GetSharedComputers(string email = null, string password = null) => GetComputers("GetSharedComputers", email, password);
+
+        private static List<string> GetComputers(string procedure, string email = null, string password = null)
         {
             if (!ConnectionUtils.HasInternetConnection())
                 return null;
 
-            List<string> myComputers = new List<string>();
+            List<string> computers = new List<string>();
 
             if (OpenConnection())
             {
-                MySqlDataReader dataReader = Query($"SELECT MAC FROM computers WHERE owner = {currentUser.ID}");
-                if (dataReader.HasRows)                
+                if (email == null)
+                {
+                    email = UserEmail;
+                    password = UserPassword;
+                }
+
+                MySqlDataReader dataReader = Query($"CALL {procedure}('{UserEmail}', '{UserPassword}');");
+                if (dataReader.HasRows)
                     while (dataReader.Read())
-                        myComputers.Add((string)dataReader["MAC"]);
+                        computers.Add((string)dataReader["MAC"]);
 
                 dataReader.Close();
                 CloseConnection();
             }
-
-            return myComputers;
+            return computers;
         }
 
-        internal static void SyncLocalMachinerData(UserData currentUser)
+        public static ComputerData GetComputerData(string MAC)
         {
-            bool newComputer = true;
-            ComputerData currentMachine = currentUser.localMachine;
-            currentMachine.Tcp = 3030;
-            currentMachine.Udp = 3031;
-            currentMachine.Name = Environment.MachineName;
-            currentMachine.Max_connections = 1;
-            currentMachine.N_connections = 0;
-            currentMachine.Status = 0;
-            currentMachine.FPS = 30;
+            ComputerData computer = new ComputerData(MAC);
+            computer.Status = -1;
             if (OpenConnection())
             {
-                MySqlDataReader dataReader = Query(
-                    $"SELECT TCP, UDP, name, max_connections, FPS " +
-                    $"FROM computers " +
-                    $"WHERE MAC = '{currentMachine.MAC}' " +
-                    $"AND owner = '{currentUser.ID}'"
-                    );
-                if (dataReader.HasRows)
-                {
-                    newComputer = false;
-
-                    dataReader.Read();
-                    currentMachine.Tcp = (int)dataReader["TCP"];
-                    currentMachine.Udp = (int)dataReader["UDP"];
-                    currentMachine.Name = (string)dataReader["name"];
-                    currentMachine.Max_connections = (int)dataReader["max_connections"];
-                    currentMachine.FPS = (int)dataReader["fps"];
-                }
-
-                dataReader.Close();
-
-                if (newComputer)
-                {                    
-                    NonQuery("INSERT INTO computers VALUES " +
-                            $"('{currentMachine.MAC}', '{currentMachine.LocalIP}', '{currentMachine.PublicIP}', {currentMachine.Tcp}, {currentMachine.Udp}, '{currentMachine.Name}', " +
-                            $"{currentMachine.N_connections}, {currentMachine.Max_connections}, {currentMachine.Status}, {currentUser.ID}, {currentMachine.FPS})");
-                }
-
-                CloseConnection();
-
-                if (!newComputer)
-                    UpdateComputerInfo(currentMachine);
-            }
-        }
-
-        internal static void GetComputerData(ComputerData pc)
-        {
-            pc.Status = -1;
-            if (OpenConnection())
-            {
-                MySqlDataReader dataReader = Query(
-                    "SELECT LocalIP, PublicIP, TCP, UDP, name, n_connections, max_connections, status, FPS " +
-                    "FROM computers " +
-                    "WHERE MAC = '" + pc.MAC + "'"
-                    );
+                MySqlDataReader dataReader = Query($"CALL GetComputerData('{UserEmail}', '{UserPassword}', '{MAC}');");
                 if (dataReader.HasRows)
                 {
                     dataReader.Read();
-                    pc.LocalIP = (string)dataReader["LocalIP"];
-                    pc.PublicIP = (string)dataReader["PublicIP"];
-                    pc.Tcp = (int)dataReader["TCP"];
-                    pc.Udp = (int)dataReader["UDP"];
-                    pc.Name = (string)dataReader["name"];
-                    pc.N_connections = (int)dataReader["n_connections"];
-                    pc.Max_connections = (int)dataReader["max_connections"];
-                    pc.Status = (int)dataReader["status"];
-                    pc.FPS = (int)dataReader["FPS"];
+                    computer.LocalIP = (string)dataReader["LocalIP"];
+                    computer.PublicIP = (string)dataReader["PublicIP"];
+                    computer.Tcp = (int)dataReader["TCP"];
+                    computer.Udp = (int)dataReader["UDP"];
+                    computer.Name = (string)dataReader["name"];
+                    computer.N_connections = (int)dataReader["n_connections"];
+                    computer.Max_connections = (int)dataReader["max_connections"];
+                    computer.Status = (int)dataReader["status"];
+                    computer.FPS = (int)dataReader["FPS"];
                 }
 
                 dataReader.Close();
                 CloseConnection();
             }
+            return computer;
         }
 
-        public static void UpdateComputerInfo(ComputerData computer)
+        public static bool AddComputer(ComputerData computer)
+        {
+            bool added = false;
+            if (OpenConnection())
+            {
+                MySqlDataReader dataReader = Query($"CALL AddComputer('{UserEmail}', '{UserPassword}', '{computer.MAC}', '{computer.LocalIP}', '{computer.PublicIP}', '{computer.Name}');");
+
+                dataReader.Read();
+                added = (int)dataReader["result"] == 1;
+
+                dataReader.Close();
+                CloseConnection();
+            }
+            return added;
+        }
+
+        public static void UpdateTransmissionConf(ComputerData computer)
         {
             if (OpenConnection())
             {
-                NonQuery("UPDATE computers SET " +
-                        $"LocalIP = '{computer.LocalIP}', PublicIP = '{computer.PublicIP}', TCP = {computer.Tcp}, UDP = {computer.Udp}, name = '{computer.Name}', " +
-                        $"max_connections = {computer.Max_connections}, n_connections = {computer.N_connections}, FPS = {computer.FPS}, status = {computer.Status} " +
-                        $"WHERE MAC = '{computer.MAC}'");
+                NonQuery($"CALL UpdateTransmissionConf('{UserEmail}', '{UserPassword}', '{computer.MAC}', {computer.Tcp}, {computer.Udp}, '{computer.Name}', {computer.Max_connections});");
                 CloseConnection();
             }
         }
 
-        public static void LogOut(UserData currentUser)
+        public static void UpdateComputerStatus(ComputerData computer)
         {
             if (OpenConnection())
             {
-                NonQuery($"UPDATE users SET status = 0 WHERE user_id = {currentUser.ID}");
-                NonQuery($"UPDATE computers SET status = 0, n_connections = 0 WHERE MAC = '{currentUser.localMachine.MAC}'");
+                NonQuery($"CALL UpdateComputerStatus('{UserEmail}', '{UserPassword}', '{computer.MAC}', '{computer.LocalIP}', '{computer.PublicIP}', {computer.N_connections}, {computer.Status});");
                 CloseConnection();
             }
+        }
+
+        public static void LogOut(ComputerData computer)
+        {
+            computer.Status = 0;
+            computer.N_connections = 0;
+            UpdateComputerStatus(computer);
+            //if (OpenConnection())
+            //{
+            //    NonQuery($"CALL LogOut('{UserEmail}', '{UserPassword}');");
+            //    CloseConnection();
+            //}
         }
     }
 }

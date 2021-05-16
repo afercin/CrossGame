@@ -38,7 +38,13 @@ namespace Cross_Game.Connection
 
             try
             {
-                ConnectionUtils.GetComputerNetworkInfo(out string localIP, out string publicIP, out string mac); Computer = computerData;
+                ConnectionUtils.GetComputerNetworkInfo(out string localIP, out string publicIP, out string mac);
+
+                Computer = computerData;
+                Computer.LocalIP = localIP;
+                Computer.PublicIP = publicIP;
+
+                DBConnection.UpdateComputerStatus(Computer);
 
                 serverIP = Computer.PublicIP == publicIP ? Computer.LocalIP : Computer.PublicIP;
 
@@ -200,7 +206,6 @@ namespace Cross_Game.Connection
             {
                 LogUtils.AppendLogText(LogUtils.ClientConnectionLog, "Reiniciando conexión...");
                 Stop();
-                DBConnection.UpdateComputerInfo(Computer);
                 Start(Computer);
             }
         }

@@ -40,7 +40,7 @@ namespace Cross_Game.Windows
                 currentUser.localMachine.Udp = UDP.Value;
                 currentUser.localMachine.Max_connections = MaxConections.Value;
                 currentUser.localMachine.FPS = FPS.Value;
-                DBConnection.UpdateComputerInfo(currentUser.localMachine);
+                DBConnection.UpdateTransmissionConf(currentUser.localMachine);
             }
         }
 

@@ -155,7 +155,7 @@ namespace Cross_Game.Windows
                             Error.Visibility = Visibility.Visible;
                         });
                     }
-                    else if (currentUser.ID == 0)
+                    else if (currentUser.Number == 0)
                     {
                         LogUtils.AppendLogWarn(LogUtils.LoginLog, "Las credenciales introducidas no concuerdan con las de ningún usuario.");
                         Dispatcher.Invoke(() =>

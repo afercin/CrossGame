@@ -21,15 +21,13 @@ namespace Cross_Game.Controllers
         private readonly Brush yellow = new SolidColorBrush(Color.FromRgb(190, 170, 40));
         private readonly Brush gray = new SolidColorBrush(Color.FromRgb(140, 140, 140));
 
-        public readonly ComputerData pc;
+        public ComputerData pc;
 
-        public Computer(string _MAC)
+        public Computer(string mac)
         {
             InitializeComponent();
-            pc = new ComputerData();
-            pc.MAC = _MAC;
 
-            UpdateStatus();
+            UpdateStatus(mac);
         }
 
         private void Computer_MouseDown(object sender, MouseButtonEventArgs e)
@@ -39,9 +37,9 @@ namespace Cross_Game.Controllers
                 ComputerClicked.Invoke(pc, new EventArgs());
         }
 
-        public void UpdateStatus()
+        public void UpdateStatus(string mac = null)
         {
-            DBConnection.GetComputerData(pc);
+            pc = DBConnection.GetComputerData(mac != null ? mac : pc.MAC);
             ComputerName.Text = pc.Name;
             Connections.Text = pc.Status == 1 ? $"{pc.N_connections}/{pc.Max_connections}" : "";
             switch (pc.Status)
