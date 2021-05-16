@@ -123,13 +123,11 @@ namespace Cross_Game.Windows
             {
                 Email.Foreground = Error.Foreground;
                 Password.Foreground = Error.Foreground;
-                CheckText.Foreground = Error.Foreground;
             }
             else
             {
                 Email.Foreground = White;
                 Password.Foreground = White;
-                CheckText.Foreground = White;
             }
         }
         /// <summary>
