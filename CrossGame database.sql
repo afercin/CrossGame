@@ -25,12 +25,12 @@ CREATE TABLE computers(
 	MAC CHAR(23) PRIMARY KEY,
 	LocalIP VARCHAR(15) NOT NULL,
 	PublicIP VARCHAR(15) NOT NULL,
-	TCP INT(5) NOT NULL,
-	UDP INT(5) NOT NULL,
+	TCP INT(5) NOT NULL DEFAULT 3030,
+	UDP INT(5) NOT NULL DEFAULT 3031,
 	name VARCHAR(30),
-	n_connections INT(2) NOT NULL,
-	max_connections INT(2) NOT NULL,
-	status INT(1) NOT NULL, -- 0 => Disconected, 1 => Connected.
+	n_connections INT(2) NOT NULL DEFAULT 0,
+	max_connections INT(2) NOT NULL DEFAULT 1,
+	status INT(1) NOT NULL DEFAULT 1, -- 0 => Disconected, 1 => Connected.
 	owner int(9) NOT NULL,
 	FPS INT(3) NOT NULL DEFAULT 30,
 	CONSTRAINT FK_C_Users FOREIGN KEY(owner) REFERENCES users(user_id) ON DELETE CASCADE
@@ -54,33 +54,118 @@ CREATE TABLE computers_options(
 	PRIMARY KEY(computer_id, option_name)
 );
 
-DELIMITER $$
-CREATE FUNCTION random_number() RETURNS INT(4)
-BEGIN
-	DECLARE number INT(4);
-    
-    SELECT RAND() * 9000 + 1000 INTO number;
-    
-    RETURN number;
-END $$
+DELIMITER //
 
-CREATE FUNCTION add_user(_email VARCHAR(30), _name VARCHAR(20), _password CHAR(32)) RETURNS INT(9)
+CREATE PROCEDURE GetUserName(_email VARCHAR(30), _password CHAR(64))
 BEGIN
-  DECLARE return_code INT(9);
-  
-  SELECT COUNT(user_id) INTO return_code
+  SELECT name, number
   FROM users
-  WHERE email = _email;
-  
-  IF return_code = 0 THEN
-    SELECT MAX(user_id) + 1 INTO return_code FROM users;
-	
-	IF return_code < 2 THEN 
-		SET return_code = 2; 
+  WHERE email = _email
+  AND password = _password;
+END //
+
+CREATE PROCEDURE GetUserComputers(_email VARCHAR(30), _password CHAR(64))
+BEGIN
+	SELECT MAC
+    FROM computers
+    WHERE owner = (    
+		SELECT user_id
+		FROM users
+		WHERE email = _email
+		AND password = _password);
+END //
+
+CREATE PROCEDURE GetSharedComputers(_email VARCHAR(30), _password CHAR(64))
+BEGIN
+	SELECT computer_id
+    FROM users_computers
+    WHERE user_id = (    
+		SELECT user_id
+		FROM users
+		WHERE email = _email
+		AND password = _password);
+END //
+
+CREATE PROCEDURE GetComputerData(_email VARCHAR(30), _password CHAR(64), _MAC CHAR(23))
+BEGIN
+	SELECT LocalIP, PublicIP, TCP, UDP, name, n_connections, max_connections, status, FPS
+    FROM computers
+    WHERE MAC = _MAC
+    AND owner = (    
+		SELECT user_id
+		FROM users
+		WHERE email = _email
+		AND password = _password);
+END //
+
+CREATE PROCEDURE UpdateTransmissionConf(_email VARCHAR(30), _password CHAR(64), _MAC CHAR(23), _TCP INT(5), _UDP INT(5), _name VARCHAR(30), _max_connections INT(2))
+BEGIN
+	UPDATE computers
+    SET TCP = _TCP,
+    	UDP = _UDP,
+        name = _name,
+        max_connections = _max_connections
+    WHERE MAC = _MAC
+    AND owner = (    
+		SELECT user_id
+		FROM users
+		WHERE email = _email
+		AND password = _password);
+END //
+
+CREATE PROCEDURE UpdateComputerStatus(_email VARCHAR(30), _password CHAR(64), _MAC CHAR(23), _LocalIP VARCHAR(15), _PublicIP VARCHAR(15), n_connections INT(2), _status INT(1))
+BEGIN
+	UPDATE computers
+    SET LocalIP = _LocalIP,
+    	PublicIP = _PublicIP,
+        status = _status
+    WHERE MAC = _MAC
+    AND owner = (    
+		SELECT user_id
+		FROM users
+		WHERE email = _email
+		AND password = _password);
+END //
+
+CREATE PROCEDURE GetComputerIP(_email VARCHAR(30), _password CHAR(64), _MAC CHAR(23))
+BEGIN
+	SELECT LocalIP, PublicIP
+	FROM computers
+	WHERE MAC = _MAC
+    AND owner = (    
+		SELECT user_id
+		FROM users
+		WHERE email = _email
+		AND password = _password);
+END //
+
+CREATE PROCEDURE AddComputer(_email VARCHAR(30), _password CHAR(64), _MAC CHAR(23), _LocalIP VARCHAR(15), _PublicIP VARCHAR(15), _name VARCHAR(30))
+BEGIN
+	DECLARE temp_value INT(9);
+
+	SELECT COUNT(MAC) INTO temp_value
+	FROM computers
+	WHERE MAC = _MAC;
+
+	IF temp_value = 0 THEN        
+		SELECT user_id INTO temp_value
+		FROM users
+		WHERE email = _email
+		AND password = _password;
+
+		INSERT INTO computers(MAC, LocalIP, PublicIP, name, owner) 
+		VALUES (_MAC, _LocalIP, _PublicIP, _name, temp_value);
+        
+		SELECT 1 AS result;
+	ELSE
+		SELECT 0 AS result;
 	END IF;
-	
-    INSERT INTO users VALUES(return_code, _name, random_number(), email, _password, 1);
-  END IF;
-  
-  RETURN return_code;
-END $$
+END //
+
+CREATE PROCEDURE UpdateUserStatus(_email VARCHAR(30), _password CHAR(64), _status INT(1))
+BEGIN
+	UPDATE users
+    SET status = _status
+    WHERE email = _email
+	AND password = _password;
+END //
