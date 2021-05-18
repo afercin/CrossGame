@@ -183,7 +183,7 @@
     <Compile Include="DataManipulation\SavingWaveProvider.cs" />
     <Compile Include="DataManipulation\Screen.cs" />
     <Compile Include="DBConnection.cs" />
-    <Compile Include="Windows\EditComputerParams.xaml.cs">
+    <Compile Include="Controllers\EditComputerParams.xaml.cs">
       <DependentUpon>EditComputerParams.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\Login.xaml.cs">
@@ -232,7 +232,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Windows\EditComputerParams.xaml">
+    <Page Include="Controllers\EditComputerParams.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

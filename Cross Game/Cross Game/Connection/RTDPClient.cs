@@ -2,6 +2,7 @@
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -232,12 +233,17 @@ namespace Cross_Game.Connection
         {
             try
             {
+                byte[] data = new byte[MaxPacketSize];
+                int dataSize;
                 while (IsConnected)
                 {
-                    byte[] data = new byte[MaxPacketSize];
-                    int dataSize;
+                    Stopwatch stopwatch = new Stopwatch();
+                    stopwatch.Start();
 
                     dataSize = dataSocket.Receive(data, MaxPacketSize, 0);
+
+                    stopwatch.Stop();
+                    Console.WriteLine("Received data {0}: {1}ms", data[0], stopwatch.ElapsedMilliseconds);
 
                     if (data[0] == 0x00) // Nuevo audio
                     {
@@ -255,14 +261,14 @@ namespace Cross_Game.Connection
                         {
                             try
                             {
-                                ga.GPUCopy(data, 1, images[img].ImageBytes, images[img].currentSize, dataSize - 1);
-                                images[img].currentSize += dataSize - 1;
-                                //images[img].AppendBuffer(data, 1, dataSize - 1);
+                                //ga.GPUCopy(data, 1, images[img].ImageBytes, images[img].currentSize, dataSize - 1);
+                                //images[img].currentSize += dataSize - 1;
+                                images[img].AppendBuffer(data, 1, dataSize - 1);
                                 if (images[img].currentSize >= images[img].imageSize)
                                 {
-                                    byte[] i = images[img].ImageBytes;
-                                    Array.Resize(ref i, images[img].imageSize);
-                                    ImageBuilt.Invoke(this, new ImageBuiltEventArgs(i));
+                                    //byte[] i = images[img].ImageBytes;
+                                    //Array.Resize(ref i, images[img].imageSize);
+                                    ImageBuilt.Invoke(this, new ImageBuiltEventArgs(images[img].ImageBytes));
                                     if (img == (skipImage + 5) % 254)
                                         skipImage = 255;
                                 }
@@ -366,8 +372,16 @@ namespace Cross_Game.Connection
 
             public bool AppendBuffer(byte[] buffer, int offset, int bufferSize)
             {
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+
                 Array.Copy(buffer, offset, ImageBytes, currentSize, bufferSize);
                 currentSize += bufferSize;
+
+                stopwatch.Stop();
+                TimeSpan ts = stopwatch.Elapsed;
+                Console.WriteLine("AppendBuffer {0}: {1}ms", buffer[0], stopwatch.ElapsedMilliseconds);
+
                 return currentSize == imageSize;
             }
         }

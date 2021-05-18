@@ -80,7 +80,7 @@ namespace Cross_Game.Connection
         public bool IsConnected { get; protected set; }
         public const int MaxPacketSize = 65507;
 
-        protected const int CacheImages = 32;
+        protected const int CacheImages = 4;
         protected Audio audio;
 
         protected RTDProtocol()

@@ -2,6 +2,7 @@
 using Cross_Game.DataManipulation;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Timers;
@@ -123,14 +124,17 @@ namespace Cross_Game.Windows
             });
         }
 
-        DateTime time = DateTime.Now;
-
         private void Client_ImageBuilt(object sender, ImageBuiltEventArgs e)
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             latestImage = e.Image;
             frames++;
-            Console.WriteLine((DateTime.Now - time).TotalMilliseconds);
-            time = DateTime.Now;
+
+            stopwatch.Stop();
+            TimeSpan ts = stopwatch.Elapsed;
+            Console.WriteLine("ImageBuilt: {0}ms",stopwatch.ElapsedMilliseconds);
         }
 
         private void Client_CursorShapeChanged(object sender, CursorShangedEventArgs e) => Dispatcher.Invoke(() => ClientDisplay.Cursor = cursors[e.CursorShape]);

@@ -39,13 +39,10 @@ namespace Cross_Game.DataManipulation
             byte[] data;
             using (Bitmap b = CaptureDesktop())
             {
-                using (Bitmap resizedImg = new Bitmap(b, 700, 394))
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    using (MemoryStream ms = new MemoryStream())
-                    {
-                        resizedImg.Save(ms, ImageFormat.Jpeg);
-                        data = ms.ToArray();
-                    }
+                    b.Save(ms, ImageFormat.Jpeg);
+                    data = ms.ToArray();
                 }
             }
             return data;

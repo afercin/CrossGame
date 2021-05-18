@@ -1,6 +1,7 @@
 ﻿using Cross_Game.DataManipulation;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -152,7 +153,7 @@ namespace Cross_Game.Connection
             audio = new Audio();
             audio.InitializeRecorder();
             audio.CapturedAudio += Audio_CapturedAudio;
-            audio.StartRecorder();
+            //audio.StartRecorder();
 
             CaptureScreen = new Thread(CaptureScreenThread);
             CaptureScreen.IsBackground = true;
@@ -160,7 +161,7 @@ namespace Cross_Game.Connection
 
             CheckCursorShape = new Thread(CheckCursorShapeThread);
             CheckCursorShape.IsBackground = true;
-            CheckCursorShape.Start();
+            //CheckCursorShape.Start();
         }
 
         public override void Stop()
@@ -269,6 +270,9 @@ namespace Cross_Game.Connection
                 {
                     try
                     {
+                        Stopwatch stopwatch = new Stopwatch();
+                        stopwatch.Start();
+
                         byte[] imageBytes = Screen.CaptureScreen(), info = new byte[5];
                         int dataleft = imageBytes.Length, offset = 0, packetSize;
                         lock (this)
@@ -293,6 +297,8 @@ namespace Cross_Game.Connection
                             dataleft -= packetSize - 1;
                             offset += packetSize - 1;
                         }
+                        stopwatch.Stop();
+                        Console.WriteLine("Image sent {0}: {1}ms", info[0], stopwatch.ElapsedMilliseconds);
                     }
                     catch (ObjectDisposedException)
                     {
