@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Cross_Game.Controllers;
 
-namespace Cross_Game.Windows
+namespace Cross_Game.Controllers
 {
     /// <summary>
     /// Lógica de interacción para EditComputerParams.xaml
