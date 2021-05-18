@@ -25,11 +25,10 @@ namespace Cross_Game.Connection
         private byte skipImage;
         private string serverIP;
         private ComputerData Computer;
-        private GPUAceleration ga;
 
         public RTDPClient() : base()
         {
-            ga = new GPUAceleration();
+
         }
 
         public void Start(ComputerData computerData)

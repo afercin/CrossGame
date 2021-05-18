@@ -72,9 +72,6 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Cloo, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Cloo.clSharp.1.0.1\lib\netstandard2.0\Cloo.dll</HintPath>
-    </Reference>
     <Reference Include="ControlzEx, Version=5.0.0.0, Culture=neutral, PublicKeyToken=69f1c32f803d307e, processorArchitecture=MSIL">
       <HintPath>..\packages\ControlzEx.5.0.0\lib\net462\ControlzEx.dll</HintPath>
     </Reference>
@@ -150,7 +147,6 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="DataManipulation\Crypto.cs" />
-    <Compile Include="DataManipulation\GPUAceleration.cs" />
     <Compile Include="DataManipulation\NativeMethods.cs" />
     <Compile Include="ComputerData.cs" />
     <Compile Include="Connection\RTDPClient.cs" />
