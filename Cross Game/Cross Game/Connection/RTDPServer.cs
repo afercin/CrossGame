@@ -1,7 +1,13 @@
 ﻿using Cross_Game.DataManipulation;
+using SharpDX;
+using SharpDX.Direct3D11;
+using SharpDX.DXGI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -161,7 +167,7 @@ namespace Cross_Game.Connection
 
             CheckCursorShape = new Thread(CheckCursorShapeThread);
             CheckCursorShape.IsBackground = true;
-            //CheckCursorShape.Start();
+            CheckCursorShape.Start();
         }
 
         public override void Stop()
@@ -262,52 +268,125 @@ namespace Cross_Game.Connection
 
         private void CaptureScreenThread()
         {
+            Bitmap bitmap = new Bitmap(Screen.Display.Width, Screen.Display.Height, PixelFormat.Format32bppRgb);
+            byte[] info = new byte[5];
             byte imageCount = 1;
             bool endConnection = false;
-            while (!endConnection)
+
+            var adapter = new Factory1().GetAdapter1(0);
+            var device = new SharpDX.Direct3D11.Device(adapter);
+
+            var output = adapter.GetOutput(0);
+            var output1 = output.QueryInterface<Output1>();
+
+            Screen.Display.Width = output.Description.DesktopBounds.Right;
+            Screen.Display.Height = output.Description.DesktopBounds.Bottom;
+
+            var textureDesc = new Texture2DDescription
             {
-                Task.Run(() =>
+                CpuAccessFlags = CpuAccessFlags.Read,
+                BindFlags = BindFlags.None,
+                Format = Format.B8G8R8A8_UNorm,
+                Width = Screen.Display.Width,
+                Height = Screen.Display.Height,
+                OptionFlags = ResourceOptionFlags.None,
+                MipLevels = 1,
+                ArraySize = 1,
+                SampleDescription = { Count = 1, Quality = 0 },
+                Usage = ResourceUsage.Staging
+            };
+
+            var screenTexture = new Texture2D(device, textureDesc);
+
+            using (var duplicatedOutput = output1.DuplicateOutput(device))
+            {
+                OutputDuplicateFrameInformation duplicateFrameInformation;
+                SharpDX.DXGI.Resource screenResource;
+                Texture2D screenTexture2D;
+                DataBox mapSource;
+                Rectangle boundsRect;
+                BitmapData mapDest;
+                IntPtr sourcePtr, destPtr;
+
+                while (!endConnection)
                 {
                     try
                     {
-                        Stopwatch stopwatch = new Stopwatch();
-                        stopwatch.Start();
-
-                        byte[] imageBytes = Screen.CaptureScreen(), info = new byte[5];
-                        int dataleft = imageBytes.Length, offset = 0, packetSize;
-                        lock (this)
+                        duplicatedOutput.AcquireNextFrame(33, out duplicateFrameInformation, out screenResource);
+                        
+                        screenTexture2D = screenResource.QueryInterface<Texture2D>();
+                        device.ImmediateContext.CopyResource(screenTexture2D, screenTexture);
+                        
+                        mapSource = device.ImmediateContext.MapSubresource(screenTexture, 0, MapMode.Read, SharpDX.Direct3D11.MapFlags.None);
+                        boundsRect = new Rectangle(0, 0, Screen.Display.Width, Screen.Display.Height);
+                        
+                        mapDest = bitmap.LockBits(boundsRect, ImageLockMode.WriteOnly, bitmap.PixelFormat);
+                        sourcePtr = mapSource.DataPointer;
+                        destPtr = mapDest.Scan0;
+                        for (int y = 0; y < Screen.Display.Height; y++)
                         {
-                            info[0] = (byte)(imageCount);
+                            Utilities.CopyMemory(destPtr, sourcePtr, Screen.Display.Width * 4);
+                            
+                            sourcePtr = IntPtr.Add(sourcePtr, mapSource.RowPitch);
+                            destPtr = IntPtr.Add(destPtr, mapDest.Stride);
+                        }
+
+                        bitmap.UnlockBits(mapDest);
+                        device.ImmediateContext.UnmapSubresource(screenTexture, 0);
+                        Bitmap r = new Bitmap(bitmap, 900, 506);
+                        Task.Run(() =>
+                        {
+                            byte[] imageBytes;
+                            using (var ms = new MemoryStream())
+                            {
+                                r.Save(ms, ImageFormat.Jpeg);
+                                r.Dispose();
+                                imageBytes = ms.ToArray();
+                            }
+                            int dataleft = imageBytes.Length, offset = 0, packetSize;
+                            info[0] = imageCount;
                             imageCount = (byte)(imageCount % CacheImages + 1);
-                        }
-                        BitConverter.GetBytes(dataleft).CopyTo(info, 1);
-                        SendData(info);
+                            BitConverter.GetBytes(dataleft).CopyTo(info, 1);
+                            SendData(info);
 
-                        while (dataleft > 0)
+                            while (dataleft > 0)
+                            {
+                                byte[] rtdpPacket;
+                                packetSize = dataleft + 1 > MaxPacketSize ? MaxPacketSize : dataleft + 1;
+
+                                rtdpPacket = new byte[packetSize];
+                                rtdpPacket[0] = info[0];
+                                Array.Copy(imageBytes, offset, rtdpPacket, 1, packetSize - 1);
+
+                                SendData(rtdpPacket);
+
+                                dataleft -= packetSize - 1;
+                                offset += packetSize - 1;
+                            }
+                        });
+                        screenResource.Dispose();
+                        duplicatedOutput?.ReleaseFrame();
+                    }
+                    catch (SharpDXException e)
+                    {
+                        if (e.ResultCode.Code != SharpDX.DXGI.ResultCode.WaitTimeout.Result.Code)
                         {
-                            byte[] rtdpPacket;
-                           packetSize = dataleft + 1 > MaxPacketSize ? MaxPacketSize : dataleft + 1;
-                           
-                            rtdpPacket = new byte[packetSize];                            
-                            rtdpPacket[0] = info[0];
-                            Array.Copy(imageBytes, offset, rtdpPacket, 1, packetSize - 1);
-
-                            SendData(rtdpPacket);
-
-                            dataleft -= packetSize - 1;
-                            offset += packetSize - 1;
+                            Trace.TraceError(e.Message);
+                            Trace.TraceError(e.StackTrace);
                         }
-                        stopwatch.Stop();
-                        Console.WriteLine("Image sent {0}: {1}ms", info[0], stopwatch.ElapsedMilliseconds);
+                    }
+                    catch (NullReferenceException)
+                    {
+                        endConnection = true;
                     }
                     catch (ObjectDisposedException)
                     {
                         Console.WriteLine("CaptureScreen, conexión destruida.");
                         endConnection = true;
                     }
-                });
-
-                Thread.Sleep(frameRate);
+                    Thread.Sleep(13);
+                }
+                bitmap.Dispose();
             }
         }
 
