@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RTDP;
+using System;
 
 namespace Cross_Game
 {
@@ -7,7 +8,7 @@ namespace Cross_Game
         public string Name { get; private set; }
         public int Number { get; private set; }
 
-        public ComputerData localMachine { get; set; }
+        public ComputerData localMachine;
 
         public UserData(string name, int number)
         {
@@ -16,7 +17,7 @@ namespace Cross_Game
             localMachine = null;
         }
 
-        public void SyncLocalMachine()
+        public void SyncLocalMachine(int status = 0)
         {
             ConnectionUtils.GetComputerNetworkInfo(out string localIP, out string publicIP, out string macAddress);
             localMachine = DBConnection.GetComputerData(macAddress);
@@ -25,7 +26,7 @@ namespace Cross_Game
             if (localMachine.Status != -1)
             {
                 localMachine.N_connections = 0;
-                localMachine.Status = 1;
+                localMachine.Status = status;
                 DBConnection.UpdateComputerStatus(localMachine);
             }
             else

@@ -1,9 +1,8 @@
-﻿using Cross_Game.DataManipulation;
-using System;
+﻿using System;
 using System.Net;
 using System.Net.Sockets;
 
-namespace Cross_Game.Connection
+namespace RTDP
 {
     /* 
      * Dimensiones: 0% --> 100% (simple precisión)
@@ -75,17 +74,22 @@ namespace Cross_Game.Connection
         //ArrowCross = 4D
     }
 
-    abstract class RTDProtocol : IDisposable
+    public abstract class RTDProtocol : IDisposable
     {
         public bool IsConnected { get; protected set; }
         public const int MaxPacketSize = 65507;
 
         protected const int CacheImages = 4;
         protected Audio audio;
+        private byte[] key;
+        private byte[] bufferCache;
 
-        protected RTDProtocol()
+        protected RTDProtocol(string password)
         {
             IsConnected = false;
+            key = Crypto.GetBytes(Crypto.CreateSHA256(password));
+            Array.Resize(ref key, 32);
+            bufferCache = new byte[MaxPacketSize];
         }
 
         protected void SendBuffer(Socket s, byte[] buffer)
@@ -98,8 +102,13 @@ namespace Cross_Game.Connection
 
         protected void ReceiveBuffer(Socket s, out byte[] buffer, out int bufferSize)
         {
-            buffer = new byte[MaxPacketSize];
-            bufferSize = s.Receive(buffer, MaxPacketSize, 0);
+            bufferSize = s.Receive(bufferCache, MaxPacketSize, 0);
+            buffer = bufferCache;
+        }
+
+        protected void SendPetition(Socket s, byte[] buffer)
+        {
+            SendBuffer(s, Crypto.Encrypt(buffer, buffer.Length, key));
         }
 
         protected void ReceivePetition(Socket s)
@@ -111,6 +120,9 @@ namespace Cross_Game.Connection
                 while (IsConnected)
                 {
                     ReceiveBuffer(s, out byte[] buffer, out int bufferSize);
+
+                    buffer = Crypto.Decrypt(buffer, bufferSize, key);
+
                     if (buffer[0] == 0)
                     {
                         errors++;

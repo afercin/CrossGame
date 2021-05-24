@@ -1,8 +1,6 @@
-﻿using Cross_Game.Connection;
-using Cross_Game.Windows;
-using MahApps.Metro.IconPacks;
+﻿using MahApps.Metro.IconPacks;
+using RTDP;
 using System;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;

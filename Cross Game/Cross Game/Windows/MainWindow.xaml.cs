@@ -1,5 +1,5 @@
-﻿using Cross_Game.Connection;
-using Cross_Game.Controllers;
+﻿using Cross_Game.Controllers;
+using RTDP;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -49,10 +49,16 @@ namespace Cross_Game.Windows
             {
                 try
                 {
-                    CurrentUser.SyncLocalMachine();
+                    //byte[] decryptPassword = Crypto.GetBytes(Crypto.CreateSHA256(GetWindowDiskSN()));
+                    //Array.Resize(ref decryptPassword, 32);
 
-                    server = new RTDPServer();
-                    server.Start(CurrentUser);
+                    string serverPassword = "patata1234";//Crypto.ReadData(AutoLoginPath, decryptPassword)[0];
+                    CurrentUser.SyncLocalMachine(1);
+
+                    server = new RTDPServer(serverPassword);
+                    server.ConnectedClientsChanged += (s, a) => DBConnection.UpdateComputerStatus(CurrentUser.localMachine);
+
+                    server.Start(ref CurrentUser.localMachine);
                     if (TransmisionOptions.Visibility == Visibility.Visible)
                         Dispatcher.Invoke(() => TransmisionOptions.IsAlerted = true);
                 }
@@ -68,6 +74,8 @@ namespace Cross_Game.Windows
                 server = null;
                 if (TransmisionOptions.Visibility == Visibility.Visible)
                     Dispatcher.Invoke(() => TransmisionOptions.IsAlerted = false);
+
+                CurrentUser.SyncLocalMachine(0);
             });
 
             SyncData();

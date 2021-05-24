@@ -1,4 +1,4 @@
-﻿namespace Cross_Game
+﻿namespace RTDP
 {
     public class ComputerData
     {

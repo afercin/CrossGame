@@ -1,12 +1,13 @@
-﻿using Cross_Game.Connection;
-using Cross_Game.DataManipulation;
+﻿using RTDP;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 
 namespace Cross_Game.Windows
 {
@@ -54,7 +55,18 @@ namespace Cross_Game.Windows
                 {
                     if (latestImage != null)
                     {
-                        Dispatcher.Invoke(() => ClientDisplay.Source = Screen.BytesToScreenImage(latestImage));
+                        Dispatcher.Invoke(() =>
+                        {
+                            BitmapImage bitmap = new BitmapImage();
+                            using (MemoryStream stream = new MemoryStream(latestImage))
+                            {
+                                bitmap.BeginInit();
+                                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                                bitmap.StreamSource = stream;
+                                bitmap.EndInit();
+                            }
+                            ClientDisplay.Source = bitmap;
+                        });
                     }                        
                     else
                     {
@@ -96,7 +108,7 @@ namespace Cross_Game.Windows
             waitingWindow.WaitEnd += (s, a) => { if (!client.IsConnected) Dispatcher.Invoke(() => Close()); };
             waitingWindow.Wait(() =>
             {
-                client = new RTDPClient();
+                client = new RTDPClient("patata123");
                 client.ImageBuilt += Client_ImageBuilt;
                 client.CursorShapeChanged += Client_CursorShapeChanged;
                 client.Reconnecting += Client_Reconnecting;
@@ -136,30 +148,51 @@ namespace Cross_Game.Windows
             Console.WriteLine("ImageBuilt: {0}ms",stopwatch.ElapsedMilliseconds);
         }
 
-        private void Client_CursorShapeChanged(object sender, CursorShangedEventArgs e) => Dispatcher.Invoke(() => ClientDisplay.Cursor = cursors[e.CursorShape]);
+        private void Client_CursorShapeChanged(object sender, CursorChangedEventArgs e) => Dispatcher.Invoke(() => ClientDisplay.Cursor = cursors[e.CursorShape]);
 
         private void ClientDisplay_MouseMove(object sender, MouseEventArgs e)
         {
             if (client != null && client.IsConnected)
-                client.SendMousePosition(e.GetPosition(ClientDisplay), ClientDisplay.RenderSize);
+            {
+                Point position = e.GetPosition(ClientDisplay);
+                Size displaySize = ClientDisplay.RenderSize;
+                client.SendMousePosition(Convert.ToSingle(position.X * 100.0 / displaySize.Width), Convert.ToSingle(position.Y * 100.0 / displaySize.Height));
+            }
         }
 
         private void ClientDisplay_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (client != null && client.IsConnected)
-                client.SendMouseButton(e.ChangedButton, true);
+                switch (e.ChangedButton)
+                {
+                    case MouseButton.Left: client.SendEvent(Petition.MouseLButtonDown); break;
+                    case MouseButton.Right: client.SendEvent(Petition.MouseRButtonDown); break;
+                    case MouseButton.Middle: client.SendEvent(Petition.MouseMButtonDown); break;
+                }
         }
 
         private void ClientDisplay_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (client != null && client.IsConnected)
-                client.SendMouseButton(e.ChangedButton, false);
+                switch (e.ChangedButton)
+                {
+                    case MouseButton.Left: client.SendEvent(Petition.MouseLButtonUp); break;
+                    case MouseButton.Right: client.SendEvent(Petition.MouseRButtonUp); break;
+                    case MouseButton.Middle: client.SendEvent(Petition.MouseMButtonUp); break;
+                }
         }
 
         private void ClientDisplay_KeyPress(object sender, KeyEventArgs e)
         {
-            if (client != null && client.IsConnected)
-                client.SendKey(e.Key, e.IsDown);
+            if (client != null && client.IsConnected && !IsForbiddenKey(e.Key))
+                client.SendKey((byte)e.Key, e.IsDown);
+        }
+
+        private bool IsForbiddenKey(Key key)
+        {
+            return key != Key.VolumeMute &&
+                   key != Key.VolumeDown &&
+                   key != Key.VolumeUp;
         }
 
         private void ClientDisplay_MouseWheel(object sender, MouseWheelEventArgs e)

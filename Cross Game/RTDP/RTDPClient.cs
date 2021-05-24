@@ -1,19 +1,16 @@
-﻿using Cross_Game.DataManipulation;
-using NAudio.Wave;
+﻿using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using System.Windows;
-using System.Windows.Input;
 
-namespace Cross_Game.Connection
+namespace RTDP
 {
-    class RTDPClient : RTDProtocol
+    public class RTDPClient : RTDProtocol
     {
-        public event CursorShangedEventHandler CursorShapeChanged;
+        public event CursorChangedEventHandler CursorShapeChanged;
         public event ImageBuiltEventHandler ImageBuilt;
         public event ReconectingEventHandler Reconnecting;
         
@@ -26,7 +23,7 @@ namespace Cross_Game.Connection
         private string serverIP;
         private ComputerData Computer;
 
-        public RTDPClient() : base()
+        public RTDPClient(string password) : base(password)
         {
 
         }
@@ -95,7 +92,7 @@ namespace Cross_Game.Connection
 
                         /****** Mandar credenciales y esperar confirmación *******/
 
-                        byte[] buffer = Crypto.GetBytes(mac);
+                        byte[] buffer = new byte[] { 0 };
                         SendBuffer(petitionsSocket, buffer);
 
                         connectedThread = new Thread(() =>
@@ -256,17 +253,9 @@ namespace Cross_Game.Connection
                         {
                             try
                             {
-                                //ga.GPUCopy(data, 1, images[img].ImageBytes, images[img].currentSize, dataSize - 1);
-                                //images[img].currentSize += dataSize - 1;
                                 images[img].AppendBuffer(data, 1, dataSize - 1);
                                 if (images[img].currentSize >= images[img].imageSize)
-                                {
-                                    //byte[] i = images[img].ImageBytes;
-                                    //Array.Resize(ref i, images[img].imageSize);
                                     ImageBuilt.Invoke(this, new ImageBuiltEventArgs(images[img].ImageBytes));
-                                    if (img == (skipImage + 5) % 254)
-                                        skipImage = 255;
-                                }
                             }                                
                             catch (KeyNotFoundException)
                             {
@@ -282,7 +271,7 @@ namespace Cross_Game.Connection
                     }
                     else // Nueva forma del cursor
                     {
-                        CursorShapeChanged.Invoke(this, new CursorShangedEventArgs((CursorShape)data[1]));
+                        CursorShapeChanged.Invoke(this, new CursorChangedEventArgs((CursorShape)data[1]));
                     }
                 }
             }
@@ -292,27 +281,17 @@ namespace Cross_Game.Connection
             }
         }
 
-        private void SendPetition(byte[] petition) => SendBuffer(petitionsSocket, petition);
+        private void SendPetition(byte[] petition) => SendPetition(petitionsSocket, petition);
 
-        public void SendMousePosition(Point position, Size RenderSize)
+        public void SendMousePosition(float positionX, float positionY)
         {
             byte[] petition = new byte[9];
 
             petition[0] = Convert.ToByte(Petition.MouseMove);
-            BitConverter.GetBytes(Convert.ToSingle(position.X * 100.0 / RenderSize.Width)).CopyTo(petition, 1);
-            BitConverter.GetBytes(Convert.ToSingle(position.Y * 100.0 / RenderSize.Height)).CopyTo(petition, 5);
+            BitConverter.GetBytes(positionX).CopyTo(petition, 1);
+            BitConverter.GetBytes(positionY).CopyTo(petition, 5);
 
             SendPetition(petition);
-        }
-
-        public void SendMouseButton(MouseButton mouseButton, bool isPressed)
-        {
-            switch (mouseButton)
-            {
-                case MouseButton.Left: SendOtherEvents(isPressed ? Petition.MouseLButtonDown : Petition.MouseLButtonUp); break;
-                case MouseButton.Right: SendOtherEvents(isPressed ? Petition.MouseRButtonDown : Petition.MouseRButtonUp); break;
-                case MouseButton.Middle: SendOtherEvents(isPressed ? Petition.MouseMButtonDown : Petition.MouseMButtonUp); break;
-            }
         }
 
         public void SendMouseScroll(int delta)
@@ -325,30 +304,20 @@ namespace Cross_Game.Connection
             SendPetition(petition);
         }
 
-        public void SendKey(Key key, bool isPressed)
+        public void SendKey(byte key, bool isPressed)
         {
-            if (!IsForbiddenKey(key))
-            {
-                byte[] petition = new byte[2];
+            byte[] petition = new byte[2];
 
-                petition[0] = Convert.ToByte(isPressed ? Petition.KeyboardKeyDown : Petition.KeyboardKeyUp);
-                petition[1] = (byte)key;
+            petition[0] = Convert.ToByte(isPressed ? Petition.KeyboardKeyDown : Petition.KeyboardKeyUp);
+            petition[1] = key;
 
-                SendPetition(petition);
-            }
-        }
-
-        public void SendOtherEvents(Petition otherEvent)
-        {
-            byte[] petition = new byte[] { Convert.ToByte(otherEvent) };
             SendPetition(petition);
         }
 
-        private bool IsForbiddenKey(Key key)
+        public void SendEvent(Petition otherEvent)
         {
-            return key != Key.VolumeMute &&
-                   key != Key.VolumeDown &&
-                   key != Key.VolumeUp;
+            byte[] petition = new byte[] { Convert.ToByte(otherEvent) };
+            SendPetition(petition);
         }
 
         private class ScreenImage

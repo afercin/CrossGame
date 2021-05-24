@@ -2,9 +2,9 @@
 using System;
 using System.IO;
 
-namespace Cross_Game.DataManipulation
+namespace RTDP
 {
-    class Audio : IDisposable
+    public class Audio : IDisposable
     {
         public event AudioCapturedEventHandler CapturedAudio;
 

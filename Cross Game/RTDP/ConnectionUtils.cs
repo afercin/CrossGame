@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
-namespace Cross_Game
+namespace RTDP
 {   
     [Serializable]
     public class InternetConnectionException : Exception
@@ -15,7 +15,7 @@ namespace Cross_Game
         }
     }
 
-    public class ConnectionUtils
+    class ConnectionUtils
     {
         public static PingReply LastPingResult = null;
         public static bool Ping(string IP)

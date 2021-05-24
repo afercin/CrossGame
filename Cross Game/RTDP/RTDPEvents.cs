@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Cross_Game.Connection
+namespace RTDP
 {
     public delegate void ReceivedBufferEventHandler(object sender, ReceivedBufferEventArgs e);
     public class ReceivedBufferEventArgs : EventArgs
@@ -37,12 +37,12 @@ namespace Cross_Game.Connection
         }
     }
 
-    public delegate void CursorShangedEventHandler(object sender, CursorShangedEventArgs e);
-    public class CursorShangedEventArgs : EventArgs
+    public delegate void CursorChangedEventHandler(object sender, CursorChangedEventArgs e);
+    public class CursorChangedEventArgs : EventArgs
     {
         public CursorShape CursorShape;
 
-        public CursorShangedEventArgs(CursorShape cursorShape)
+        public CursorChangedEventArgs(CursorShape cursorShape)
         {
             CursorShape = cursorShape;
         }

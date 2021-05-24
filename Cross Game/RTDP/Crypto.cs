@@ -3,9 +3,9 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Cross_Game.DataManipulation
+namespace RTDP
 {
-    class Crypto
+    public class Crypto
     {
         private static readonly string separator = "\r\n";
         /// <summary>
@@ -80,17 +80,62 @@ namespace Cross_Game.DataManipulation
 
             return data.Split(new string[] { separator }, StringSplitOptions.None);
         }
+
+        public static byte[] Encrypt(byte[] data, int dataSize, byte[] key)
+        {
+            using (var aes = Aes.Create())
+            {
+                aes.KeySize = 128;
+                aes.BlockSize = 128;
+                aes.Padding = PaddingMode.Zeros;
+
+                aes.Key = key;
+
+                aes.IV = new byte[aes.IV.Length];
+
+                using (var encryptor = aes.CreateEncryptor(aes.Key, aes.IV))
+                {
+                    return PerformCryptography(data, dataSize, encryptor);
+                }
+            }
+        }
+
+        public static byte[] Decrypt(byte[] data, int dataSize, byte[] key)
+        {
+            using (var aes = Aes.Create())
+            {
+                aes.KeySize = 128;
+                aes.BlockSize = 128;
+                aes.Padding = PaddingMode.Zeros;
+
+                aes.Key = key;
+                aes.IV = new byte[aes.IV.Length];
+
+                using (var decryptor = aes.CreateDecryptor(aes.Key, aes.IV))
+                {
+                    return PerformCryptography(data, dataSize, decryptor);
+                }
+            }
+        }
+
+        private static byte[] PerformCryptography(byte[] data, int dataSize, ICryptoTransform cryptoTransform)
+        {
+            using (var ms = new MemoryStream())
+            using (var cryptoStream = new CryptoStream(ms, cryptoTransform, CryptoStreamMode.Write))
+            {
+                cryptoStream.Write(data, 0, dataSize);
+                cryptoStream.FlushFinalBlock();
+
+                return ms.ToArray();
+            }
+        }
+
         /// <summary>
         /// Codifica una cadena a binario.
         /// </summary>
         /// <param name="s">Cadena a obtener los bytes.</param>
         /// <returns>Devuelve un array de bytes que representa cara carácter de la cadena como un carácter ASCII.</returns>
         public static byte[] GetBytes(string s) => Encoding.ASCII.GetBytes(s);
-        /// <summary>
-        /// Decodifica un array de bytes.
-        /// </summary>
-        /// <param name="bytes">Array de bytes.</param>
-        /// <returns>Devuelve la cadena correspondiente a la concatenación de cada carácter ASCII que representa cada byte.</returns>
-        public static string GetString(byte[] bytes) => Encoding.ASCII.GetString(bytes, 0, bytes.Length);
+        
     }
 }

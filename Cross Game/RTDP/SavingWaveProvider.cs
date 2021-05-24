@@ -1,7 +1,7 @@
 ﻿using NAudio.Wave;
 using System;
 
-namespace Cross_Game.DataManipulation
+namespace RTDP
 {
     class SavingWaveProvider : IWaveProvider, IDisposable
     {

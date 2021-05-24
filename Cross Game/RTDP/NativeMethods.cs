@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Cross_Game.DataManipulation
+namespace RTDP
 {
     [Flags]
-    enum InputType
+    public enum InputType
     {
         Mouse    = 0,
         Keyboard = 1,
         Hardware = 2
     }
     [Flags]
-    enum KeyEventF
+    public enum KeyEventF
     {
         /// <summary> The key is being pressed. </summary>
         KeyDown = 0x0000,
@@ -23,7 +23,7 @@ namespace Cross_Game.DataManipulation
         Scancode = 0x0008,
     }
     [Flags]
-    enum MouseEventFlags
+    public enum MouseEventFlags
     {
         /// <summary> Movement occurred. </summary>
         Move = 0x0001,
@@ -51,7 +51,7 @@ namespace Cross_Game.DataManipulation
         Absolute = 0x8000
     }
     [Flags]
-    enum MonitorOptions
+    public enum MonitorOptions
     {
         MONITOR_DEFAULTTONULL    = 0x00000000,
         MONITOR_DEFAULTTOPRIMARY = 0x00000001,
@@ -59,7 +59,7 @@ namespace Cross_Game.DataManipulation
     }
     /// <summary> Defines a rectangle by the coordinates of its upper-left and lower-right corners. </summary>
     [StructLayout(LayoutKind.Sequential)]
-    struct RECT
+    public struct RECT
     {
         public int left;
         public int top;
@@ -68,14 +68,14 @@ namespace Cross_Game.DataManipulation
     }
     /// <summary> Defines the x and y coordinates of a point. </summary>
     [StructLayout(LayoutKind.Sequential)]
-    struct POINT
+    public struct POINT
     {
         public int x;
         public int y;
     }
     /// <summary> Contains global cursor information. </summary>
     [StructLayout(LayoutKind.Sequential)]
-    struct CURSORINFO
+    public struct CURSORINFO
     {
         public int cbSize;
         public int flags;
@@ -83,14 +83,14 @@ namespace Cross_Game.DataManipulation
         public POINT ptScreenPos;
     }
     /// <summary> This structure is used by the SendInput function to synthesize keystrokes, stylus and mouse motions, and button clicks. </summary>
-    struct Input
+    public struct Input
     {
         public int type;
         public InputUnion u;
     }
     /// <summary> Input's struct union. </summary>
     [StructLayout(LayoutKind.Explicit)]
-    struct InputUnion
+    public struct InputUnion
     {
         [FieldOffset(0)] public MouseInput mi;
         [FieldOffset(0)] public KeyboardInput ki;
@@ -109,7 +109,7 @@ namespace Cross_Game.DataManipulation
     }
     /// <summary> Contains information about simulated keyboard input. </summary>
     [StructLayout(LayoutKind.Sequential)]
-    struct KeyboardInput
+    public struct KeyboardInput
     {
         public ushort wVk;
         public ushort wScan;
@@ -119,7 +119,7 @@ namespace Cross_Game.DataManipulation
     }
     /// <summary> Contains information about a simulated input device message. </summary>
     [StructLayout(LayoutKind.Sequential)]
-    struct HardwareInput
+    public struct HardwareInput
     {
         public readonly uint uMsg;
         public readonly ushort wParamL;
@@ -127,7 +127,7 @@ namespace Cross_Game.DataManipulation
     }
     /// <summary> Contains information about a window's maximized size and position and its minimum and maximum tracking size. </summary>
     [StructLayout(LayoutKind.Sequential)]
-    struct MINMAXINFO
+    public struct MINMAXINFO
     {
         public POINT ptReserved;
         public POINT ptMaxSize;
@@ -137,7 +137,7 @@ namespace Cross_Game.DataManipulation
     };
     /// <summary> Contains information about a display monitor. </summary>
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-    class MONITORINFO
+    public class MONITORINFO
     {
         public int cbSize = Marshal.SizeOf(typeof(MONITORINFO));
         public RECT rcMonitor = new RECT();
@@ -145,7 +145,7 @@ namespace Cross_Game.DataManipulation
         public int dwFlags = 0;
     }
     /// <summary> Clase de apoyo para utiliar funciones nativas de c++. </summary>
-    class NativeMethods
+    public class NativeMethods
     {
         [DllImport("user32.dll")]
         public static extern void mouse_event(int dwFlags, int dx, int dy, int dwData, int dwExtraInfo);

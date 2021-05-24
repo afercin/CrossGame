@@ -1,7 +1,6 @@
-﻿using Cross_Game.DataManipulation;
-using System;
+﻿using System;
 
-namespace Cross_Game.Connection
+namespace RTDP
 {
     class MouseSimulator
     {
