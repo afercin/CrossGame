@@ -6,8 +6,8 @@ namespace Cross_Game
 {
     class DBConnection
     {
-        private static string UserEmail;
-        private static string UserPassword;
+        public static string UserEmail;
+        public static string UserPassword;
         private static MySqlConnection connection = new MySqlConnection(
             "SERVER=crossgame.sytes.net;" +
             "DATABASE=CrossGame;" +
@@ -71,7 +71,8 @@ namespace Cross_Game
 
             if (OpenConnection())
             {
-                password = Crypto.CreateSHA256(password);
+                if (overrideCredentials)
+                    password = Crypto.CreateSHA256(password);
                 MySqlDataReader dataReader = Query($"CALL GetUserName('{email}', '{password}');");
 
                 if (dataReader.HasRows)
@@ -202,7 +203,7 @@ namespace Cross_Game
         {
             if (OpenConnection())
             {
-                NonQuery($"CALL UpdateTransmissionConf('{UserEmail}', '{UserPassword}', '{computer.MAC}', {computer.Tcp}, {computer.Udp}, '{computer.Name}', {computer.Max_connections});");
+                NonQuery($"CALL UpdateTransmissionConf('{UserEmail}', '{UserPassword}', '{computer.MAC}', {computer.Tcp}, {computer.Udp}, '{computer.Name}', {computer.Max_connections}, {computer.FPS});");
                 CloseConnection();
             }
         }
