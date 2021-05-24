@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 
 namespace RTDP
 {
@@ -81,7 +82,9 @@ namespace RTDP
 
         protected const int CacheImages = 4;
         protected Audio audio;
-        private byte[] key;
+        protected byte[] key;
+        protected ComputerData computer;
+
         private byte[] bufferCache;
 
         protected RTDProtocol(string password)
@@ -121,7 +124,8 @@ namespace RTDP
                 {
                     ReceiveBuffer(s, out byte[] buffer, out int bufferSize);
 
-                    buffer = Crypto.Decrypt(buffer, bufferSize, key);
+                    try { buffer = Crypto.Decrypt(buffer, bufferSize, key); }
+                    catch (CryptographicException) { buffer[0] = 0; }
 
                     if (buffer[0] == 0)
                     {

@@ -47,4 +47,25 @@ namespace RTDP
             CursorShape = cursorShape;
         }
     }
+
+    public delegate void GotClientCredentialsEventHandler(object sender, GotClientCredentialsEventArgs e);
+    public class GotClientCredentialsEventArgs : EventArgs
+    {
+        public int UserPriority { get; set; }
+
+        public string email;
+        public string password;
+        public string localIP;
+        public string publicIP;
+        public string mac;
+
+        public GotClientCredentialsEventArgs(string[] clientInfo)
+        {
+            email = clientInfo[0];
+            password = clientInfo[1];
+            localIP = clientInfo[2];
+            publicIP = clientInfo[3];
+            mac = clientInfo[4];
+        }
+    }
 }

@@ -10,6 +10,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,6 +19,7 @@ namespace RTDP
     public class RTDPServer : RTDProtocol
     {
         public event EventHandler ConnectedClientsChanged;
+        public event GotClientCredentialsEventHandler GotClientCredentials;
 
         private Dictionary<IPAddress, Client> clientSockets;
         private Thread listenThread;
@@ -25,10 +27,10 @@ namespace RTDP
         private Thread CheckCursorShape;
         private Socket listenSocket;
         private int frameRate;
-        private ComputerData computer;
 
         public RTDPServer(string password) : base(password)
         {
+
         }
 
         public void Start(ref ComputerData currentComputer)
@@ -51,7 +53,6 @@ namespace RTDP
             Thread receivePetitionThread;
             byte[] buffer = null;
             int bufferSize = 0;
-            int userPriority = 0;
 
             LogUtils.AppendLogHeader(LogUtils.ServerConnectionLog);
             LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"Comenzando a recibir clientes por el puerto {computer.Tcp}");
@@ -71,60 +72,70 @@ namespace RTDP
                     receivePetitionThread.IsBackground = true;
                     receivePetitionThread.Start();
 
-                    if (!receivePetitionThread.Join(10000))
+                    if (receivePetitionThread.Join(10000))
+                        try
+                        {
+                            buffer = Crypto.Decrypt(buffer, bufferSize, key);
+
+                            var credentials = new GotClientCredentialsEventArgs(Crypto.GetString(buffer, buffer.Length).Replace("\0", "").Split(';'));
+                            GotClientCredentials.Invoke(this, credentials);
+
+                            if (credentials.UserPriority > 0)
+                            {
+                                LogUtils.AppendLogOk(LogUtils.ServerConnectionLog, $"Cliente {clientAddress.Address.ToString()} aceptado, procediendo a establecer canal de comunicación.");
+
+                                SendBuffer(tcpClientSocket, new byte[] { Convert.ToByte(Petition.ConnectionAccepted) });
+
+                                if (computer.N_connections == 0)
+                                    Init();
+
+                                byte[] waveformat = new byte[] { 0 };
+                                SendWaveFormat(tcpClientSocket, waveformat);
+                                udpClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                                udpClientSocket.Connect(new IPEndPoint(clientAddress.Address, computer.Udp));
+
+                                Client client = new Client()
+                                {
+                                    mouse = credentials.UserPriority == 2 ? new MouseSimulator() : null,
+                                    keyboard = new DXKeyboardSimulator(),
+                                    tcpSocket = tcpClientSocket,
+                                    udpSocket = udpClientSocket
+                                };
+
+
+                                clientSockets[clientAddress.Address] = client;
+
+                                receivePetitionThread = new Thread(() => ReceivePetition(tcpClientSocket));
+                                receivePetitionThread.IsBackground = true;
+                                receivePetitionThread.Start();
+
+                                computer.N_connections++;
+
+                                ConnectedClientsChanged.Invoke(this, new EventArgs());
+
+                                LogUtils.AppendLogOk(LogUtils.ServerConnectionLog, $"Cliente con IP {clientAddress.Address.ToString()} agregado con éxito.");
+                            }
+                            else
+                            {
+                                SendBuffer(tcpClientSocket, new byte[] { Convert.ToByte(Petition.ConnectionRefused) });
+                                LogUtils.AppendLogWarn(LogUtils.ServerConnectionLog, $"No se acepta la conexión desde {clientAddress.Address.ToString()} (usuario no autorizado).");
+                            }
+                        }
+                        catch (CryptographicException)
+                        {
+                            SendBuffer(tcpClientSocket, new byte[] { Convert.ToByte(Petition.ConnectionRefused) });
+                            LogUtils.AppendLogWarn(LogUtils.ServerConnectionLog, $"No se acepta la conexión desde {clientAddress.Address.ToString()} (no ha sido posible desencriptar el mensaje).");
+                        }
+                    else
                     {
                         receivePetitionThread.Abort();
                         LogUtils.AppendLogWarn(LogUtils.ServerConnectionLog, $"No se acepta la conexión desde {clientAddress.Address.ToString()} (TimeOut).");
-                    }
-                    else
-                    {
-                        userPriority = 2;
-
-                        if (userPriority > 0)
-                        {
-                            LogUtils.AppendLogOk(LogUtils.ServerConnectionLog, $"Cliente {clientAddress.Address.ToString()} aceptado, procediendo a establecer canal de comunicación.");
-                            
-                            SendBuffer(tcpClientSocket, new byte[] { Convert.ToByte(Petition.ConnectionAccepted) });
-
-                            if (computer.N_connections == 0)
-                                Init();
-
-                            byte[] waveformat = new byte[] { 0 };
-                            SendWaveFormat(tcpClientSocket, waveformat);
-                            udpClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-                            udpClientSocket.Connect(new IPEndPoint(clientAddress.Address, computer.Udp));
-
-                            Client client = new Client()
-                            {
-                                mouse = userPriority == 2 ? new MouseSimulator() : null,
-                                keyboard = new DXKeyboardSimulator(),
-                                tcpSocket = tcpClientSocket,
-                                udpSocket = udpClientSocket
-                            };
-
-
-                            clientSockets[clientAddress.Address] = client;
-
-                            receivePetitionThread = new Thread(() => ReceivePetition(tcpClientSocket));
-                            receivePetitionThread.IsBackground = true;
-                            receivePetitionThread.Start();
-
-                            computer.N_connections++;
-
-                            ConnectedClientsChanged.Invoke(this, new EventArgs());
-
-                            LogUtils.AppendLogOk(LogUtils.ServerConnectionLog, $"Cliente con IP {clientAddress.Address.ToString()} agregado con éxito.");
-                        }
-                        else
-                        {
-                            SendBuffer(tcpClientSocket, new byte[] { Convert.ToByte(Petition.ConnectionRefused) });
-                            LogUtils.AppendLogWarn(LogUtils.ServerConnectionLog, $"No se acepta la conexión desde {clientAddress.Address.ToString()} (usuario no autorizado).");
-                        }
                     }
                 }
             }
             catch (ThreadAbortException)
             {
+
             }
             catch (SocketException)
             {
@@ -135,11 +146,6 @@ namespace RTDP
                 listenSocket?.Close();
             }
             LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"El servidor ya no acepta más clientes ({computer.N_connections}/{computer.Max_connections})");
-        }
-
-        private void ReceivedConnection()
-        {
-
         }
 
         protected override void Init()
@@ -189,7 +195,6 @@ namespace RTDP
 
             computer.N_connections = 0;
             computer.Status = 0;
-
             
             LogUtils.AppendLogFooter(LogUtils.ServerConnectionLog);
         }
@@ -389,7 +394,7 @@ namespace RTDP
                     }
                     stopwatch.Stop();
                     Console.WriteLine("Fotograma enviado: {0}ms", stopwatch.ElapsedMilliseconds);
-                    Thread.Sleep((int)Math.Max(0, 32 - stopwatch.ElapsedMilliseconds));
+                    Thread.Sleep((int)Math.Max(0, frameRate - 1 - stopwatch.ElapsedMilliseconds));
                 }
             }
             catch (ThreadAbortException)

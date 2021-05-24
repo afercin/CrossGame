@@ -169,7 +169,6 @@
       <DependentUpon>WindowHeader.xaml</DependentUpon>
     </Compile>
     <Compile Include="CrossGameEvents.cs" />
-    <Compile Include="Server.cs" />
     <Compile Include="UserData.cs" />
     <Compile Include="Windows\WaitingWindow.xaml.cs">
       <DependentUpon>WaitingWindow.xaml</DependentUpon>

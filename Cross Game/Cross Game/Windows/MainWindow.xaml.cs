@@ -52,11 +52,20 @@ namespace Cross_Game.Windows
                     //byte[] decryptPassword = Crypto.GetBytes(Crypto.CreateSHA256(GetWindowDiskSN()));
                     //Array.Resize(ref decryptPassword, 32);
 
-                    string serverPassword = "patata1234";//Crypto.ReadData(AutoLoginPath, decryptPassword)[0];
+                    string serverPassword = "patata123";//Crypto.ReadData(AutoLoginPath, decryptPassword)[0];
                     CurrentUser.SyncLocalMachine(1);
 
                     server = new RTDPServer(serverPassword);
                     server.ConnectedClientsChanged += (s, a) => DBConnection.UpdateComputerStatus(CurrentUser.localMachine);
+                    server.GotClientCredentials += (s, a) =>
+                    {
+                        if (DBConnection.CheckLogin(a.email, a.password, false).Number != 0)
+                        {
+                            a.UserPriority = 2;
+                        }
+                        else
+                            a.UserPriority = 0;
+                    };
 
                     server.Start(ref CurrentUser.localMachine);
                     if (TransmisionOptions.Visibility == Visibility.Visible)

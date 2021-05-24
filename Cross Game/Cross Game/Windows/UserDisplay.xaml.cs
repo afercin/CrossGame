@@ -112,7 +112,7 @@ namespace Cross_Game.Windows
                 client.ImageBuilt += Client_ImageBuilt;
                 client.CursorShapeChanged += Client_CursorShapeChanged;
                 client.Reconnecting += Client_Reconnecting;
-                client.Start(serverComputer);
+                client.Start(ref serverComputer, DBConnection.UserEmail, DBConnection.UserPassword);
             }, $"Conectando con {serverComputer.Name}...");
         }
 

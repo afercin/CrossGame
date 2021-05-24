@@ -136,6 +136,8 @@ namespace RTDP
         /// <param name="s">Cadena a obtener los bytes.</param>
         /// <returns>Devuelve un array de bytes que representa cara carácter de la cadena como un carácter ASCII.</returns>
         public static byte[] GetBytes(string s) => Encoding.ASCII.GetBytes(s);
+
+        public static string GetString(byte[] data, int dataSize) => Encoding.ASCII.GetString(data, 0, dataSize);
         
     }
 }

@@ -18,17 +18,17 @@ namespace RTDP
         private Thread receiveDataThread;
         private Socket petitionsSocket;
         private Socket dataSocket;
+
+        private readonly string[] credentials;
         private Dictionary<int, ScreenImage> images;
-        private byte skipImage;
         private string serverIP;
-        private ComputerData Computer;
 
         public RTDPClient(string password) : base(password)
         {
-
+            credentials = new string[2];
         }
 
-        public void Start(ComputerData computerData)
+        public void Start(ref ComputerData computerData, string email, string password)
         {
             int err = 0;
             bool connected = false;
@@ -37,12 +37,14 @@ namespace RTDP
             {
                 ConnectionUtils.GetComputerNetworkInfo(out string localIP, out string publicIP, out string mac);
 
-                Computer = computerData;
+                computer = computerData;
+                credentials[0] = email;
+                credentials[1] = password;
 
-                serverIP = Computer.PublicIP == publicIP ? Computer.LocalIP : Computer.PublicIP;
+                serverIP = computer.PublicIP == publicIP ? computer.LocalIP : computer.PublicIP;
 
                 LogUtils.AppendLogHeader(LogUtils.ClientConnectionLog);
-                LogUtils.AppendLogText(LogUtils.ClientConnectionLog, $"Intentando conectar con {serverIP}:{Computer.Tcp}");
+                LogUtils.AppendLogText(LogUtils.ClientConnectionLog, $"Intentando conectar con {serverIP}:{computer.Tcp}");
 
                 if (ConnectionUtils.Ping(serverIP))
                 {
@@ -56,7 +58,7 @@ namespace RTDP
                             LogUtils.AppendLogText(LogUtils.ClientConnectionLog, $"Intento de conexión {err + 1} de 5...");
                             try
                             {
-                                petitionsSocket.Connect(new IPEndPoint(IPAddress.Parse(serverIP), Computer.Tcp));
+                                petitionsSocket.Connect(new IPEndPoint(IPAddress.Parse(serverIP), computer.Tcp));
                                 connected = true;
                             }
                             catch (SocketException e)
@@ -92,8 +94,8 @@ namespace RTDP
 
                         /****** Mandar credenciales y esperar confirmación *******/
 
-                        byte[] buffer = new byte[] { 0 };
-                        SendBuffer(petitionsSocket, buffer);
+                        byte[] buffer = Crypto.GetBytes($"{email};{password};{localIP};{publicIP};{mac}");
+                        SendBuffer(petitionsSocket, Crypto.Encrypt(buffer, buffer.Length, key));
 
                         connectedThread = new Thread(() =>
                         {
@@ -157,7 +159,6 @@ namespace RTDP
             IsConnected = true;
 
             images = new Dictionary<int, ScreenImage>();
-            skipImage = 255;
 
             for (int i = 1; i <= CacheImages; i++)
             {
@@ -165,7 +166,7 @@ namespace RTDP
             }
 
             dataSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            dataSocket.Bind(new IPEndPoint(IPAddress.Any, Computer.Udp));
+            dataSocket.Bind(new IPEndPoint(IPAddress.Any, computer.Udp));
 
             receivePetitionThread = new Thread(() => ReceivePetition(petitionsSocket));
             receivePetitionThread.IsBackground = true;
@@ -199,7 +200,7 @@ namespace RTDP
             {
                 LogUtils.AppendLogText(LogUtils.ClientConnectionLog, "Reiniciando conexión...");
                 Stop();
-                Start(Computer);
+                Start(ref computer, credentials[1], credentials[2]);
             }
         }
 
@@ -253,19 +254,16 @@ namespace RTDP
                         {
                             try
                             {
-                                images[img].AppendBuffer(data, 1, dataSize - 1);
-                                if (images[img].currentSize >= images[img].imageSize)
+                                if (images[img].AppendBuffer(data, 1, dataSize - 1))
                                     ImageBuilt.Invoke(this, new ImageBuiltEventArgs(images[img].ImageBytes));
                             }                                
                             catch (KeyNotFoundException)
                             {
                                 LogUtils.AppendLogError(LogUtils.ClientConnectionLog, $"No ha llegado a tiempo el paquete que inicializaba el fotograma nº{img}");
-                                skipImage = img;
                             }
                             catch (ArgumentException)
                             {
                                 LogUtils.AppendLogError(LogUtils.ClientConnectionLog, $"No ha llegado a tiempo el paquete que inicializaba el fotograma nº{img}");
-                                skipImage = img;
                             }
                         }                            
                     }
