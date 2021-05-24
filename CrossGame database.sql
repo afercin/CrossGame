@@ -98,13 +98,14 @@ BEGIN
 		AND password = _password);
 END //
 
-CREATE PROCEDURE UpdateTransmissionConf(_email VARCHAR(30), _password CHAR(64), _MAC CHAR(23), _TCP INT(5), _UDP INT(5), _name VARCHAR(30), _max_connections INT(2))
+CREATE PROCEDURE UpdateTransmissionConf(_email VARCHAR(30), _password CHAR(64), _MAC CHAR(23), _TCP INT(5), _UDP INT(5), _name VARCHAR(30), _max_connections INT(2), _FPS INT(3))
 BEGIN
 	UPDATE computers
     SET TCP = _TCP,
     	UDP = _UDP,
         name = _name,
-        max_connections = _max_connections
+        max_connections = _max_connections,
+		FPS = _FPS
     WHERE MAC = _MAC
     AND owner = (    
 		SELECT user_id
