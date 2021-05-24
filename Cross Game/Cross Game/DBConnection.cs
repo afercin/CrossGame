@@ -1,6 +1,8 @@
 ﻿using MySql.Data.MySqlClient;
 using RTDP;
+using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace Cross_Game
 {
@@ -42,6 +44,12 @@ namespace Cross_Game
                 }
                 LogUtils.AppendLogFooter(LogUtils.DatabaseErrorsLog);
                 return false;
+            }
+            catch (InvalidOperationException)
+            {
+                Console.WriteLine("La conexión ya estaba creada, esperando 50ms para volver a intentar...");
+                Thread.Sleep(50);
+                return OpenConnection();
             }
         }
         
@@ -91,6 +99,11 @@ namespace Cross_Game
 
                 dataReader.Close();
                 CloseConnection();
+            }
+
+            if (currentUser.Number != 0)
+            {
+                UpdateUserStatus(currentUser);
             }
             return currentUser;
         }
@@ -217,16 +230,22 @@ namespace Cross_Game
             }
         }
 
-        public static void LogOut(ComputerData computer)
+        public static void UpdateUserStatus(UserData user)
         {
-            computer.Status = 0;
-            computer.N_connections = 0;
-            UpdateComputerStatus(computer);
-            //if (OpenConnection())
-            //{
-            //    NonQuery($"CALL LogOut('{UserEmail}', '{UserPassword}');");
-            //    CloseConnection();
-            //}
+            if (OpenConnection())
+            {
+                NonQuery($"CALL UpdateUserStatus('{UserEmail}', '{UserPassword}', '{user.Status}');");
+                CloseConnection();
+            }
+        }
+
+        public static void LogOut(UserData user)
+        {
+            user.Status = 0;
+            user.localMachine.Status = 0;
+            user.localMachine.N_connections = 0;
+            UpdateComputerStatus(user.localMachine);
+            UpdateUserStatus(user);
         }
     }
 }

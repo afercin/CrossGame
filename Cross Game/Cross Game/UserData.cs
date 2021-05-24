@@ -7,6 +7,7 @@ namespace Cross_Game
     {
         public string Name { get; private set; }
         public int Number { get; private set; }
+        public int Status { get; set; }
 
         public ComputerData localMachine;
 
@@ -14,6 +15,7 @@ namespace Cross_Game
         {
             Name = name;
             Number = number;
+            Status = 1;
             localMachine = null;
         }
 

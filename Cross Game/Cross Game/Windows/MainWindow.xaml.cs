@@ -111,18 +111,25 @@ namespace Cross_Game.Windows
             {
                 case "Ordenadores": MyComputers.Visibility = visibility; break;
                 case "Amigos":
-                    var display = new UserDisplay();
-                    display.StartTransmission(CurrentUser.localMachine);
                     try
                     {
+                        var display = new UserDisplay();
+                        display.StartTransmission(CurrentUser.localMachine);
                         display.Visibility = Visibility.Visible;
                         Hide();
+                        CurrentUser.Status = 2;
+                        DBConnection.UpdateUserStatus(CurrentUser);
                         display.ShowDialog();
-                        Show();
                     }
                     catch
                     {
 
+                    }
+                    finally
+                    {
+                        CurrentUser.Status = 1;
+                        DBConnection.UpdateUserStatus(CurrentUser);
+                        Show();
                     }
                     break;
                 case "Transmisión": TransmisionOptions.Visibility = visibility;break;
@@ -189,11 +196,15 @@ namespace Cross_Game.Windows
                 display.StartTransmission(pc);
                 display.Visibility = Visibility.Visible;
                 Hide();
+                CurrentUser.Status = 2;
+                DBConnection.UpdateUserStatus(CurrentUser);
                 display.ShowDialog();
             }
             catch { }
             finally
             {
+                CurrentUser.Status = 1;
+                DBConnection.UpdateUserStatus(CurrentUser);
                 Show();
             }
         }
@@ -215,7 +226,7 @@ namespace Cross_Game.Windows
             connectivity.Stop();
             connectivity.Dispose();
             server?.Stop();
-            DBConnection.LogOut(CurrentUser.localMachine);
+            DBConnection.LogOut(CurrentUser);
         }
     }
 }
