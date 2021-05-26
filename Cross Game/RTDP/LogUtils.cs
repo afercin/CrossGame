@@ -4,15 +4,13 @@ using System.Threading;
 
 namespace RTDP
 {
-    class LogUtils
+    public class LogUtils
     {
-        private static readonly string CrossGameFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Cross Game");
-        private static readonly string LogsFolder = Path.Combine(CrossGameFolder, "Logs");
+        protected static readonly string CrossGameFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Cross Game");
+        protected static readonly string LogsFolder = Path.Combine(CrossGameFolder, "Logs");
         public static readonly string LoginLog = Path.Combine(LogsFolder, "Login.log");
         public static readonly string ClientConnectionLog = Path.Combine(LogsFolder, "ClientConnection.log");
         public static readonly string ServerConnectionLog = Path.Combine(LogsFolder, "ServerConnection.log");
-        public static readonly string DatabaseErrorsLog = Path.Combine(LogsFolder, "DatabaseErrors.log");
-        public static readonly string ConnectionErrorsLog = Path.Combine(LogsFolder, "ConnectionErrors.log");
 
 
         public static void AppendLogHeader(string logPath)
@@ -60,26 +58,5 @@ namespace RTDP
             DateTime time = DateTime.Now;
             return "[" + time.ToShortDateString() + " " + time.ToLongTimeString() + "] ";
         }
-
-        public static void CleanLogs()
-        {
-            if (!Directory.Exists(CrossGameFolder))
-                Directory.CreateDirectory(CrossGameFolder);
-
-            try
-            {
-                if ((DateTime.Now - File.GetCreationTime(LoginLog)).TotalDays >= 1)
-                {
-                    Directory.Delete(LogsFolder, true);
-                    Thread.Sleep(50);
-                }
-            }
-            catch { }
-            finally
-            {
-                Directory.CreateDirectory(LogsFolder);
-            }
-        }
-
     }
 }
