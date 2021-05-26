@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Management;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -138,6 +139,27 @@ namespace RTDP
         public static byte[] GetBytes(string s) => Encoding.ASCII.GetBytes(s);
 
         public static string GetString(byte[] data, int dataSize) => Encoding.ASCII.GetString(data, 0, dataSize);
-        
+        public static string GetWindowDiskSN()
+        {
+            try
+            {
+                string windowsDriveLetter = Path.GetPathRoot(Environment.GetFolderPath(Environment.SpecialFolder.System)).Split('\\')[0];
+                using (var partitions = new ManagementObjectSearcher("ASSOCIATORS OF {Win32_LogicalDisk.DeviceID='" + windowsDriveLetter + "'} WHERE ResultClass=Win32_DiskPartition"))
+                    foreach (var partition in partitions.Get())
+                        using (var drives = new ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskPartition.DeviceID='" + partition["DeviceID"] + "'} WHERE ResultClass=Win32_DiskDrive"))
+                            foreach (var drive in drives.Get())
+                                return (string)drive["SerialNumber"];
+            }
+            catch
+            {
+                LogUtils.AppendLogError(LogUtils.LoginLog, "404");
+                using (var disks = new ManagementObjectSearcher("SELECT SerialNumber FROM Win32_DiskDrive"))
+                    foreach (var disk in disks.Get())
+                        return disk["SerialNumber"].ToString();
+            }
+
+            return "<unknown>";
+        }
+
     }
 }

@@ -34,9 +34,8 @@
                    Margin="3" 
                    Style="{StaticResource FlatTextStyle}"/>
 
-        <TextBox Name="ComputerName" 
-                                   HorizontalAlignment="Left"
-                 Text="DESKTOP-T80PHBO"
+        <TextBox Name="ComputerName"
+                 HorizontalAlignment="Left"
                  Width="450"
                  Margin="3" 
                  Height="24"
