@@ -254,7 +254,7 @@ namespace RTDP
             SendPetition(newClientSocket, petition);
         }
 
-        private void Audio_CapturedAudio(object sender, Audio.AudioCapturedEventArgs e)
+        private void Audio_CapturedAudio(object sender, AudioCapturedEventArgs e)
         {
             SendData(e.Sample);
         }

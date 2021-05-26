@@ -15,6 +15,13 @@ namespace RTDP
         }
     }
 
+    public delegate void AudioCapturedEventHandler(object sender, AudioCapturedEventArgs e);
+    public class AudioCapturedEventArgs : EventArgs
+    {
+        public byte[] Sample;
+        public AudioCapturedEventArgs(byte[] sample) : base() => Sample = sample;
+    }
+
     public delegate void ImageBuiltEventHandler(object sender, ImageBuiltEventArgs e);
     public class ImageBuiltEventArgs : EventArgs
     {

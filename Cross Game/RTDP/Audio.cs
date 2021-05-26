@@ -30,8 +30,6 @@ namespace RTDP
             tempFile = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
         }
 
-        #region Player
-
         public void StartPlayer(WaveFormat waveFormat)
         {
             bufferedWaveProvider = new BufferedWaveProvider(waveFormat);
@@ -45,17 +43,6 @@ namespace RTDP
         public void PlayAudio(byte[] sample)
         {
             bufferedWaveProvider?.AddSamples(sample, 4, BitConverter.ToInt32(sample, 0));
-        }
-
-        #endregion
-
-        #region Recorder
-
-        public delegate void AudioCapturedEventHandler(object sender, AudioCapturedEventArgs e);
-        public class AudioCapturedEventArgs : EventArgs
-        {
-            public byte[] Sample;
-            public AudioCapturedEventArgs(byte[] sample) : base() => Sample = sample;
         }
 
         public WaveFormat InitializeRecorder()//MMDevice device = null)
@@ -77,8 +64,6 @@ namespace RTDP
             Array.Copy(e.Buffer, 0, sample, 4, e.BytesRecorded);
             CapturedAudio.Invoke(sender, new AudioCapturedEventArgs(sample));
         }
-
-        #endregion
 
         public void Dispose()
         {
