@@ -26,7 +26,7 @@ namespace Cross_Game.Controllers
         private void Computer_MouseDown(object sender, MouseButtonEventArgs e)
         {
             UpdateStatus();
-            if (pc.N_connections < pc.Max_connections && pc.Status != 0)
+            if (pc.N_connections < pc.Max_connections && pc.Status > 0 || pc.Status == -1)
                 ComputerClicked.Invoke(pc, new EventArgs());
         }
 

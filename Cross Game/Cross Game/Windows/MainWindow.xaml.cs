@@ -3,6 +3,7 @@ using RTDP;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
@@ -188,12 +189,19 @@ namespace Cross_Game.Windows
 
                         Ping.Text = CrossGameUtils.LastPingResult.RoundtripTime + "ms";
 
+                        Computer[] deletedComputers = new Computer[computerList.Count];
+                        computerList.CopyTo(deletedComputers);
+
                         foreach (string mac in MACs)
                             if (mac != CurrentUser.localMachine.MAC)
                             {
                                 var computer = computerList.Find(c => c.pc.MAC == mac);
+
                                 if (computer != null)
+                                {
                                     computer.UpdateStatus();
+                                    deletedComputers = deletedComputers.Where(c => c.pc.MAC != computer.pc.MAC).ToArray();
+                                }
                                 else
                                 {
                                     computer = new Computer(mac);
@@ -203,6 +211,12 @@ namespace Cross_Game.Windows
                                     ComputerPanel.Children.Add(computer);
                                 }
                             }
+
+                        foreach (Computer c in deletedComputers)
+                        {
+                            computerList.Remove(c);
+                            ComputerPanel.Children.Remove(c);
+                        }
                     });
                 else
                 {
@@ -245,22 +259,31 @@ namespace Cross_Game.Windows
         private void Computer_Clicked(object sender, EventArgs e)
         {
             ComputerData pc = (sender as ComputerData);
-            try
+            if (pc.Status != -1)
             {
-                var display = new UserDisplay();
-                display.StartTransmission(ref pc);
-                display.Visibility = Visibility.Visible;
-                Hide();
-                CurrentUser.Status = 2;
-                DBConnection.UpdateUserStatus(CurrentUser);
-                display.ShowDialog();
+                try
+                {
+                    var display = new UserDisplay();
+                    display.StartTransmission(ref pc);
+                    display.Visibility = Visibility.Visible;
+                    Hide();
+                    CurrentUser.Status = 2;
+                    DBConnection.UpdateUserStatus(CurrentUser);
+                    display.ShowDialog();
+                }
+                catch { }
+                finally
+                {
+                    CurrentUser.Status = 1;
+                    DBConnection.UpdateUserStatus(CurrentUser);
+                    Show();
+                }
             }
-            catch { }
-            finally
+            else
             {
-                CurrentUser.Status = 1;
-                DBConnection.UpdateUserStatus(CurrentUser);
-                Show();
+                Computer removedComputer = computerList.Find(c => c.pc.MAC == pc.MAC);
+                computerList.Remove(removedComputer);
+                ComputerPanel.Children.Remove(removedComputer);
             }
         }
 
@@ -275,6 +298,8 @@ namespace Cross_Game.Windows
         }
 
         private void MainWindow_Closed(object sender, EventArgs e) => Dispose();
+
+        private void Refresh_Click(object sender, RoutedEventArgs e) => SyncData();
 
         #endregion
 

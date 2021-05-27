@@ -5,7 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:controllers="clr-namespace:Cross_Game.Controllers"
         xmlns:iconpacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-        xmlns:windows="clr-namespace:Cross_Game.Windows"
         mc:Ignorable="d"
         UseLayoutRounding="True"
         WindowStyle="None"
@@ -110,7 +109,6 @@
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
-                    <ColumnDefinition/>
                     <ColumnDefinition Width="30"/>
                 </Grid.ColumnDefinitions>
                 <StackPanel Orientation="Horizontal" >
@@ -121,11 +119,22 @@
                     <controllers:WaitSlider x:Name="WaitSlider"/>
                 </StackPanel>
 
+
+                <Button Height="24"
+                        Width="130"
+                        Grid.Column="2"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Right"
+                        Style="{StaticResource FlatButtonStyle}"
+                        Click="Refresh_Click">
+                    <TextBlock Text="Actualizar lista."/>
+                </Button>
+
                 <Border VerticalAlignment="Center" 
                         HorizontalAlignment="Left"
                         Margin="0 0 5 0"
                         Background="#0FFF"
-                        Grid.Column="4">
+                        Grid.Column="3">
                     <iconpacks:PackIconMaterial Name="ConnectionStatus"
                                                 Kind="wifi" 
                                                 Height="18"
