@@ -17,10 +17,6 @@ namespace Cross_Game.Controllers
         public bool Active { get => active; set => active = value; }
         public bool Done { get; set; }
 
-        private readonly Brush blue = new SolidColorBrush(Color.FromRgb(48, 149, 191));
-        private readonly Brush black = new SolidColorBrush(Color.FromRgb(50, 50, 50));
-        private readonly Brush gray = new SolidColorBrush(Color.FromRgb(179, 179, 179));
-        private readonly Brush darkgray = new SolidColorBrush(Color.FromRgb(230, 230, 230));
         private readonly Storyboard leftAnimation;
         private readonly Storyboard rightAnimation;
 
@@ -93,8 +89,8 @@ namespace Cross_Game.Controllers
 
             Dispatcher.Invoke(() =>
             {
-                BackgroundBorder.Background = active && Done ? blue : black;
-                slider.Fill = active ? darkgray : gray;
+                BackgroundBorder.Background = active && Done ? CrossGameUtils.BlueBrush : CrossGameUtils.BlackBrush;
+                slider.Fill = active ? CrossGameUtils.WhiteBrush : CrossGameUtils.LightGrayBrush;
                 Progress.Visibility = Visibility.Hidden;
             });
             actionThread = null;

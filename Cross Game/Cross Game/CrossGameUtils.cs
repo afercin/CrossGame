@@ -33,10 +33,13 @@ namespace Cross_Game
 
     public class CrossGameUtils
     {
+        public static readonly Brush BlackBrush = new SolidColorBrush(Color.FromRgb(50, 50, 50));
+        public static readonly Brush GrayBrush = new SolidColorBrush(Color.FromRgb(140, 140, 140));
+        public static readonly Brush LightGrayBrush = new SolidColorBrush(Color.FromRgb(179, 179, 179));
+        public static readonly Brush WhiteBrush = new SolidColorBrush(Color.FromRgb(230, 230, 230));
         public static readonly Brush RedBrush = new SolidColorBrush(Color.FromRgb(240, 30, 30));
         public static readonly Brush BlueBrush = new SolidColorBrush(Color.FromRgb(50, 157, 201));
         public static readonly Brush YellowBrush = new SolidColorBrush(Color.FromRgb(190, 170, 40));
-        public static readonly Brush GrayBrush = new SolidColorBrush(Color.FromRgb(140, 140, 140));
         public static readonly Brush GreenBrush = new SolidColorBrush(Colors.LimeGreen);
 
         public static PingReply LastPingResult = null;
