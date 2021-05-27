@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"        
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
-        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:gif="http://wpfanimatedgif.codeplex.com"
         mc:Ignorable="d"
         AllowsTransparency="True" 
         Background="Transparent"
@@ -97,10 +97,8 @@
                         <StackPanel Name="Checking"
                                     Orientation="Horizontal"
                                     Visibility="Hidden">
-                            <mah:ProgressRing Foreground="#AFFF"
-                                              Width="20" 
-                                              Height="auto"
-                                              Margin="0 -2 2 0"/>
+                            <Image gif:ImageBehavior.AnimatedSource="/Images/doublering20px.gif"
+                                   Margin="0 -2 2 0"/>
                             <TextBlock Text="Comprobando credenciales..." 
                                        Foreground="#CFFF"
                                        FontWeight="DemiBold"
