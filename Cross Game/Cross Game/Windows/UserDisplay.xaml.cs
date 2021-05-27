@@ -139,6 +139,8 @@ namespace Cross_Game.Windows
                     client.Start(ref serverComputer, DBConnection.UserEmail, DBConnection.UserPassword);
                 }, $"Conectando con {serverComputer.Name}...");
             }
+            else
+                Close();
         }
 
         private void Client_Reconnecting(object sender, ReconnectingEventArgs e)
