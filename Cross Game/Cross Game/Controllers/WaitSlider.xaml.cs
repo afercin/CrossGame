@@ -15,6 +15,7 @@ namespace Cross_Game.Controllers
     public partial class WaitSlider : UserControl
     {
         public bool Active { get => active; set => active = value; }
+        public bool Done { get; set; }
 
         private readonly Brush blue = new SolidColorBrush(Color.FromRgb(48, 149, 191));
         private readonly Brush black = new SolidColorBrush(Color.FromRgb(50, 50, 50));
@@ -27,7 +28,6 @@ namespace Cross_Game.Controllers
         private ThreadStart activeAction;
         private ThreadStart deactiveAction;
         private Thread actionThread;
-
 
         public WaitSlider()
         {
@@ -64,7 +64,7 @@ namespace Cross_Game.Controllers
             deactiveAction = new ThreadStart(deactive);
         }
 
-        private void Slider_MouseDown(object sender, MouseButtonEventArgs e)
+        public void Slider_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (deactiveAction == null || activeAction == null)
                 throw new Exception();
@@ -93,7 +93,7 @@ namespace Cross_Game.Controllers
 
             Dispatcher.Invoke(() =>
             {
-                BackgroundBorder.Background = active ? blue : black;
+                BackgroundBorder.Background = active && Done ? blue : black;
                 slider.Fill = active ? darkgray : gray;
                 Progress.Visibility = Visibility.Hidden;
             });

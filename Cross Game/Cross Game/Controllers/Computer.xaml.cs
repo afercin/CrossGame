@@ -14,11 +14,6 @@ namespace Cross_Game.Controllers
     {
         public event EventHandler ComputerClicked;
 
-        private readonly Brush red = new SolidColorBrush(Color.FromRgb(240, 30, 30));
-        private readonly Brush blue = new SolidColorBrush(Color.FromRgb(50, 157, 201));
-        private readonly Brush yellow = new SolidColorBrush(Color.FromRgb(190, 170, 40));
-        private readonly Brush gray = new SolidColorBrush(Color.FromRgb(140, 140, 140));
-
         public ComputerData pc;
 
         public Computer(string mac)
@@ -43,24 +38,24 @@ namespace Cross_Game.Controllers
             switch (pc.Status)
             {
                 case 0:
-                    ComputerBorder.BorderBrush = gray;
+                    ComputerBorder.BorderBrush = CrossGameUtils.GrayBrush;
                     Icon.Kind = PackIconMaterialKind.MonitorOff;
                     break;
                 case 1:
                     if (pc.N_connections == 0)
                     {
                         Icon.Kind = PackIconMaterialKind.MonitorClean;
-                        ComputerBorder.BorderBrush = blue;
+                        ComputerBorder.BorderBrush = CrossGameUtils.BlueBrush;
                     }
                     else if (pc.N_connections == pc.Max_connections)
                     {
                         Icon.Kind = PackIconMaterialKind.MonitorDashboard;
-                        ComputerBorder.BorderBrush = red;
+                        ComputerBorder.BorderBrush = CrossGameUtils.RedBrush;
                     }
                     else
                     {
                         Icon.Kind = PackIconMaterialKind.MonitorEye;
-                        ComputerBorder.BorderBrush = yellow;
+                        ComputerBorder.BorderBrush = CrossGameUtils.YellowBrush;
                     }
                     break;
             }

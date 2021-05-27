@@ -21,7 +21,7 @@ namespace Cross_Game
 
         public void SyncLocalMachine(int status = 0)
         {
-            ConnectionUtils.GetComputerNetworkInfo(out string localIP, out string publicIP, out string macAddress);
+            CrossGameUtils.GetComputerNetworkInfo(out string localIP, out string publicIP, out string macAddress);
             localMachine = DBConnection.GetComputerData(macAddress);
             localMachine.LocalIP = localIP;
             localMachine.PublicIP = publicIP;

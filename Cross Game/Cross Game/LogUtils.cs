@@ -6,8 +6,10 @@ namespace Cross_Game
 {
     class LogUtils : RTDP.LogUtils
     {
+        public static readonly string LoginLog = Path.Combine(LogsFolder, "Login.log");
         public static readonly string DatabaseErrorsLog = Path.Combine(LogsFolder, "DatabaseErrors.log");
         public static readonly string ConnectionErrorsLog = Path.Combine(LogsFolder, "ConnectionErrors.log");
+        public static readonly string PasswordErrorsLog = Path.Combine(LogsFolder, "PasswordErrors.log");
 
         public static void CleanLogs()
         {

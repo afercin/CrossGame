@@ -86,34 +86,59 @@ namespace Cross_Game.Windows
             });
         }
 
-        public void StartTransmission(ComputerData serverComputer)
+        public void StartTransmission(ref ComputerData server)
         {
-            if (client != null && client.IsConnected)
+            ComputerData serverComputer = server;
+            string password = string.Empty, passFile = Path.Combine(LogUtils.CrossGameFolder, $"{serverComputer.MAC}.password");
+            bool error = false;
+            try
             {
-                client.Stop();
-                client.ImageBuilt -= Client_ImageBuilt;
-                client.CursorShapeChanged -= Client_CursorShapeChanged;
-                framerate.Stop();
-                paint.Abort();
+                LogUtils.AppendLogHeader(LogUtils.ClientConnectionLog);
+
+                byte[] decryptPassword = Crypto.GetBytes(Crypto.CreateSHA256(CrossGameUtils.GetWindowDiskSN(LogUtils.LoginLog)));
+                Array.Resize(ref decryptPassword, 32);
+                LogUtils.AppendLogHeader(LogUtils.ClientConnectionLog);
+
+                password = Crypto.ReadData(passFile, decryptPassword)[0];
+
+                LogUtils.AppendLogOk(LogUtils.ClientConnectionLog, $"Se ha detectado el fichero con la contraseña de del equipo actual. Iniciando proceso de conexión...");
+            }
+            catch (IOException)
+            {
+                LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, "No existe el fichero con la contraseña de del equipo actual, se le solicitará al usuario.");
+                password = string.Empty;
+            }
+            catch (Exception)
+            {
+                LogUtils.AppendLogWarn(LogUtils.ClientConnectionLog, "Error al leer el fichero con la contraseña de del equipo actual, se le solicitará al usuario.");
+                File.Delete(passFile);
+                password = string.Empty;
+                error = true;
             }
 
-            frames = 0;
-            framerate.Start();
-            paint = new System.Threading.Thread(PaintThread);
-            paint.IsBackground = true;
-            paint.Start();
+            if (password == string.Empty)
+                Dispatcher.Invoke(() => password = new PasswordWindow().GetPassword(serverComputer.MAC, serverComputer.Name, error));
 
-            waitingWindow = new WaitingWindow();
-            waitingWindow.WaitStopped += (s, a) => Dispatcher.Invoke(() => Close());
-            waitingWindow.WaitEnd += (s, a) => { if (!client.IsConnected) Dispatcher.Invoke(() => Close()); };
-            waitingWindow.Wait(() =>
+            if (password != string.Empty)
             {
-                client = new RTDPClient("patata123");
-                client.ImageBuilt += Client_ImageBuilt;
-                client.CursorShapeChanged += Client_CursorShapeChanged;
-                client.Reconnecting += Client_Reconnecting;
-                client.Start(ref serverComputer, DBConnection.UserEmail, DBConnection.UserPassword);
-            }, $"Conectando con {serverComputer.Name}...");
+                frames = 0;
+                framerate.Start();
+                paint = new System.Threading.Thread(PaintThread);
+                paint.IsBackground = true;
+                paint.Start();
+
+                waitingWindow = new WaitingWindow();
+                waitingWindow.WaitStopped += (s, a) => Dispatcher.Invoke(() => Close());
+                waitingWindow.WaitEnd += (s, a) => { if (!client.IsConnected) Dispatcher.Invoke(() => Close()); };
+                waitingWindow.Wait(() =>
+                {
+                    client = new RTDPClient(password);
+                    client.ImageBuilt += Client_ImageBuilt;
+                    client.CursorShapeChanged += Client_CursorShapeChanged;
+                    client.Reconnecting += Client_Reconnecting;
+                    client.Start(ref serverComputer, DBConnection.UserEmail, DBConnection.UserPassword);
+                }, $"Conectando con {serverComputer.Name}...");
+            }
         }
 
         private void Client_Reconnecting(object sender, ReconnectingEventArgs e)

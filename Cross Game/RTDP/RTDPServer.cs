@@ -53,8 +53,7 @@ namespace RTDP
             Thread receivePetitionThread;
             byte[] buffer = null;
             int bufferSize = 0;
-
-            LogUtils.AppendLogHeader(LogUtils.ServerConnectionLog);
+            
             LogUtils.AppendLogText(LogUtils.ServerConnectionLog, $"Comenzando a recibir clientes por el puerto {computer.Tcp}");
 
             listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -121,7 +120,7 @@ namespace RTDP
                                 LogUtils.AppendLogWarn(LogUtils.ServerConnectionLog, $"No se acepta la conexión desde {clientAddress.Address.ToString()} (usuario no autorizado).");
                             }
                         }
-                        catch (CryptographicException)
+                        catch
                         {
                             SendBuffer(tcpClientSocket, new byte[] { Convert.ToByte(Petition.ConnectionRefused) });
                             LogUtils.AppendLogWarn(LogUtils.ServerConnectionLog, $"No se acepta la conexión desde {clientAddress.Address.ToString()} (no ha sido posible desencriptar el mensaje).");

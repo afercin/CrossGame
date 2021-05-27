@@ -101,7 +101,7 @@ namespace Cross_Game
                 CloseConnection();
             }
 
-            if (currentUser.Number != 0)
+            if (currentUser != null && currentUser.Number != 0)
             {
                 UpdateUserStatus(currentUser);
             }
@@ -145,7 +145,7 @@ namespace Cross_Game
 
         private static List<string> GetComputers(string procedure, string email = null, string password = null)
         {
-            if (!ConnectionUtils.HasInternetConnection())
+            if (!CrossGameUtils.HasInternetConnection())
                 return null;
 
             List<string> computers = new List<string>();

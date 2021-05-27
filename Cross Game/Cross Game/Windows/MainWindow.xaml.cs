@@ -2,6 +2,7 @@
 using RTDP;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
@@ -27,35 +28,56 @@ namespace Cross_Game.Windows
         {
             InitializeComponent();
 
-            connectivity = new Timer(600000); // 10 * 60 * 1000
+            connectivity = new Timer(300000); // 5 * 60 * 1000
             connectivity.Elapsed += (s, e) => SyncData();
             connectivity.Start();
 
             computerList = new List<Computer>();
-            server = null;
 
             currentOption = Ordenadores;
             Ordenadores.Active = true;
         }
 
-        private void Window_SourceInitialized(object sender, EventArgs e)
+        private void ServerStart()
         {
-            Header.SetWindowHandler(this);
-
-            UserName.Text = CurrentUser.Name;
-            UserNumber.Text = CurrentUser.Number.ToString();
-
-            WaitSlider.SetActions(() =>
+            string password = string.Empty, passFile = Path.Combine(LogUtils.CrossGameFolder, $"{CurrentUser.localMachine.MAC}.password");
+            bool error = false;
+            try
             {
+                CurrentUser.SyncLocalMachine(1);
                 try
                 {
-                    //byte[] decryptPassword = Crypto.GetBytes(Crypto.CreateSHA256(GetWindowDiskSN()));
-                    //Array.Resize(ref decryptPassword, 32);
+                    LogUtils.AppendLogHeader(LogUtils.ServerConnectionLog);
 
-                    string serverPassword = "patata123";//Crypto.ReadData(AutoLoginPath, decryptPassword)[0];
-                    CurrentUser.SyncLocalMachine(1);
+                    byte[] decryptPassword = Crypto.GetBytes(Crypto.CreateSHA256(CrossGameUtils.GetWindowDiskSN(LogUtils.LoginLog)));
+                    Array.Resize(ref decryptPassword, 32);
+                    LogUtils.AppendLogHeader(LogUtils.ServerConnectionLog);
 
-                    server = new RTDPServer(serverPassword);
+                    password = Crypto.ReadData(passFile, decryptPassword)[0];
+                    error = false;
+
+                    LogUtils.AppendLogOk(LogUtils.ServerConnectionLog, $"Se ha detectado el fichero con la contraseña de del equipo actual. Iniciando proceso de conexión...");
+                }
+                catch (IOException)
+                {
+                    LogUtils.AppendLogWarn(LogUtils.ServerConnectionLog, "No existe el fichero con la contraseña de del equipo actual, se le solicitará al usuario.");
+                    password = string.Empty;
+                    error = false;
+                }
+                catch (Exception)
+                {
+                    LogUtils.AppendLogWarn(LogUtils.ServerConnectionLog, "Error al leer el fichero con la contraseña de del equipo actual, se le solicitará al usuario.");
+                    File.Delete(passFile);
+                    password = string.Empty;
+                    error = true;
+                }
+
+                if (password == string.Empty)
+                    Dispatcher.Invoke(() => password = new PasswordWindow().GetPassword(CurrentUser.localMachine.MAC, string.Empty, error));
+
+                if (password != string.Empty)
+                {
+                    server = new RTDPServer(password);
                     server.ConnectedClientsChanged += (s, a) => DBConnection.UpdateComputerStatus(CurrentUser.localMachine);
                     server.GotClientCredentials += (s, a) =>
                     {
@@ -70,39 +92,33 @@ namespace Cross_Game.Windows
                     server.Start(ref CurrentUser.localMachine);
                     if (TransmisionOptions.Visibility == Visibility.Visible)
                         Dispatcher.Invoke(() => TransmisionOptions.IsAlerted = true);
+
+                    WaitSlider.Done = true;
                 }
-                catch (InternetConnectionException ex)
+                else
                 {
-                    LogUtils.AppendLogHeader(LogUtils.ConnectionErrorsLog);
-                    LogUtils.AppendLogError(LogUtils.ConnectionErrorsLog, ex.Message);
-                    LogUtils.AppendLogFooter(LogUtils.ConnectionErrorsLog);
+                    WaitSlider.Done = false;
+                    Task.Run(() =>
+                    {
+                        System.Threading.Thread.Sleep(50);
+                        Dispatcher.Invoke(() => WaitSlider.Slider_MouseDown(null, null));
+                    });
                 }
-            }, () =>
+            }
+            catch (InternetConnectionException ex)
             {
-                server.Stop();
-                server = null;
-                if (TransmisionOptions.Visibility == Visibility.Visible)
-                    Dispatcher.Invoke(() => TransmisionOptions.IsAlerted = false);
-
-                CurrentUser.SyncLocalMachine(0);
-            });
-
-            SyncData();
-            TransmisionOptions = new EditComputerParams(CurrentUser);
-            TransmisionOptions.Visibility = Visibility.Hidden;
-            Content.Children.Add(TransmisionOptions);
+                LogUtils.AppendLogError(LogUtils.ServerConnectionLog, ex.Message);
+                LogUtils.AppendLogFooter(LogUtils.ServerConnectionLog);
+            }
         }
 
-        private void OptionButton_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void ServerStop()
         {
-            OptionButton pressedOption = sender as OptionButton;
-            if (currentOption != pressedOption)
-            {
-                currentOption.Active = false;
-                ChangeMenuVisibility(currentOption.Name, Visibility.Hidden);
-                ChangeMenuVisibility(pressedOption.Name, Visibility.Visible);
-                currentOption = pressedOption;
-            }
+            server?.Stop();
+            if (TransmisionOptions.Visibility == Visibility.Visible)
+                Dispatcher.Invoke(() => TransmisionOptions.IsAlerted = false);
+
+            CurrentUser.SyncLocalMachine(0);
         }
 
         private void ChangeMenuVisibility(string name, Visibility visibility)
@@ -114,7 +130,7 @@ namespace Cross_Game.Windows
                     try
                     {
                         var display = new UserDisplay();
-                        display.StartTransmission(CurrentUser.localMachine);
+                        display.StartTransmission(ref CurrentUser.localMachine);
                         display.Visibility = Visibility.Visible;
                         Hide();
                         CurrentUser.Status = 2;
@@ -149,18 +165,18 @@ namespace Cross_Game.Windows
                         LocalIP.Text = CurrentUser.localMachine.LocalIP;
                         PublicIP.Text = CurrentUser.localMachine.PublicIP;
 
-                        if (ConnectionUtils.LastPingResult.RoundtripTime < 200)
+                        if (CrossGameUtils.LastPingResult.RoundtripTime < 200)
                         {
                             ConnectionStatus.Kind = MahApps.Metro.IconPacks.PackIconMaterialKind.Wifi;
-                            ConnectionStatus.Foreground = new SolidColorBrush(Colors.LimeGreen);
+                            ConnectionStatus.Foreground = CrossGameUtils.GreenBrush;
                         }
                         else
                         {
                             ConnectionStatus.Kind = MahApps.Metro.IconPacks.PackIconMaterialKind.WifiAlert;
-                            ConnectionStatus.Foreground = new SolidColorBrush(Colors.Yellow);
+                            ConnectionStatus.Foreground = CrossGameUtils.YellowBrush;
                         }
 
-                        Ping.Text = ConnectionUtils.LastPingResult.RoundtripTime + "ms";
+                        Ping.Text = CrossGameUtils.LastPingResult.RoundtripTime + "ms";
 
                         foreach (string mac in MACs)
                             if (mac != CurrentUser.localMachine.MAC)
@@ -187,13 +203,42 @@ namespace Cross_Game.Windows
             });
         }
 
+        #region Window events
+
+        private void Window_SourceInitialized(object sender, EventArgs e)
+        {
+            Header.SetWindowHandler(this);
+
+            UserName.Text = CurrentUser.Name;
+            UserNumber.Text = CurrentUser.Number.ToString();
+
+            WaitSlider.SetActions(ServerStart, ServerStop);
+
+            SyncData();
+            TransmisionOptions = new EditComputerParams(CurrentUser);
+            TransmisionOptions.Visibility = Visibility.Hidden;
+            Content.Children.Add(TransmisionOptions);
+        }
+
+        private void OptionButton_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            OptionButton pressedOption = sender as OptionButton;
+            if (currentOption != pressedOption)
+            {
+                currentOption.Active = false;
+                ChangeMenuVisibility(currentOption.Name, Visibility.Hidden);
+                ChangeMenuVisibility(pressedOption.Name, Visibility.Visible);
+                currentOption = pressedOption;
+            }
+        }
+
         private void Computer_Clicked(object sender, EventArgs e)
         {
             ComputerData pc = (sender as ComputerData);
             try
             {
                 var display = new UserDisplay();
-                display.StartTransmission(pc);
+                display.StartTransmission(ref pc);
                 display.Visibility = Visibility.Visible;
                 Hide();
                 CurrentUser.Status = 2;
@@ -220,6 +265,8 @@ namespace Cross_Game.Windows
         }
 
         private void MainWindow_Closed(object sender, EventArgs e) => Dispose();
+
+        #endregion
 
         public void Dispose()
         {

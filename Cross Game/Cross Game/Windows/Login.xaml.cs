@@ -16,7 +16,7 @@ namespace Cross_Game.Windows
     /// </summary>
     public partial class Login : Window
     {
-        private readonly string AutoLoginPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Cross Game", "autologin.info");
+        private readonly string AutoLoginPath = Path.Combine(LogUtils.CrossGameFolder, "autologin.info");
         private readonly Brush White = new SolidColorBrush(Colors.White);
 
         private const string watermakEmail = "email@example.com";
@@ -37,7 +37,7 @@ namespace Cross_Game.Windows
             try
             {
                 string[] credentials;
-                byte[] decryptPassword = Crypto.GetBytes(Crypto.CreateSHA256(Crypto.GetWindowDiskSN()));
+                byte[] decryptPassword = Crypto.GetBytes(Crypto.CreateSHA256(CrossGameUtils.GetWindowDiskSN(LogUtils.LoginLog)));
                 Array.Resize(ref decryptPassword, 32);
 
                 credentials = Crypto.ReadData(AutoLoginPath, decryptPassword);
@@ -57,6 +57,7 @@ namespace Cross_Game.Windows
             catch (Exception)
             {
                 LogUtils.AppendLogWarn(LogUtils.LoginLog, "Error al leer el fichero de autologin, se le solicitarán las credenciales al usuario.");
+                File.Delete(AutoLoginPath);
             }
 
         }
@@ -178,7 +179,7 @@ namespace Cross_Game.Windows
 
                                 try
                                 {
-                                    byte[] encryptPassword = Crypto.GetBytes(Crypto.CreateSHA256(Crypto.GetWindowDiskSN()));
+                                    byte[] encryptPassword = Crypto.GetBytes(Crypto.CreateSHA256(CrossGameUtils.GetWindowDiskSN(LogUtils.LoginLog)));
                                     Array.Resize(ref encryptPassword, 32);
 
                                     Crypto.WriteData(AutoLoginPath, encryptPassword, new string[] { email, password });
