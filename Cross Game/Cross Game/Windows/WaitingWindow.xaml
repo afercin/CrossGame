@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
         xmlns:controllers="clr-namespace:Cross_Game.Controllers"
+             xmlns:gif="http://wpfanimatedgif.codeplex.com"
         mc:Ignorable="d"
         WindowStyle="None"
         ResizeMode="NoResize"
@@ -27,16 +28,14 @@
                 <RowDefinition/>
                 <RowDefinition Height="30"/>
             </Grid.RowDefinitions>
-            <controllers:WindowHeader x:Name="Header"
-                                      MenuButtonClick="Header_MenuButtonClick"/>
+            <controllers:WindowHeader x:Name="Header"/>
             <StackPanel Grid.Row="1"
                         Margin="10 0"
                         Orientation="Horizontal">
-                <mah:ProgressRing x:Name="Progress"
-                                  Foreground="White"
-                                  VerticalAlignment="Center"
-                                  HorizontalAlignment="Left"
-                                  Width="10"/>
+                <Image Name="Progress"
+                       gif:ImageBehavior.AnimatedSource="/Images/doublering32px.gif"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Left"/>
                 <TextBlock Name="WaitText"
                            Text="Mensaje de espera..."
                            Margin="10 0 0 0"

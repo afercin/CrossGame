@@ -3,8 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:Cross_Game.Controllers"
-             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:gif="http://wpfanimatedgif.codeplex.com"
              mc:Ignorable="d" 
              Height="20" Width="80"
              MouseDown="Slider_MouseDown">
@@ -53,11 +52,10 @@
                  Height="10"
                  Margin="4 4 4 4"/>
 
-        <mah:ProgressRing x:Name="Progress"
-                          Foreground="White"
-                          VerticalAlignment="Center"
-                          HorizontalAlignment="Right"
-                          Width="10"
-                          Visibility="Hidden"/>
+        <Image Name="Progress"
+               gif:ImageBehavior.AnimatedSource="/Images/doublering20px.gif"
+               VerticalAlignment="Center"
+               HorizontalAlignment="Right"
+               Visibility="Hidden"/>
     </Grid>
 </UserControl>
