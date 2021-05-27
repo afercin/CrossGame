@@ -81,12 +81,22 @@ namespace Cross_Game.Windows
                     server.ConnectedClientsChanged += (s, a) => DBConnection.UpdateComputerStatus(CurrentUser.localMachine);
                     server.GotClientCredentials += (s, a) =>
                     {
-                        if (DBConnection.CheckLogin(a.email, a.password, false).Number != 0)
+                        a.UserPriority = 0;
+                        if (DBConnection.CheckLogin(a.email, a.password, false).Number != 0) // El usuario existe
                         {
-                            a.UserPriority = 2;
+                            var clientComputer = DBConnection.GetComputerData(a.mac);
+                            var computerList = DBConnection.GetUserComputers(a.email, a.password);
+                            if (computerList.Contains(a.mac))   // El usuario es la mismo que el del servidor.
+                                a.UserPriority = 2;
+                            else
+                            {
+                                computerList = DBConnection.GetSharedComputers(a.email, a.password);
+                                if (computerList.Contains(a.mac))
+                                    a.UserPriority = 1;
+                            }
+                            if (a.localIP != clientComputer.LocalIP || a.publicIP != clientComputer.PublicIP)
+                                a.UserPriority = 0;
                         }
-                        else
-                            a.UserPriority = 0;
                     };
 
                     server.Start(ref CurrentUser.localMachine);
