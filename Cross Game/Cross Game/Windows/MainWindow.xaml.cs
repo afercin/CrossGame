@@ -24,6 +24,7 @@ namespace Cross_Game.Windows
         private OptionButton currentOption;
         private RTDPServer server;
         private Timer connectivity;
+        private DateTime lastSync;
 
         public MainWindow()
         {
@@ -136,7 +137,10 @@ namespace Cross_Game.Windows
         {
             switch (name)
             {
-                case "Ordenadores": MyComputers.Visibility = visibility; break;
+                case "Ordenadores":
+                    MyComputers.Visibility = visibility;
+                    ComputerBorder.Visibility = visibility;
+                    break;
                 case "Amigos":
                     try
                     {
@@ -159,7 +163,9 @@ namespace Cross_Game.Windows
                         Show();
                     }
                     break;
-                case "Transmisión": TransmisionOptions.Visibility = visibility;break;
+                case "Transmisión":
+                    TransmisionOptions.Visibility = visibility;
+                    break;
             }
         }
 
@@ -224,6 +230,7 @@ namespace Cross_Game.Windows
                     ConnectionStatus.Foreground = new SolidColorBrush(Colors.Red);
                     Ping.Text = "-";
                 }
+                Dispatcher.Invoke(() => RefreshText.Text = DateTime.Now.ToLongTimeString());
             });
         }
 

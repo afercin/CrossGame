@@ -70,7 +70,7 @@ namespace Cross_Game.Windows
             Close();
         }
 
-        private void Header_MenuButtonClick(object sender, ClickEventArgs e)
+        private void WindowHeader_MenuButtonClick(object sender, ClickEventArgs e)
         {
             DialogResult = false;
             Close();

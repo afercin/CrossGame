@@ -33,34 +33,14 @@
         </Style.Resources>
     </Style>
 
-    <Style x:Key="RoundButtonStyle" TargetType="Border">
-        <Setter Property="BorderBrush" Value="#267799"/>
-        <Setter Property="Background" Value="#3095bf"/>
+
+    <Style x:Key="RoundButtonBase" TargetType="Border">
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="4"/>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Cursor" Value="Hand"/>
             </Trigger>
-            <Trigger Property="IsMouseOver" Value="False">
-                <Setter Property="Cursor" Value="Arrow"/>
-            </Trigger>
-            <EventTrigger RoutedEvent="MouseMove">
-                <BeginStoryboard>
-                    <Storyboard>
-                        <ColorAnimation To="#267799" Duration="0:0:0.25"
-                                        Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"/>
-                    </Storyboard>
-                </BeginStoryboard>
-            </EventTrigger>
-            <EventTrigger RoutedEvent="MouseLeave">
-                <BeginStoryboard>
-                    <Storyboard>
-                        <ColorAnimation To="#3095bf" Duration="0:0:0.25"
-                                        Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"/>
-                    </Storyboard>
-                </BeginStoryboard>
-            </EventTrigger>
         </Style.Triggers>
         <Style.Resources>
             <Style TargetType="Button">
@@ -88,6 +68,52 @@
                 </Style.Resources>
             </Style>
         </Style.Resources>
+    </Style>
+    
+    <Style x:Key="RoundButtonStyle" TargetType="Border" BasedOn="{StaticResource RoundButtonBase}">
+        <Setter Property="BorderBrush" Value="#206683"/>
+        <Setter Property="Background" Value="#3095bf"/>
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="MouseMove">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <ColorAnimation To="#206683" Duration="0:0:0.25"
+                                        Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+            <EventTrigger RoutedEvent="MouseLeave">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <ColorAnimation To="#3095bf" Duration="0:0:0.25"
+                                        Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="BlackRoundButtonStyle" TargetType="Border" BasedOn="{StaticResource RoundButtonBase}">
+        <Setter Property="BorderBrush" Value="#383838"/>
+        <Setter Property="Background" Value="#111"/>
+        <Style.Triggers>
+            <EventTrigger RoutedEvent="MouseMove">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <ColorAnimation To="#383838" Duration="0:0:0.25"
+                                        Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+            <EventTrigger RoutedEvent="MouseLeave">
+                <BeginStoryboard>
+                    <Storyboard>
+                        <ColorAnimation To="#111" Duration="0:0:0.25"
+                                        Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </EventTrigger>
+        </Style.Triggers>
     </Style>
     
 </ResourceDictionary>

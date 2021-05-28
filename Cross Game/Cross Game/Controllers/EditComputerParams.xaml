@@ -110,15 +110,15 @@
             <iconpacks:PackIconMaterial Style="{StaticResource AlertIconSyle}"/>
         </StackPanel>
 
-        <Button Margin="3 8 3 3" 
+        <Border Margin="3 8 3 3" 
                 Height="26"
                 Width="450"
                 HorizontalAlignment="Left"
-                Style="{StaticResource FlatButtonStyle}" 
-                Click="SaveButton_Click">
-            <TextBlock Text="Aplicar configuración"/>
-            
-        </Button>
+                Style="{StaticResource RoundButtonStyle}">
+            <Button Click="SaveButton_Click">
+                <TextBlock Text="Aplicar configuración"/>
+            </Button>
+        </Border>
 
         <StackPanel Orientation="Horizontal">
             <iconpacks:PackIconMaterial Style="{StaticResource AlertIconSyle}"/>

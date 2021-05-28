@@ -119,16 +119,26 @@
                     <controllers:WaitSlider x:Name="WaitSlider"/>
                 </StackPanel>
 
-
-                <Button Height="24"
-                        Width="130"
+                <Border Name="ComputerBorder"
+                        Height="24"
+                        Width="140"
                         Grid.Column="2"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Right"
-                        Style="{StaticResource FlatButtonStyle}"
-                        Click="Refresh_Click">
-                    <TextBlock Text="Actualizar lista."/>
-                </Button>
+                        Margin="0 -2 10 0"
+                        BorderThickness="0"
+                        Style="{StaticResource BlackRoundButtonStyle}">
+                    <Button Click="Refresh_Click">
+                        <TextBlock Text="Actualizar ordenadores"
+                                   FontSize="12"/>
+                    </Button>
+                    <Border.ToolTip>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Última actualización a las "/>
+                            <TextBlock Name="RefreshText"/>
+                        </StackPanel>
+                    </Border.ToolTip>
+                </Border>                
 
                 <Border VerticalAlignment="Center" 
                         HorizontalAlignment="Left"
