@@ -56,7 +56,7 @@ CREATE TABLE computers_options(
 
 DELIMITER //
 
-CREATE PROCEDURE GetUserName(_email VARCHAR(30), _password CHAR(64))
+CREATE PROCEDURE GetUserName(_email varchar(50), _password CHAR(64))
 BEGIN
   SELECT name, number
   FROM users
@@ -64,7 +64,7 @@ BEGIN
   AND password = _password;
 END //
 
-CREATE PROCEDURE GetUserComputers(_email VARCHAR(30), _password CHAR(64))
+CREATE PROCEDURE GetUserComputers(_email varchar(50), _password CHAR(64))
 BEGIN
 	SELECT MAC
     FROM computers
@@ -75,7 +75,7 @@ BEGIN
 		AND password = _password);
 END //
 
-CREATE PROCEDURE GetSharedComputers(_email VARCHAR(30), _password CHAR(64))
+CREATE PROCEDURE GetSharedComputers(_email varchar(50), _password CHAR(64))
 BEGIN
 	SELECT computer_id
     FROM users_computers
@@ -86,7 +86,7 @@ BEGIN
 		AND password = _password);
 END //
 
-CREATE PROCEDURE GetComputerData(_email VARCHAR(30), _password CHAR(64), _MAC CHAR(23))
+CREATE PROCEDURE GetComputerData(_email varchar(50), _password CHAR(64), _MAC CHAR(23))
 BEGIN
 	SELECT LocalIP, PublicIP, TCP, UDP, name, n_connections, max_connections, status, FPS
     FROM computers
@@ -98,7 +98,7 @@ BEGIN
 		AND password = _password);
 END //
 
-CREATE PROCEDURE UpdateTransmissionConf(_email VARCHAR(30), _password CHAR(64), _MAC CHAR(23), _TCP INT(5), _UDP INT(5), _name VARCHAR(30), _max_connections INT(2), _FPS INT(3))
+CREATE PROCEDURE UpdateTransmissionConf(_email varchar(50), _password CHAR(64), _MAC CHAR(23), _TCP INT(5), _UDP INT(5), _name VARCHAR(30), _max_connections INT(2), _FPS INT(3))
 BEGIN
 	UPDATE computers
     SET TCP = _TCP,
@@ -114,7 +114,7 @@ BEGIN
 		AND password = _password);
 END //
 
-CREATE PROCEDURE UpdateComputerStatus(_email VARCHAR(30), _password CHAR(64), _MAC CHAR(23), _LocalIP VARCHAR(15), _PublicIP VARCHAR(15), n_connections INT(2), _status INT(1))
+CREATE PROCEDURE UpdateComputerStatus(_email varchar(50), _password CHAR(64), _MAC CHAR(23), _LocalIP VARCHAR(15), _PublicIP VARCHAR(15), n_connections INT(2), _status INT(1))
 BEGIN
 	UPDATE computers
     SET LocalIP = _LocalIP,
@@ -128,7 +128,7 @@ BEGIN
 		AND password = _password);
 END //
 
-CREATE PROCEDURE GetComputerIP(_email VARCHAR(30), _password CHAR(64), _MAC CHAR(23))
+CREATE PROCEDURE GetComputerIP(_email varchar(50), _password CHAR(64), _MAC CHAR(23))
 BEGIN
 	SELECT LocalIP, PublicIP
 	FROM computers
@@ -140,7 +140,7 @@ BEGIN
 		AND password = _password);
 END //
 
-CREATE PROCEDURE AddComputer(_email VARCHAR(30), _password CHAR(64), _MAC CHAR(23), _LocalIP VARCHAR(15), _PublicIP VARCHAR(15), _name VARCHAR(30))
+CREATE PROCEDURE AddComputer(_email varchar(50), _password CHAR(64), _MAC CHAR(23), _LocalIP VARCHAR(15), _PublicIP VARCHAR(15), _name VARCHAR(30))
 BEGIN
 	DECLARE temp_value INT(9);
 
@@ -163,10 +163,39 @@ BEGIN
 	END IF;
 END //
 
-CREATE PROCEDURE UpdateUserStatus(_email VARCHAR(30), _password CHAR(64), _status INT(1))
+CREATE PROCEDURE UpdateUserStatus(_email varchar(50), _password CHAR(64), _status INT(1))
 BEGIN
 	UPDATE users
     SET status = _status
     WHERE email = _email
 	AND password = _password;
+END //
+
+CREATE PROCEDURE GetFriends(_email varchar(50), _password CHAR(64))
+BEGIN
+	DECLARE id INT(9);
+
+	SELECT user_id into id
+	FROM users
+	WHERE email = _email
+	AND password = _password;
+    
+	IF id IS NOT NULL THEN 
+		SELECT name, number
+		FROM users
+		WHERE user_id = (
+			SELECT IF(user1 = id, user2, user1)
+			FROM friendlist 
+			WHERE accepted = 0 
+			AND (user1 = id or user2 = id)
+		);
+	END IF;	
+END //
+
+CREATE PROCEDURE GetUserStatus(_name VARCHAR(30), _number INT(4))
+BEGIN
+	SELECT status
+	FROM users
+	WHERE name = _name
+	AND number = _number;
 END //

@@ -21,20 +21,21 @@ namespace Cross_Game.Windows
 
         private EditComputerParams TransmisionOptions;
         private List<Computer> computerList;
+        private List<Friend> friendList;
         private OptionButton currentOption;
         private RTDPServer server;
         private Timer connectivity;
-        private DateTime lastSync;
 
         public MainWindow()
         {
             InitializeComponent();
 
             connectivity = new Timer(300000); // 5 * 60 * 1000
-            connectivity.Elapsed += (s, e) => SyncData();
+            connectivity.Elapsed += (s, e) => SyncComputers();
             connectivity.Start();
-
+            
             computerList = new List<Computer>();
+            friendList = new List<Friend>();
 
             currentOption = Ordenadores;
             Ordenadores.Active = true;
@@ -139,29 +140,17 @@ namespace Cross_Game.Windows
             {
                 case "Ordenadores":
                     MyComputers.Visibility = visibility;
+                    RefreshButton.Text = "Actualizar ordenadores";
                     ComputerBorder.Visibility = visibility;
+                    if (visibility == Visibility.Visible)
+                        SyncComputers();
                     break;
                 case "Amigos":
-                    try
-                    {
-                        var display = new UserDisplay();
-                        display.StartTransmission(ref CurrentUser.localMachine);
-                        display.Visibility = Visibility.Visible;
-                        Hide();
-                        CurrentUser.Status = 2;
-                        DBConnection.UpdateUserStatus(CurrentUser);
-                        display.ShowDialog();
-                    }
-                    catch
-                    {
-
-                    }
-                    finally
-                    {
-                        CurrentUser.Status = 1;
-                        DBConnection.UpdateUserStatus(CurrentUser);
-                        Show();
-                    }
+                    MyFriends.Visibility = visibility;
+                    RefreshButton.Text = "Actualizar amigos";
+                    ComputerBorder.Visibility = visibility;
+                    if (visibility == Visibility.Visible)
+                        SyncFriends();
                     break;
                 case "Transmisión":
                     TransmisionOptions.Visibility = visibility;
@@ -169,12 +158,12 @@ namespace Cross_Game.Windows
             }
         }
 
-        private void SyncData()
+        private void SyncComputers()
         {
             Task.Run(()=>
             {
                 List<string> MACs = DBConnection.GetUserComputers();
-                if (MACs != null)
+                if (MACs != null) {
                     Dispatcher.Invoke(() =>
                     {
                         CurrentUser.SyncLocalMachine();
@@ -194,10 +183,12 @@ namespace Cross_Game.Windows
                         }
 
                         Ping.Text = CrossGameUtils.LastPingResult.RoundtripTime + "ms";
+                    });
 
-                        Computer[] deletedComputers = new Computer[computerList.Count];
-                        computerList.CopyTo(deletedComputers);
+                    Computer[] deletedComputers = computerList.ToArray();
 
+                    Dispatcher.Invoke(() =>
+                    {
                         foreach (string mac in MACs)
                             if (mac != CurrentUser.localMachine.MAC)
                             {
@@ -224,6 +215,7 @@ namespace Cross_Game.Windows
                             ComputerPanel.Children.Remove(c);
                         }
                     });
+                }                    
                 else
                 {
                     ConnectionStatus.Kind = MahApps.Metro.IconPacks.PackIconMaterialKind.WifiOff;
@@ -231,6 +223,45 @@ namespace Cross_Game.Windows
                     Ping.Text = "-";
                 }
                 Dispatcher.Invoke(() => RefreshText.Text = DateTime.Now.ToLongTimeString());
+            });
+        }
+
+        private void SyncFriends()
+        {
+            Task.Run(() =>
+            {
+                var friends = DBConnection.GetFriends();
+                if (friends != null)
+                {
+                    Friend[] deletedFriends = friendList.ToArray();
+                    Dispatcher.Invoke(() =>
+                    {
+                        foreach (string gameTag in friends)
+                        {
+                            var friend = friendList.Find(f => f.GameTag == gameTag);
+                            if (friend != null)
+                            {
+                                friend.UpdateStatus();
+                                deletedFriends = deletedFriends.Where(f => f.GameTag != gameTag).ToArray();
+                            }
+                            else
+                            {
+                                friend = new Friend(gameTag);
+                                friend.FriendClicked += Friend_FriendClicked;
+                                friendList.Add(friend);
+
+                                FriendsPanel.Children.Add(friend);
+                            }
+                        }
+
+                        foreach (Friend f in deletedFriends)
+                        {
+                            friendList.Remove(f);
+                            FriendsPanel.Children.Remove(f);
+                        }
+                        RefreshText.Text = DateTime.Now.ToLongTimeString();
+                    });
+                }             
             });
         }
 
@@ -245,7 +276,7 @@ namespace Cross_Game.Windows
 
             WaitSlider.SetActions(ServerStart, ServerStop);
 
-            SyncData();
+            SyncComputers();
             TransmisionOptions = new EditComputerParams(CurrentUser);
             TransmisionOptions.Visibility = Visibility.Hidden;
             Content.Children.Add(TransmisionOptions);
@@ -265,7 +296,7 @@ namespace Cross_Game.Windows
 
         private void Computer_Clicked(object sender, EventArgs e)
         {
-            ComputerData pc = (sender as ComputerData);
+            ComputerData pc = sender as ComputerData;
             if (pc.Status != -1)
             {
                 try
@@ -294,6 +325,12 @@ namespace Cross_Game.Windows
             }
         }
 
+        private void Friend_FriendClicked(object sender, EventArgs e)
+        {
+            Friend f = sender as Friend;
+
+        }
+
         private void WindowHeader_MenuButtonClick(object sender, ClickEventArgs e)
         {
             switch (e.PressedButton)
@@ -306,7 +343,13 @@ namespace Cross_Game.Windows
 
         private void MainWindow_Closed(object sender, EventArgs e) => Dispose();
 
-        private void Refresh_Click(object sender, RoutedEventArgs e) => SyncData();
+        private void Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            if (RefreshButton.Text == "Actualizar ordenadores")
+                SyncComputers();
+            else
+                SyncFriends();
+        }
 
         #endregion
 

@@ -73,14 +73,25 @@
                     BorderBrush="#464244">
                 <Grid Name="Content">
                     <ScrollViewer Name="MyComputers"
-                              Padding="5" 
-                              HorizontalScrollBarVisibility="Disabled"
-                              VerticalScrollBarVisibility="Auto">
-                        <WrapPanel  Name="ComputerPanel"
-                                Width="auto"
-                                Height="auto"
-                                Orientation="Horizontal" 
-                                VerticalAlignment="Top"/>
+                                  Padding="5" 
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Auto">
+                        <WrapPanel Name="ComputerPanel"
+                                   Width="auto"
+                                   Height="auto"
+                                   Orientation="Horizontal" 
+                                   VerticalAlignment="Top"/>
+                    </ScrollViewer>
+                    <ScrollViewer Name="MyFriends"
+                                  Padding="5" 
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  VerticalScrollBarVisibility="Auto"
+                                  Visibility="Hidden">
+                        <WrapPanel Name="FriendsPanel"
+                                   Width="auto"
+                                   Height="auto"
+                                   Orientation="Horizontal" 
+                                   VerticalAlignment="Top"/>
                     </ScrollViewer>
                 </Grid>
                 
@@ -129,7 +140,8 @@
                         BorderThickness="0"
                         Style="{StaticResource BlackRoundButtonStyle}">
                     <Button Click="Refresh_Click">
-                        <TextBlock Text="Actualizar ordenadores"
+                        <TextBlock Name="RefreshButton"
+                                   Text="Actualizar ordenadores"
                                    FontSize="12"/>
                     </Button>
                     <Border.ToolTip>

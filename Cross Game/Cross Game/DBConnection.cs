@@ -230,6 +230,41 @@ namespace Cross_Game
             }
         }
 
+        public static List<string> GetFriends()
+        {
+            List<string> friends = null;
+            if (OpenConnection())
+            {
+                friends = new List<string>();
+                MySqlDataReader dataReader = Query($"CALL GetFriends('{UserEmail}', '{UserPassword}');");
+
+                while (dataReader.Read())
+                    friends.Add($"{(string)dataReader["name"]}#{(int)dataReader["number"]}");
+
+                dataReader.Close();
+                CloseConnection();
+            }
+            return friends;
+        }
+        public static int GetUserStatus(string name, string number)
+        {
+            int status = 0;
+            if (OpenConnection())
+            {
+                MySqlDataReader dataReader = Query($"CALL GetUserStatus('{name}', {number});");
+
+                if (dataReader.HasRows)
+                {
+                    dataReader.Read();
+                    status = (int)dataReader["status"];
+                }
+
+                dataReader.Close();
+                CloseConnection();
+            }
+            return status;
+        }
+
         public static void UpdateUserStatus(UserData user)
         {
             if (OpenConnection())
