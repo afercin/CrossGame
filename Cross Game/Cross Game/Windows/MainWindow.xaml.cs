@@ -162,12 +162,12 @@ namespace Cross_Game.Windows
         {
             Task.Run(()=>
             {
+                CurrentUser.SyncLocalMachine();
                 List<string> MACs = DBConnection.GetUserComputers();
-                if (MACs != null) {
+                if (MACs != null)
+                {
                     Dispatcher.Invoke(() =>
                     {
-                        CurrentUser.SyncLocalMachine();
-
                         LocalIP.Text = CurrentUser.localMachine.LocalIP;
                         PublicIP.Text = CurrentUser.localMachine.PublicIP;
 
