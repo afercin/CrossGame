@@ -15,7 +15,7 @@ namespace Cross_Game.Windows
     /// <summary>
     /// Lógica de interacción para MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window, IDisposable
+    public partial class MainWindow : Window
     {
         public UserData CurrentUser { get; set; }
 
@@ -279,7 +279,7 @@ namespace Cross_Game.Windows
             SyncComputers();
             TransmisionOptions = new EditComputerParams(CurrentUser);
             TransmisionOptions.Visibility = Visibility.Hidden;
-            Content.Children.Add(TransmisionOptions);
+            Panels.Children.Add(TransmisionOptions);
         }
 
         private void OptionButton_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -341,7 +341,13 @@ namespace Cross_Game.Windows
             }
         }
 
-        private void MainWindow_Closed(object sender, EventArgs e) => Dispose();
+        private void MainWindow_Closed(object sender, EventArgs e)
+        {
+            connectivity.Stop();
+            connectivity.Dispose();
+            server?.Stop();
+            DBConnection.LogOut(CurrentUser);
+        }
 
         private void Refresh_Click(object sender, RoutedEventArgs e)
         {
@@ -352,13 +358,5 @@ namespace Cross_Game.Windows
         }
 
         #endregion
-
-        public void Dispose()
-        {
-            connectivity.Stop();
-            connectivity.Dispose();
-            server?.Stop();
-            DBConnection.LogOut(CurrentUser);
-        }
     }
 }
