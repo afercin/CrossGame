@@ -16,14 +16,14 @@ namespace Cross_Game.Controllers
         
         public string GameTag { get => FriendName.Text; }
         public string name;
-        public string number;
+        public int number;
 
         public Friend(string gameTag)
         {
             InitializeComponent();
             FriendName.Text = gameTag;
             name = gameTag.Split('#')[0];
-            number = gameTag.Split('#')[1];
+            number = int.Parse(gameTag.Split('#')[1]);
             UpdateStatus();
         }
 

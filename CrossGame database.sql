@@ -56,34 +56,39 @@ CREATE TABLE computers_options(
 
 DELIMITER //
 
+CREATE FUNCTION GetUserID(_email VARCHAR(50), _password CHAR(64)) RETURNS INT(9)
+READS SQL DATA
+BEGIN
+	DECLARE id INT(9);
+    
+    SELECT user_id into id
+    FROM users
+    WHERE email = _email
+    AND password = _password;
+    
+    RETURN id;
+END //
+
 CREATE PROCEDURE GetUserName(_email varchar(50), _password CHAR(64))
 BEGIN
-  SELECT name, number
-  FROM users
-  WHERE email = _email
-  AND password = _password;
+	SELECT name, number
+	FROM users
+	WHERE email = _email
+	AND password = _password;
 END //
 
 CREATE PROCEDURE GetUserComputers(_email varchar(50), _password CHAR(64))
 BEGIN
 	SELECT MAC
     FROM computers
-    WHERE owner = (    
-		SELECT user_id
-		FROM users
-		WHERE email = _email
-		AND password = _password);
+    WHERE owner = GetUserID(_email, _password);
 END //
 
 CREATE PROCEDURE GetSharedComputers(_email varchar(50), _password CHAR(64))
 BEGIN
 	SELECT computer_id
     FROM users_computers
-    WHERE user_id = (    
-		SELECT user_id
-		FROM users
-		WHERE email = _email
-		AND password = _password);
+    WHERE user_id = GetUserID(_email, _password);
 END //
 
 CREATE PROCEDURE GetComputerData(_email varchar(50), _password CHAR(64), _MAC CHAR(23))
@@ -91,11 +96,7 @@ BEGIN
 	SELECT LocalIP, PublicIP, TCP, UDP, name, n_connections, max_connections, status, FPS
     FROM computers
     WHERE MAC = _MAC
-    AND owner = (    
-		SELECT user_id
-		FROM users
-		WHERE email = _email
-		AND password = _password);
+    AND owner = GetUserID(_email, _password);
 END //
 
 CREATE PROCEDURE UpdateTransmissionConf(_email varchar(50), _password CHAR(64), _MAC CHAR(23), _TCP INT(5), _UDP INT(5), _name VARCHAR(30), _max_connections INT(2), _FPS INT(3))
@@ -107,11 +108,7 @@ BEGIN
         max_connections = _max_connections,
 		FPS = _FPS
     WHERE MAC = _MAC
-    AND owner = (    
-		SELECT user_id
-		FROM users
-		WHERE email = _email
-		AND password = _password);
+    AND owner = GetUserID(_email, _password);
 END //
 
 CREATE PROCEDURE UpdateComputerStatus(_email varchar(50), _password CHAR(64), _MAC CHAR(23), _LocalIP VARCHAR(15), _PublicIP VARCHAR(15), n_connections INT(2), _status INT(1))
@@ -121,11 +118,7 @@ BEGIN
     	PublicIP = _PublicIP,
         status = _status
     WHERE MAC = _MAC
-    AND owner = (    
-		SELECT user_id
-		FROM users
-		WHERE email = _email
-		AND password = _password);
+    AND owner = GetUserID(_email, _password);
 END //
 
 CREATE PROCEDURE GetComputerIP(_email varchar(50), _password CHAR(64), _MAC CHAR(23))
@@ -133,11 +126,7 @@ BEGIN
 	SELECT LocalIP, PublicIP
 	FROM computers
 	WHERE MAC = _MAC
-    AND owner = (    
-		SELECT user_id
-		FROM users
-		WHERE email = _email
-		AND password = _password);
+    AND owner = GetUserID(_email, _password);
 END //
 
 CREATE PROCEDURE AddComputer(_email varchar(50), _password CHAR(64), _MAC CHAR(23), _LocalIP VARCHAR(15), _PublicIP VARCHAR(15), _name VARCHAR(30))
@@ -149,10 +138,7 @@ BEGIN
 	WHERE MAC = _MAC;
 
 	IF temp_value = 0 THEN        
-		SELECT user_id INTO temp_value
-		FROM users
-		WHERE email = _email
-		AND password = _password;
+		SELECT GetUserID(_email, _password) INTO temp_value;
 
 		INSERT INTO computers(MAC, LocalIP, PublicIP, name, owner) 
 		VALUES (_MAC, _LocalIP, _PublicIP, _name, temp_value);
@@ -167,18 +153,14 @@ CREATE PROCEDURE UpdateUserStatus(_email varchar(50), _password CHAR(64), _statu
 BEGIN
 	UPDATE users
     SET status = _status
-    WHERE email = _email
-	AND password = _password;
+    WHERE user_id = GetUserID(_email, _password);
 END //
 
 CREATE PROCEDURE GetFriends(_email varchar(50), _password CHAR(64))
 BEGIN
 	DECLARE id INT(9);
 
-	SELECT user_id into id
-	FROM users
-	WHERE email = _email
-	AND password = _password;
+	SELECT GetUserID(_email, _password) INTO id;
     
 	IF id IS NOT NULL THEN 
 		SELECT name, number
@@ -198,4 +180,44 @@ BEGIN
 	FROM users
 	WHERE name = _name
 	AND number = _number;
+END //
+
+CREATE PROCEDURE GetComputersSharedWithFriend(_email VARCHAR(50), _password VARCHAR(64), _friendName VARCHAR(30), _friendNumber INT(4))
+BEGIN
+	SELECT MAC
+	FROM computers c INNER JOIN users_computers u
+	ON c.MAC = u.computer_id
+	WHERE user_id = (
+		SELECT user_id
+		FROM users
+		WHERE name = _friendName
+		AND number = _friendNumber
+	)
+	AND computer_id IN (
+		SELECT MAC
+		FROM computers
+		WHERE owner = GetUserID(_email, _password)
+	);
+END //
+
+CREATE PROCEDURE ManageComputerAccess(_email VARCHAR(50), _password VARCHAR(64), _friendName VARCHAR(30), _friendNumber INT(4), _MAC CHAR(23), _allow BOOLEAN)
+BEGIN
+	DECLARE user INT(9);
+	DECLARE computer CHAR(23);
+
+	SELECT user_id into user
+	FROM users
+	WHERE name = _friendName
+	AND number = _friendNumber;
+
+	SELECT MAC into computer
+	FROM computers 
+	WHERE MAC = _MAC
+	AND owner = GetUserID(_email, _password);
+
+	IF _allow AND user IS NOT NULL AND computer IS NOT NULL THEN
+		INSERT INTO users_computers VALUES(user, computer, 1, NULL);
+	ELSE
+		DELETE FROM users_computers WHERE user_id = user AND computer_id = computer;
+	END IF;
 END //

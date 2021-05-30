@@ -246,7 +246,7 @@ namespace Cross_Game
             }
             return friends;
         }
-        public static int GetUserStatus(string name, string number)
+        public static int GetUserStatus(string name, int number)
         {
             int status = 0;
             if (OpenConnection())
@@ -264,12 +264,40 @@ namespace Cross_Game
             }
             return status;
         }
+        public static List<string> GetComputersSharedWithFriend(string friendName, int friendNumber)
+        {
+            List<string> computers = null;
+
+            if (OpenConnection())
+            {
+                MySqlDataReader dataReader = Query($"CALL GetComputersSharedWithFriend('{UserEmail}', '{UserPassword}', '{friendName}', {friendNumber});");
+
+                computers = new List<string>();
+
+                if (dataReader.HasRows)
+                    while (dataReader.Read())
+                        computers.Add((string)dataReader["MAC"]);
+
+                dataReader.Close();
+                CloseConnection();
+            }
+            return computers;
+        }
+
+        public static void ManageComputerAccess(string friendName, int friendNumber, string MAC, bool allow)
+        {
+            if (OpenConnection())
+            {
+                NonQuery($"CALL ManageComputerAccess('{UserEmail}', '{UserPassword}', '{friendName}', {friendNumber}, '{MAC}', {allow});");
+                CloseConnection();
+            }
+        }
 
         public static void UpdateUserStatus(UserData user)
         {
             if (OpenConnection())
             {
-                NonQuery($"CALL UpdateUserStatus('{UserEmail}', '{UserPassword}', '{user.Status}');");
+                NonQuery($"CALL UpdateUserStatus('{UserEmail}', '{UserPassword}', {user.Status});");
                 CloseConnection();
             }
         }

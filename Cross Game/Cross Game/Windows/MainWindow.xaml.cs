@@ -41,6 +41,8 @@ namespace Cross_Game.Windows
             Ordenadores.Active = true;
         }
 
+        #region Server On/Off
+
         private void ServerStart()
         {
             string password = string.Empty, passFile = Path.Combine(LogUtils.CrossGameFolder, $"{CurrentUser.localMachine.MAC}.password");
@@ -134,29 +136,9 @@ namespace Cross_Game.Windows
             CurrentUser.SyncLocalMachine(0);
         }
 
-        private void ChangeMenuVisibility(string name, Visibility visibility)
-        {
-            switch (name)
-            {
-                case "Ordenadores":
-                    MyComputers.Visibility = visibility;
-                    RefreshButton.Text = "Actualizar ordenadores";
-                    ComputerBorder.Visibility = visibility;
-                    if (visibility == Visibility.Visible)
-                        SyncComputers();
-                    break;
-                case "Amigos":
-                    MyFriends.Visibility = visibility;
-                    RefreshButton.Text = "Actualizar amigos";
-                    ComputerBorder.Visibility = visibility;
-                    if (visibility == Visibility.Visible)
-                        SyncFriends();
-                    break;
-                case "Transmisión":
-                    TransmisionOptions.Visibility = visibility;
-                    break;
-            }
-        }
+        #endregion
+
+        #region Sync data
 
         private void SyncComputers()
         {
@@ -265,6 +247,8 @@ namespace Cross_Game.Windows
             });
         }
 
+        #endregion
+
         #region Window events
 
         private void Window_SourceInitialized(object sender, EventArgs e)
@@ -291,6 +275,30 @@ namespace Cross_Game.Windows
                 ChangeMenuVisibility(currentOption.Name, Visibility.Hidden);
                 ChangeMenuVisibility(pressedOption.Name, Visibility.Visible);
                 currentOption = pressedOption;
+            }
+        }
+
+        private void ChangeMenuVisibility(string name, Visibility visibility)
+        {
+            switch (name)
+            {
+                case "Ordenadores":
+                    MyComputers.Visibility = visibility;
+                    RefreshButton.Text = "Actualizar ordenadores";
+                    ComputerBorder.Visibility = visibility;
+                    if (visibility == Visibility.Visible)
+                        SyncComputers();
+                    break;
+                case "Amigos":
+                    MyFriends.Visibility = visibility;
+                    RefreshButton.Text = "Actualizar amigos";
+                    ComputerBorder.Visibility = visibility;
+                    if (visibility == Visibility.Visible)
+                        SyncFriends();
+                    break;
+                case "Transmisión":
+                    TransmisionOptions.Visibility = visibility;
+                    break;
             }
         }
 
@@ -328,7 +336,7 @@ namespace Cross_Game.Windows
         private void Friend_FriendClicked(object sender, EventArgs e)
         {
             Friend f = sender as Friend;
-
+            new ShareWindow().Show(f.name, f.number);
         }
 
         private void WindowHeader_MenuButtonClick(object sender, ClickEventArgs e)
