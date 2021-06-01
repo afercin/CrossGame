@@ -46,8 +46,8 @@ namespace Cross_Game.Windows
         {
             StopWaiting();
         }
-
-        private void Header_MenuButtonClick(object sender, ClickEventArgs e)
+        
+        private void WindowHeader_MenuButtonClick(object sender, ClickEventArgs e)
         {
             StopWaiting();
         }
