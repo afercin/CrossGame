@@ -200,7 +200,7 @@ namespace RTDP
             {
                 LogUtils.AppendLogText(LogUtils.ClientConnectionLog, "Reiniciando conexión...");
                 Stop();
-                Start(ref computer, credentials[1], credentials[2]);
+                Start(ref computer, credentials[0], credentials[1]);
             }
         }
 

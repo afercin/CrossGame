@@ -154,6 +154,7 @@ namespace RTDP
             audio = new Audio();
             audio.InitializeRecorder();
             audio.CapturedAudio += Audio_CapturedAudio;
+            audio.StartRecorder();
             
             CaptureScreen = new Thread(CaptureScreenThread);
             CaptureScreen.IsBackground = true;
@@ -335,7 +336,7 @@ namespace RTDP
 
                         bitmap.UnlockBits(mapDest);
                         device.ImmediateContext.UnmapSubresource(screenTexture, 0);
-                        r = new Bitmap(bitmap, 700, 393);
+                        r = new Bitmap(bitmap, 900, 506);
                         Task.Factory.StartNew(() =>
                         {
                             byte[] imageBytes;
