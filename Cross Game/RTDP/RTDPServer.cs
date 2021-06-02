@@ -10,7 +10,6 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -38,6 +37,7 @@ namespace RTDP
             clientSockets = new Dictionary<IPAddress, Client>();
 
             computer = currentComputer;
+            computer.Status = 1;
             frameRate = 1000 / computer.FPS;
             
             listenThread = new Thread(ConnectionThread);
