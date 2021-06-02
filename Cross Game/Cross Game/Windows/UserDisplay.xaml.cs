@@ -217,9 +217,9 @@ namespace Cross_Game.Windows
 
         private bool IsForbiddenKey(Key key)
         {
-            return key != Key.VolumeMute &&
-                   key != Key.VolumeDown &&
-                   key != Key.VolumeUp;
+            return key == Key.VolumeMute ||
+                   key == Key.VolumeDown ||
+                   key == Key.VolumeUp;
         }
 
         private void ClientDisplay_MouseWheel(object sender, MouseWheelEventArgs e)

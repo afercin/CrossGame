@@ -26,7 +26,7 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
-            <controllers:WindowHeader x:Name="Header"
+            <controllers:WindowHeader x:Name="Header" 
                                       MenuButtonClick="Header_MenuButtonClick"/>
             <Border BorderThickness="1"
                     BorderBrush="#464244"
@@ -41,26 +41,39 @@
                                   CanUserResizeRows="False" 
                                   RowHeaderWidth="0" 
                                   AutoGenerateColumns="False"
-                                  CanUserAddRows="False">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Nombre" Width="150" Binding="{Binding Name, NotifyOnTargetUpdated=True,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                <DataGridTextColumn Header="IP privada" Width="100" Binding="{Binding LocalIP, NotifyOnTargetUpdated=True,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                <DataGridHyperlinkColumn Header="IP pública" Width="100" Binding="{Binding PublicIP, NotifyOnTargetUpdated=True,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                <DataGridCheckBoxColumn Header="Permitir acceso" Width="98" Binding="{Binding AccessAllowed, NotifyOnTargetUpdated=True,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                            </DataGrid.Columns>
-                            <DataGrid.Style>
-                                <Style>
-                                    <Style.Resources>
-                                        <Style TargetType="DataGridCell">
-                                            <Style.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter Property="IsEditing" Value="True" />
-                                                </Trigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Style.Resources>
+                                  CanUserAddRows="False"
+                                  Background="#2A2829"
+                                  BorderBrush="#1C1C1C"
+                                  BorderThickness="0 0 1 1"
+                                  Foreground="#E9E9E9"
+                                  IsReadOnly="True">
+                            <DataGrid.Resources>
+                                <Style BasedOn="{StaticResource {x:Type DataGridColumnHeader}}" TargetType="{x:Type DataGridColumnHeader}">
+                                    <Setter Property="Background" Value="#424041"/>
+                                    <Setter Property="FontWeight" Value="DemiBold"/>
+                                    <Setter Property="BorderBrush" Value="#1C1C1C"/>
+                                    <Setter Property="BorderThickness" Value="1 1 0 1"/>
+                                    <Setter Property="Height" Value="24"/>
                                 </Style>
-                            </DataGrid.Style>
+                                <Style BasedOn="{StaticResource {x:Type DataGridCell}}" TargetType="{x:Type DataGridCell}">
+                                    <Setter Property="Background" Value="#5A5859"/>
+                                    <Setter Property="BorderBrush" Value="#1C1C1C"/>
+                                    <Setter Property="BorderThickness" Value="1 1 0 1"/>
+                                    <Setter Property="Focusable" Value="False"/>
+                                    <Setter Property="IsTabStop" Value="False"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="IsEditing" Value="True"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.Resources>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header=" Nombre" Width="150" Binding="{Binding Name, NotifyOnTargetUpdated=True,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <DataGridTextColumn Header=" IP privada" Width="100" Binding="{Binding LocalIP, NotifyOnTargetUpdated=True,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <DataGridTextColumn Header=" IP pública" Width="100" Binding="{Binding PublicIP, NotifyOnTargetUpdated=True,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <DataGridCheckBoxColumn Header=" Permitir acceso" Width="99" Binding="{Binding AccessAllowed, NotifyOnTargetUpdated=True,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </DataGrid.Columns>
                         </DataGrid>
                         <Grid  Margin="0 0 0 0">
                             <Grid.ColumnDefinitions>
